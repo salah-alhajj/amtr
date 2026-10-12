@@ -1,60 +1,98 @@
 #!/usr/bin/env python3
 import os
+from collections import deque
 from PIL import Image
 
-def get_full_bleed_logo(input_png):
-    print(f"Reading master transparent logo from {input_png}...")
-    im = Image.open(input_png).convert('RGBA')
-    bbox = im.getbbox()
-    print(f"Original bbox: {bbox}")
-    cropped = im.crop(bbox)
-    # Full bleed 1024x1024 square with 0 empty margins
-    full_bleed = cropped.resize((1024, 1024), Image.Resampling.LANCZOS)
-    print(f"Full bleed bbox: {full_bleed.getbbox()}")
-    return full_bleed
+def generate_sharp_square_logo():
+    """
+    Reconstructs the logo with sharp 90-degree square corners (unrounded).
+    Fills corner cutouts with the natural background blue gradient so that
+    corners are completely sharp and square without any pre-rounded masks.
+    Systems (iOS, Android, etc.) will apply their own clipping and corner rounding.
+    """
+    src_path = '/tmp/original_icon.jpg'
+    if not os.path.exists(src_path):
+        raise FileNotFoundError(f"Source icon not found at {src_path}")
 
-def place_on_canvas(cropped_logo, canvas_size, scale_factor=1.0, bg_color=None):
-    if isinstance(canvas_size, int):
-        cw, ch = canvas_size, canvas_size
-    else:
-        cw, ch = canvas_size
+    orig = Image.open(src_path).convert('RGB')
+    # Exact square bounds of the blue logo tile
+    tile = orig.crop((180, 180, 844, 844)) # size: (664, 664)
+    w, h = tile.size
+    pixels = tile.load()
 
-    mode = 'RGBA' if bg_color is None or (len(bg_color) == 4 and bg_color[3] < 255) else 'RGB'
-    if bg_color is None:
-        canvas = Image.new('RGBA', (cw, ch), (0, 0, 0, 0))
-    elif mode == 'RGBA':
-        canvas = Image.new('RGBA', (cw, ch), bg_color)
-    else:
-        canvas = Image.new('RGB', (cw, ch), bg_color[:3])
+    # Identify corner cutouts (non-blue background) in the 4 corners
+    is_corner = [[False]*h for _ in range(w)]
+    for x in range(w):
+        for y in range(h):
+            in_tl = (x < 180 and y < 180)
+            in_tr = (x > w - 180 and y < 180)
+            in_bl = (x < 180 and y > h - 180)
+            in_br = (x > w - 180 and y > h - 180)
+            if in_tl or in_tr or in_bl or in_br:
+                r, g, b = pixels[x, y]
+                # High luminance / background pixels
+                if r > 115 and g > 115:
+                    is_corner[x][y] = True
 
-    lw, lh = cropped_logo.size
-    max_target_dim = min(cw, ch) * scale_factor
-    ratio = min(max_target_dim / lw, max_target_dim / lh)
-    nw = max(1, int(lw * ratio))
-    nh = max(1, int(lh * ratio))
+    # BFS outward from boundary of non-corner to fill is_corner pixels with edge colors
+    q = deque()
+    filled = [[not is_corner[x][y] for y in range(h)] for x in range(w)]
 
-    resized = cropped_logo.resize((nw, nh), Image.Resampling.LANCZOS)
-    pos_x = (cw - nw) // 2
-    pos_y = (ch - nh) // 2
+    for x in range(w):
+        for y in range(h):
+            if not is_corner[x][y]:
+                for dx, dy in ((1,0), (-1,0), (0,1), (0,-1)):
+                    nx, ny = x+dx, y+dy
+                    if 0 <= nx < w and 0 <= ny < h and is_corner[nx][ny]:
+                        q.append((x, y))
+                        break
 
-    canvas.paste(resized, (pos_x, pos_y), resized)
-    return canvas
+    while q:
+        cx, cy = q.popleft()
+        for dx, dy in ((1,0), (-1,0), (0,1), (0,-1)):
+            nx, ny = cx+dx, cy+dy
+            if 0 <= nx < w and 0 <= ny < h and is_corner[nx][ny] and not filled[nx][ny]:
+                pixels[nx, ny] = pixels[cx, cy]
+                filled[nx][ny] = True
+                q.append((nx, ny))
+
+    # Smooth the infilled corners using 8 iterations of local averaging
+    for _ in range(8):
+        temp = [[pixels[x, y] for y in range(h)] for x in range(w)]
+        for x in range(w):
+            for y in range(h):
+                if is_corner[x][y]:
+                    neighbors = []
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            nx, ny = x+dx, y+dy
+                            if 0 <= nx < w and 0 <= ny < h:
+                                neighbors.append(temp[nx][ny])
+                    avg_r = sum(c[0] for c in neighbors) // len(neighbors)
+                    avg_g = sum(c[1] for c in neighbors) // len(neighbors)
+                    avg_b = sum(c[2] for c in neighbors) // len(neighbors)
+                    pixels[x, y] = (avg_r, avg_g, avg_b)
+
+    # Scale up to high-resolution 1024x1024 sharp square image
+    sharp_logo = tile.resize((1024, 1024), Image.Resampling.LANCZOS)
+    return sharp_logo
 
 def main():
-    source_png = 'assets/icons/amtr_audit_icon.png'
-    master_logo = get_full_bleed_logo(source_png)
+    print("Generating sharp 90-degree square logo...")
+    sharp_logo = generate_sharp_square_logo()
 
-    # 1. Update in-app master transparent PNG: 100% full bleed, 0 empty margins
-    master_logo.save('assets/icons/amtr_audit_icon.png', 'PNG', optimize=True)
-    print("Saved full-bleed assets/icons/amtr_audit_icon.png with zero empty space.")
+    # 1. In-app master PNG: Sharp 90-degree corners, completely square, zero margins
+    sharp_logo_rgba = sharp_logo.convert('RGBA')
+    sharp_logo_rgba.save('assets/icons/amtr_audit_icon.png', 'PNG', optimize=True)
+    print("Saved sharp unrounded assets/icons/amtr_audit_icon.png (corners are 90-degree sharp).")
 
-    # 2. Delete white background backup JPEG if exists
+    # Ensure white background backup JPEG is removed
     jpg_backup = 'assets/icons/amtr_audit_icon.jpg'
     if os.path.exists(jpg_backup):
         os.remove(jpg_backup)
-        print(f"Completely removed {jpg_backup}")
+        print(f"Removed {jpg_backup}")
 
-    # 3. iOS AppIcon (all 15 sizes, full bleed 1.0, no empty margins)
+    # 2. iOS AppIcon (all 15 sizes, sharp 90-degree square, system clips squircle)
     ios_base_dir = 'ios/Runner/Assets.xcassets/AppIcon.appiconset'
     os.makedirs(ios_base_dir, exist_ok=True)
     ios_sizes = {
@@ -76,12 +114,12 @@ def main():
     }
     for filename, sz in ios_sizes.items():
         out_path = os.path.join(ios_base_dir, filename)
-        icon_img = place_on_canvas(master_logo, sz, scale_factor=1.0, bg_color=(255, 255, 255))
-        icon_img.save(out_path, 'PNG', optimize=True)
-    print("Generated all iOS AppIcon sizes with zero empty margins.")
+        resized = sharp_logo.resize((sz, sz), Image.Resampling.LANCZOS)
+        resized.save(out_path, 'PNG', optimize=True)
+    print("Generated all iOS AppIcon sizes with sharp 90-degree square corners.")
 
-    # 4. Android launcher icons (Legacy mipmaps + Adaptive icons)
-    # Legacy mipmaps: 100% full bleed, zero margins, transparent background
+    # 3. Android launcher icons (Legacy + Adaptive)
+    # Legacy: Sharp 90-degree square icons
     android_legacy_sizes = {
         'mipmap-mdpi': 48,
         'mipmap-hdpi': 72,
@@ -93,10 +131,10 @@ def main():
     for folder, sz in android_legacy_sizes.items():
         folder_path = os.path.join(res_dir, folder)
         os.makedirs(folder_path, exist_ok=True)
-        legacy_icon = place_on_canvas(master_logo, sz, scale_factor=1.0, bg_color=None)
-        legacy_icon.save(os.path.join(folder_path, 'ic_launcher.png'), 'PNG', optimize=True)
+        resized = sharp_logo_rgba.resize((sz, sz), Image.Resampling.LANCZOS)
+        resized.save(os.path.join(folder_path, 'ic_launcher.png'), 'PNG', optimize=True)
 
-    # Android Adaptive foreground (108dp canvas, safe zone 72%)
+    # Adaptive icons foreground
     adaptive_sizes = {
         'mipmap-mdpi': 108,
         'mipmap-hdpi': 162,
@@ -106,60 +144,40 @@ def main():
     }
     for folder, sz in adaptive_sizes.items():
         folder_path = os.path.join(res_dir, folder)
-        fg_icon = place_on_canvas(master_logo, sz, scale_factor=0.72, bg_color=None)
-        fg_icon.save(os.path.join(folder_path, 'ic_launcher_foreground.png'), 'PNG', optimize=True)
+        # Place centered sharp icon within adaptive safe area (72%)
+        canvas = Image.new('RGBA', (sz, sz), (0, 0, 0, 0))
+        target_sz = int(sz * 0.72)
+        resized = sharp_logo_rgba.resize((target_sz, target_sz), Image.Resampling.LANCZOS)
+        pos = (sz - target_sz) // 2
+        canvas.paste(resized, (pos, pos), resized)
+        canvas.save(os.path.join(folder_path, 'ic_launcher_foreground.png'), 'PNG', optimize=True)
 
-    # Adaptive icon XML in mipmap-anydpi-v26
-    anydpi_dir = os.path.join(res_dir, 'mipmap-anydpi-v26')
-    os.makedirs(anydpi_dir, exist_ok=True)
-    with open(os.path.join(anydpi_dir, 'ic_launcher.xml'), 'w', encoding='utf-8') as f:
-        f.write('''<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/ic_launcher_background"/>
-    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
-</adaptive-icon>
-''')
+    print("Generated Android launcher icons with sharp corners.")
 
-    # Color resource for adaptive background
-    values_dir = os.path.join(res_dir, 'values')
-    os.makedirs(values_dir, exist_ok=True)
-    colors_xml = os.path.join(values_dir, 'colors.xml')
-    with open(colors_xml, 'w', encoding='utf-8') as f:
-        f.write('''<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
-</resources>
-''')
-    print("Generated Android legacy and adaptive launcher icons with zero empty margins.")
-
-    # 5. Web Icons
+    # 4. Web Icons
     web_dir = 'web'
     web_icons_dir = 'web/icons'
     os.makedirs(web_icons_dir, exist_ok=True)
-    # Favicon (32x32, 100% full bleed, zero margins)
-    fav = place_on_canvas(master_logo, 32, scale_factor=1.0, bg_color=None)
-    fav.save(os.path.join(web_dir, 'favicon.png'), 'PNG', optimize=True)
+    sharp_logo_rgba.resize((32, 32), Image.Resampling.LANCZOS).save(os.path.join(web_dir, 'favicon.png'), 'PNG', optimize=True)
+    sharp_logo_rgba.resize((192, 192), Image.Resampling.LANCZOS).save(os.path.join(web_icons_dir, 'Icon-192.png'), 'PNG', optimize=True)
+    sharp_logo_rgba.resize((512, 512), Image.Resampling.LANCZOS).save(os.path.join(web_icons_dir, 'Icon-512.png'), 'PNG', optimize=True)
+    # Maskable PWA
+    for sz in (192, 512):
+        canvas = Image.new('RGBA', (sz, sz), (15, 36, 139, 255))
+        target_sz = int(sz * 0.72)
+        resized = sharp_logo_rgba.resize((target_sz, target_sz), Image.Resampling.LANCZOS)
+        pos = (sz - target_sz) // 2
+        canvas.paste(resized, (pos, pos), resized)
+        canvas.save(os.path.join(web_icons_dir, f'Icon-maskable-{sz}.png'), 'PNG', optimize=True)
+    print("Generated Web icons with sharp corners.")
 
-    # Icon-192.png & Icon-512.png (PWA standard full bleed)
-    i192 = place_on_canvas(master_logo, 192, scale_factor=1.0, bg_color=None)
-    i192.save(os.path.join(web_icons_dir, 'Icon-192.png'), 'PNG', optimize=True)
-    i512 = place_on_canvas(master_logo, 512, scale_factor=1.0, bg_color=None)
-    i512.save(os.path.join(web_icons_dir, 'Icon-512.png'), 'PNG', optimize=True)
-
-    # Maskable PWA icons (72% safe zone)
-    m192 = place_on_canvas(master_logo, 192, scale_factor=0.72, bg_color=(255, 255, 255))
-    m192.save(os.path.join(web_icons_dir, 'Icon-maskable-192.png'), 'PNG', optimize=True)
-    m512 = place_on_canvas(master_logo, 512, scale_factor=0.72, bg_color=(255, 255, 255))
-    m512.save(os.path.join(web_icons_dir, 'Icon-maskable-512.png'), 'PNG', optimize=True)
-    print("Generated Web favicon and PWA icons with zero empty margins.")
-
-    # 6. Windows app_icon.ico
+    # 5. Windows app_icon.ico
     win_res_dir = 'windows/runner/resources'
     os.makedirs(win_res_dir, exist_ok=True)
-    ico_master = place_on_canvas(master_logo, 256, scale_factor=1.0, bg_color=None)
+    ico_256 = sharp_logo_rgba.resize((256, 256), Image.Resampling.LANCZOS)
     ico_path = os.path.join(win_res_dir, 'app_icon.ico')
-    ico_master.save(ico_path, format='ICO', sizes=[(16,16), (24,24), (32,32), (48,48), (64,64), (128,128), (256,256)])
-    print("Generated Windows multi-resolution app_icon.ico with zero empty margins.")
+    ico_256.save(ico_path, format='ICO', sizes=[(16,16), (24,24), (32,32), (48,48), (64,64), (128,128), (256,256)])
+    print("Generated Windows app_icon.ico with sharp corners.")
 
 if __name__ == '__main__':
     main()

@@ -180,7 +180,6 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             height: size * 0.70,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
               color: isDark ? AppColors.darkSurfaceCard : Colors.white,
               border: Border.all(
                 color: isDark
@@ -198,25 +197,23 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
                 ),
               ],
             ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/icons/amtr_audit_icon.png',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColors.primaryBlue,
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'AMTR',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                      ),
+            child: Image.asset(
+              'assets/icons/amtr_audit_icon.png',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: AppColors.primaryBlue,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'AMTR',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],

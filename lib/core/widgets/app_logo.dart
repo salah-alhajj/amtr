@@ -13,7 +13,7 @@ class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,
     this.size = 48,
-    this.borderRadius,
+    this.borderRadius = 0,
     this.isTransparent = true,
     this.showShadow = false,
     this.onTap,
@@ -21,34 +21,38 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveRadius = borderRadius ?? (size * 0.22);
+    final effectiveRadius = borderRadius ?? 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    Widget content = ClipRRect(
-      borderRadius: BorderRadius.circular(effectiveRadius),
-      child: Image.asset(
-        'assets/icons/amtr_audit_icon.png',
-        width: size,
-        height: size,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: size,
-            height: size,
-            color: AppColors.primaryBlue,
-            alignment: Alignment.center,
-            child: Text(
-              'AMTR',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: size * 0.28,
-              ),
+    Widget imageWidget = Image.asset(
+      'assets/icons/amtr_audit_icon.png',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: size,
+          height: size,
+          color: AppColors.primaryBlue,
+          alignment: Alignment.center,
+          child: Text(
+            'AMTR',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: size * 0.28,
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
+
+    Widget content = effectiveRadius > 0
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(effectiveRadius),
+            child: imageWidget,
+          )
+        : imageWidget;
 
     if (!isTransparent) {
       content = Container(

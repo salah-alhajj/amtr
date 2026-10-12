@@ -63,7 +63,7 @@ class BusinessDrawer extends StatelessWidget {
                     children: [
                       const AppLogo(
                         size: 44,
-                        borderRadius: 12,
+                        borderRadius: 0,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
