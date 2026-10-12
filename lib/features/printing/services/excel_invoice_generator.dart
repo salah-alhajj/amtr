@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants.dart';
-import '../../../../core/localization/localization.dart';
-import '../../../../models/individual_order.dart';
+import '../../../core/constants.dart';
+import '../../../core/localization/localization.dart';
+import '../../../models/individual_order.dart';
 
 /// مولي ملفات إكسل (Excel .xlsx) للفواتير والطلبات
 /// يولد صفحات منسقة تشمل ملخص الفواتير والمديونيات وتفاصيل الأصناف

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/localization/localization.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../core/localization/localization.dart';
+import '../../../core/theme/app_colors.dart';
 import '../models/onboarding_item.dart';
 
 /// قائمة عناصر جولة التعريف بالتطبيق (8 سلايدات: من 0 إلى 7)

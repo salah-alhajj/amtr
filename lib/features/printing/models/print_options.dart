@@ -1,5 +1,5 @@
 import 'package:pdf/pdf.dart';
-import '../../../../core/localization/localization.dart';
+import '../../../core/localization/localization.dart';
 
 /// أحجام الورق المدعومة للطباعة
 enum PrintPaperSize {
