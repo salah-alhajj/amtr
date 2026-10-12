@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-es" viewBox="0 0 640 480">
+  <path fill="#aa151b" d="M0 0h640v480H0z"/>
+  <path fill="#f1bf00" d="M0 120h640v240H0z"/>
+  <g id="es-arms" transform="translate(140, 160) scale(0.7)">
+    <!-- Crown -->
+    <path fill="#d43021" d="M30 20 h60 v15 h-60 z"/>
+    <path fill="#f1bf00" d="M25 35 c0 -15 20 -25 35 -25 c15 0 35 10 35 25 z"/>
+    <circle cx="60" cy="8" r="5" fill="#f1bf00"/>
+    <path fill="#aa151b" d="M57 3 h6 v10 h-6 z"/>
+    <!-- Pillars of Hercules -->
+    <rect x="0" y="30" width="10" height="80" rx="3" fill="#ffffff" stroke="#c0c0c0" stroke-width="1.5"/>
+    <rect x="110" y="30" width="10" height="80" rx="3" fill="#ffffff" stroke="#c0c0c0" stroke-width="1.5"/>
+    <path fill="#aa151b" d="M-3 60 h16 v12 h-16 z M107 60 h16 v12 h-16 z"/>
+    <!-- Shield -->
+    <path fill="#ffffff" stroke="#d43021" stroke-width="3" d="M25 40 h70 v40 c0 30 -35 45 -35 45 c0 0 -35 -15 -35 -45 z"/>
+    <!-- Shield Quarters -->
+    <path fill="#aa151b" d="M26 41 h34 v39 h-34 z"/>
+    <path fill="#ffffff" d="M60 41 h34 v39 h-34 z"/>
+    <path fill="#f1bf00" d="M26 80 h34 v25 c0 8 7 14 10 16 c-6 -3 -10 -9 -10 -16 z"/>
+    <path fill="#aa151b" d="M60 80 h34 v25 c0 8 -7 14 -10 16 c6 -3 10 -9 10 -16 z"/>
+    <!-- Center Inescutcheon -->
+    <ellipse cx="60" cy="80" rx="9" ry="12" fill="#003594" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="60" cy="80" r="4" fill="#f1bf00"/>
+  </g>
+</svg>

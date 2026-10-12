@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-tr" viewBox="0 0 640 480">
+  <g fill-rule="evenodd">
+    <path fill="#e30a17" d="M0 0h640v480H0z"/>
+    <circle cx="260" cy="240" r="120" fill="#fff"/>
+    <circle cx="290" cy="240" r="96" fill="#e30a17"/>
+    <polygon fill="#fff" points="360,202 371,228 399,228 376,245 385,271 362,254 339,271 348,245 325,228 353,228"/>
+  </g>
+</svg>
