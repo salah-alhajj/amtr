@@ -258,7 +258,7 @@ class GlobalSearchDelegate extends SearchDelegate {
                 }),
               ),
               ...shipments.map(
-                (s) => AppleCard(
+                (s) => AppCard(
                   margin: const EdgeInsets.only(bottom: 8),
                   onTap: () {
                     Navigator.push(
