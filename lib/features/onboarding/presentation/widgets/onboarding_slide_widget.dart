@@ -200,8 +200,8 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             ),
             child: ClipOval(
               child: Image.asset(
-                'assets/icons/amtr_logo_symbol.jpg',
-                fit: BoxFit.cover,
+                'assets/icons/amtr_audit_icon.png',
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: AppColors.primaryBlue,

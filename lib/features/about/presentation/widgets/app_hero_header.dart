@@ -34,31 +34,10 @@ class AppHeroHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // أيقونة التطبيق الكبيرة بتدرج آبل
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0A2540), Color(0xFF007AFF), Color(0xFF059669)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.35),
-                  offset: const Offset(0, 8),
-                  blurRadius: 20,
-                  spreadRadius: -2,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_rounded,
-              color: Colors.white,
-              size: 42,
-            ),
+          // أيقونة التطبيق الرسمية وفق إرشادات آبل
+          const AppLogo(
+            size: 80,
+            borderRadius: 22,
           ),
           const SizedBox(height: 16),
 

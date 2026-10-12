@@ -26,5 +26,6 @@ export 'shimmer_loading.dart';
 export 'app_search_bar.dart';
 export 'country_flag_svg.dart';
 export 'whatsapp_icon.dart';
+export 'app_logo.dart';
 export 'charts/financial_charts.dart';
 export '../utils/app_validators.dart';
