@@ -4,15 +4,17 @@ import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 
-/// بطاقة اختيار لغة التطبيق بتصميم نمط أبل مع أعلام الدول بصيغة SVG فائقة النقاء
+/// بطاقة اختيار لغة التطبيق بتصميم نمط أبل كقائمة منسدلة (Dropdown) مع أعلام الدول بصيغة SVG فائقة النقاء
 class LanguageSelectorCard extends StatelessWidget {
   const LanguageSelectorCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return BlocBuilder<LocaleBloc, LocaleState>(
       builder: (context, localeState) {
-        final isArabic = localeState.isArabic;
+        final currentCode = localeState.locale.languageCode;
 
         return AppCard(
           child: Column(
@@ -26,9 +28,12 @@ class LanguageSelectorCard extends StatelessWidget {
                       color: AppColors.primaryBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: isArabic
-                        ? const CountryFlagSvg.sa(width: 24, height: 18, borderRadius: 3.5)
-                        : const CountryFlagSvg.us(width: 24, height: 18, borderRadius: 3.5),
+                    child: CountryFlagSvg.fromLanguageCode(
+                      currentCode,
+                      width: 24,
+                      height: 18,
+                      borderRadius: 3.5,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -57,104 +62,83 @@ class LanguageSelectorCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _LanguageOptionButton(
-                      title: 'language_arabic_rtl'.i18n(),
-                      flag: const DualArabFlagSvg(size: 16),
-                      isSelected: isArabic,
-                      onTap: () {
-                        context.read<LocaleBloc>().add(
-                              const ChangeLocale(Locale('ar')),
-                            );
-                      },
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkSurfaceCard : context.surfaceCard,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: context.borderDivider,
+                    width: 1.0,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _LanguageOptionButton(
-                      title: 'language_english_ltr'.i18n(),
-                      flag: const CountryFlagSvg.us(width: 22, height: 16, borderRadius: 3.5),
-                      isSelected: !isArabic,
-                      onTap: () {
-                        context.read<LocaleBloc>().add(
-                              const ChangeLocale(Locale('en')),
-                            );
-                      },
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: AppLanguage.supported.any((l) => l.code == currentCode) ? currentCode : 'ar',
+                    isExpanded: true,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: context.textSecondary,
                     ),
+                    dropdownColor: isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
+                    borderRadius: BorderRadius.circular(14),
+                    elevation: 4,
+                    items: AppLanguage.supported.map((lang) {
+                      final isSelected = lang.code == currentCode;
+                      return DropdownMenuItem<String>(
+                        value: lang.code,
+                        child: Row(
+                          children: [
+                            CountryFlagSvg.fromLanguageCode(
+                              lang.code,
+                              width: 24,
+                              height: 18,
+                              borderRadius: 3.5,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              lang.nativeName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                color: isSelected ? AppColors.primaryBlue : context.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '(${lang.translationKey.i18n()})',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected
+                                    ? AppColors.primaryBlue.withValues(alpha: 0.8)
+                                    : context.textSecondary,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (isSelected)
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 18,
+                                color: AppColors.primaryBlue,
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (newCode) {
+                      if (newCode != null && newCode != currentCode) {
+                        context.read<LocaleBloc>().add(
+                              ChangeLocale(Locale(newCode)),
+                            );
+                      }
+                    },
                   ),
-                ],
+                ),
               ),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-class _LanguageOptionButton extends StatelessWidget {
-  final String title;
-  final Widget flag;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _LanguageOptionButton({
-    required this.title,
-    required this.flag,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryBlue.withValues(alpha: 0.1)
-              : context.surfaceCard,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : context.borderDivider,
-            width: isSelected ? 1.6 : 1.0,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            flag,
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? AppColors.primaryBlue : context.textPrimary,
-                ),
-              ),
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 4),
-              const Icon(
-                Icons.check_circle_rounded,
-                size: 15,
-                color: AppColors.primaryBlue,
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }

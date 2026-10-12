@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amtr/core/localization/localization.dart';
+import 'package:amtr/core/widgets/country_flag_svg.dart';
 
 void main() {
   group('Localization & i18n Suite Tests', () {
@@ -68,27 +69,56 @@ void main() {
       expect(fallbackResult, 'missing_unknown_key');
     });
 
-    test('Root i18n files integrity and 1:1 key parity test', () {
-      final arFile = File('i18n/ar.json');
-      final enFile = File('i18n/en.json');
+    test('CountryFlagSvg maps Arabic strictly to Yemen flag, and others correctly', () {
+      expect(CountryFlagSvg.fromLanguageCode('ar').flagCode, 'ye');
+      expect(CountryFlagSvg.fromLanguageCode('en').flagCode, 'us');
+      expect(CountryFlagSvg.fromLanguageCode('tr').flagCode, 'tr');
+      expect(CountryFlagSvg.fromLanguageCode('fr').flagCode, 'fr');
+      expect(CountryFlagSvg.fromLanguageCode('es').flagCode, 'es');
+    });
 
-      expect(arFile.existsSync(), true, reason: 'i18n/ar.json must exist in root');
-      expect(enFile.existsSync(), true, reason: 'i18n/en.json must exist in root');
+    test('AppLanguage supports all 5 languages with valid metadata', () {
+      expect(AppLanguage.supported.length, 5);
+      final codes = AppLanguage.supported.map((l) => l.code).toList();
+      expect(codes, containsAll(['ar', 'en', 'tr', 'fr', 'es']));
 
-      final Map<String, dynamic> arJson = json.decode(arFile.readAsStringSync());
-      final Map<String, dynamic> enJson = json.decode(enFile.readAsStringSync());
+      final ar = AppLanguage.fromCode('ar');
+      expect(ar.nativeName, 'العربية');
 
-      expect(arJson.isNotEmpty, true);
-      expect(enJson.isNotEmpty, true);
+      final tr = AppLanguage.fromCode('tr');
+      expect(tr.nativeName, 'Türkçe');
 
-      final arKeys = arJson.keys.toSet();
-      final enKeys = enJson.keys.toSet();
+      final fr = AppLanguage.fromCode('fr');
+      expect(fr.nativeName, 'Français');
 
-      final missingInEn = arKeys.difference(enKeys);
-      final missingInAr = enKeys.difference(arKeys);
+      final es = AppLanguage.fromCode('es');
+      expect(es.nativeName, 'Español');
+    });
 
-      expect(missingInEn, isEmpty, reason: 'Keys present in ar.json but missing in en.json: $missingInEn');
-      expect(missingInAr, isEmpty, reason: 'Keys present in en.json but missing in ar.json: $missingInAr');
+    test('Root i18n files integrity and 1:1 key parity test across all 5 languages', () {
+      final languages = ['ar', 'en', 'tr', 'fr', 'es'];
+      final Map<String, Set<String>> keysByLang = {};
+
+      for (final lang in languages) {
+        final file = File('i18n/$lang.json');
+        expect(file.existsSync(), true, reason: 'i18n/$lang.json must exist in root');
+
+        final Map<String, dynamic> jsonMap = json.decode(file.readAsStringSync());
+        expect(jsonMap.isNotEmpty, true, reason: 'i18n/$lang.json must not be empty');
+        keysByLang[lang] = jsonMap.keys.toSet();
+      }
+
+      final baseKeys = keysByLang['ar']!;
+      for (final lang in languages.where((l) => l != 'ar')) {
+        final currentKeys = keysByLang[lang]!;
+        final missingInLang = baseKeys.difference(currentKeys);
+        final extraInLang = currentKeys.difference(baseKeys);
+
+        expect(missingInLang, isEmpty,
+            reason: 'Keys present in ar.json but missing in $lang.json: $missingInLang');
+        expect(extraInLang, isEmpty,
+            reason: 'Keys present in $lang.json but missing in ar.json: $extraInLang');
+      }
 
       // Verify no obsolete folders exist
       expect(Directory('assets/i18n').existsSync(), false, reason: 'assets/i18n must not exist');

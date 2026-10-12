@@ -110,6 +110,9 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   static const List<Locale> supportedLocales = [
     Locale('ar'),
     Locale('en'),
+    Locale('tr'),
+    Locale('fr'),
+    Locale('es'),
   ];
 
   @override

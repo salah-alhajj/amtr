@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// ويدجت احترافي لعرض أعلام الدول بصيغة SVG فائقة النقاء والدقة
 /// بديل موحد وخالٍ تماماً من الإيموجيز المشوهة أو غير المتسقة
 class CountryFlagSvg extends StatelessWidget {
-  final String flagCode; // 'ye', 'sa', 'us', 'gb'
+  final String flagCode; // 'ye', 'sa', 'us', 'gb', 'tr', 'fr', 'es'
   final double width;
   final double height;
   final double borderRadius;
@@ -19,7 +19,7 @@ class CountryFlagSvg extends StatelessWidget {
     this.showBorder = true,
   });
 
-  /// علم الجمهورية اليمنية بصيغة SVG
+  /// علم الجمهورية اليمنية بصيغة SVG (العلم الحصري والمعتمد للغة العربية)
   const CountryFlagSvg.ye({
     super.key,
     this.width = 24,
@@ -37,7 +37,7 @@ class CountryFlagSvg extends StatelessWidget {
     this.showBorder = true,
   }) : flagCode = 'sa';
 
-  /// علم الولايات المتحدة الأمريكية بصيغة SVG
+  /// علم الولايات المتحدة الأمريكية بصيغة SVG (للغة الإنجليزية)
   const CountryFlagSvg.us({
     super.key,
     this.width = 24,
@@ -55,6 +55,60 @@ class CountryFlagSvg extends StatelessWidget {
     this.showBorder = true,
   }) : flagCode = 'gb';
 
+  /// علم الجمهورية التركية بصيغة SVG (للغة التركية)
+  const CountryFlagSvg.tr({
+    super.key,
+    this.width = 24,
+    this.height = 18,
+    this.borderRadius = 4,
+    this.showBorder = true,
+  }) : flagCode = 'tr';
+
+  /// علم الجمهورية الفرنسية بصيغة SVG (للغة الفرنسية)
+  const CountryFlagSvg.fr({
+    super.key,
+    this.width = 24,
+    this.height = 18,
+    this.borderRadius = 4,
+    this.showBorder = true,
+  }) : flagCode = 'fr';
+
+  /// علم مملكة إسبانيا بصيغة SVG (للغة الإسبانية)
+  const CountryFlagSvg.es({
+    super.key,
+    this.width = 24,
+    this.height = 18,
+    this.borderRadius = 4,
+    this.showBorder = true,
+  }) : flagCode = 'es';
+
+  /// منشئ مخصص لعرض علم الدولة المناسب حسب رمز اللغة
+  factory CountryFlagSvg.fromLanguageCode(
+    String langCode, {
+    Key? key,
+    double width = 24,
+    double height = 18,
+    double borderRadius = 4,
+    bool showBorder = true,
+  }) {
+    final code = switch (langCode.toLowerCase()) {
+      'ar' => 'ye', // العلم اليمني فقط للغة العربية
+      'en' => 'us',
+      'tr' => 'tr',
+      'fr' => 'fr',
+      'es' => 'es',
+      _ => 'ye',
+    };
+    return CountryFlagSvg(
+      key: key,
+      flagCode: code,
+      width: width,
+      height: height,
+      borderRadius: borderRadius,
+      showBorder: showBorder,
+    );
+  }
+
   String _getAssetPath() {
     switch (flagCode.toLowerCase()) {
       case 'sa':
@@ -63,6 +117,12 @@ class CountryFlagSvg extends StatelessWidget {
         return 'assets/icons/flags/flag_us.svg';
       case 'gb':
         return 'assets/icons/flags/flag_gb.svg';
+      case 'tr':
+        return 'assets/icons/flags/flag_tr.svg';
+      case 'fr':
+        return 'assets/icons/flags/flag_fr.svg';
+      case 'es':
+        return 'assets/icons/flags/flag_es.svg';
       case 'ye':
       default:
         return 'assets/icons/flags/flag_ye.svg';

@@ -775,5 +775,12 @@
   "about_app_stats_shipments": "Shipments",
   "about_app_stats_customers": "Customers",
   "about_app_stats_offline": "100% Offline",
-  "about_app_copyright": "All rights reserved © {year} - Salah aldain alhajj"
+  "about_app_copyright": "All rights reserved © {year} - Salah aldain alhajj",
+  "turkish": "Turkish",
+  "french": "French",
+  "spanish": "Spanish",
+  "language_turkish": "Turkish (Türkçe)",
+  "language_french": "French (Français)",
+  "language_spanish": "Spanish (Español)",
+  "select_language": "Select Language"
 }

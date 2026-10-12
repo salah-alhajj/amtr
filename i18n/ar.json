@@ -775,5 +775,12 @@
   "about_app_stats_shipments": "تجميع الشحنات",
   "about_app_stats_customers": "دفتر الديون",
   "about_app_stats_offline": "بدون إنترنت",
-  "about_app_copyright": "جميع الحقوق محفوظة © {year} - صلاح الدين الحاج"
+  "about_app_copyright": "جميع الحقوق محفوظة © {year} - صلاح الدين الحاج",
+  "turkish": "التركية",
+  "french": "الفرنسية",
+  "spanish": "الإسبانية",
+  "language_turkish": "التركية (Türkçe)",
+  "language_french": "الفرنسية (Français)",
+  "language_spanish": "الإسبانية (Español)",
+  "select_language": "اختر اللغة"
 }
