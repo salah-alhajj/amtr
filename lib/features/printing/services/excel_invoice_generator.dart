@@ -3,6 +3,7 @@ import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants.dart';
 import '../../../core/localization/localization.dart';
+import '../../../core/services/currency_service.dart';
 import '../../../models/individual_order.dart';
 
 /// مولي ملفات إكسل (Excel .xlsx) للفواتير والطلبات
@@ -53,15 +54,9 @@ class ExcelInvoiceGenerator {
 
     // تعبئة صفوف الطلبات
     int rowIndex = 4;
-    double totalAllSell = 0.0;
-    double totalAllPaid = 0.0;
-    double totalAllDebt = 0.0;
 
     for (int i = 0; i < orders.length; i++) {
       final o = orders[i];
-      totalAllSell += o.totalSellPrice;
-      totalAllPaid += o.paidAmount;
-      totalAllDebt += o.remainingDebt;
 
       summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex)).value =
           IntCellValue(i + 1);
@@ -91,18 +86,79 @@ class ExcelInvoiceGenerator {
       rowIndex++;
     }
 
-    // صف الإجماليات
+    // صف الإجماليات (مجمعة بدقة حسب كل عملة لتفادي الخلط المحاسبي)
+    final currencyStats = <String, ({double sell, double paid, double debt, int items})>{};
+    for (final o in orders) {
+      final curr = o.currency;
+      final existing = currencyStats[curr] ?? (sell: 0.0, paid: 0.0, debt: 0.0, items: 0);
+      currencyStats[curr] = (
+        sell: existing.sell + o.totalSellPrice,
+        paid: existing.paid + o.paidAmount,
+        debt: existing.debt + o.remainingDebt,
+        items: existing.items + o.items.length,
+      );
+    }
+
     rowIndex++;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex)).value =
-        TextCellValue('excel_row_grand_total'.i18n());
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex)).value =
-        IntCellValue(orders.fold<int>(0, (prev, o) => prev + o.items.length));
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex)).value =
-        DoubleCellValue(totalAllSell);
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: rowIndex)).value =
-        DoubleCellValue(totalAllPaid);
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 7, rowIndex: rowIndex)).value =
-        DoubleCellValue(totalAllDebt);
+    if (currencyStats.length <= 1) {
+      final singleCurrency = currencyStats.keys.firstOrNull ?? AppConstants.currencyYer;
+      final stats = currencyStats[singleCurrency] ?? (sell: 0.0, paid: 0.0, debt: 0.0, items: 0);
+
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex)).value =
+          TextCellValue('excel_row_grand_total'.i18n());
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex)).value =
+          IntCellValue(stats.items);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex)).value =
+          DoubleCellValue(stats.sell);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: rowIndex)).value =
+          DoubleCellValue(stats.paid);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 7, rowIndex: rowIndex)).value =
+          DoubleCellValue(stats.debt);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: rowIndex)).value =
+          TextCellValue(singleCurrency);
+    } else {
+      // تفقيط الإجماليات لكل عملة بشكل مستقل
+      for (final entry in currencyStats.entries) {
+        final curr = entry.key;
+        final stats = entry.value;
+        summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex)).value =
+            TextCellValue('${'excel_row_grand_total'.i18n()} ($curr)');
+        summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex)).value =
+            IntCellValue(stats.items);
+        summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex)).value =
+            DoubleCellValue(stats.sell);
+        summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: rowIndex)).value =
+            DoubleCellValue(stats.paid);
+        summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 7, rowIndex: rowIndex)).value =
+            DoubleCellValue(stats.debt);
+        summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: rowIndex)).value =
+            TextCellValue(curr);
+        rowIndex++;
+      }
+
+      // صف إجمالي موحد محول إلى العملة الأساسية (الريال اليمني)
+      double equivSellYer = 0.0;
+      double equivPaidYer = 0.0;
+      double equivDebtYer = 0.0;
+      for (final o in orders) {
+        equivSellYer += CurrencyService.instance.toBaseYer(o.totalSellPrice, o.currency);
+        equivPaidYer += CurrencyService.instance.toBaseYer(o.paidAmount, o.currency);
+        equivDebtYer += CurrencyService.instance.toBaseYer(o.remainingDebt, o.currency);
+      }
+
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex)).value =
+          TextCellValue('${'excel_row_grand_total'.i18n()} (${'converter_equiv_yer'.i18n()})');
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex)).value =
+          IntCellValue(orders.fold<int>(0, (prev, o) => prev + o.items.length));
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex)).value =
+          DoubleCellValue(equivSellYer);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: rowIndex)).value =
+          DoubleCellValue(equivPaidYer);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 7, rowIndex: rowIndex)).value =
+          DoubleCellValue(equivDebtYer);
+      summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: rowIndex)).value =
+          TextCellValue(AppConstants.currencyYer);
+    }
 
     // 2. ورقة تفاصيل كل صنف / بند
     final itemsSheetName = 'excel_sheet_items'.i18n();

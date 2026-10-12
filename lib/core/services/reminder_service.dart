@@ -41,10 +41,52 @@ class ReminderService {
       );
 
       await _notificationsPlugin.initialize(settings: initializationSettings);
+
+      // طلب إذن الإشعارات والمنبه الدقيق لنظام أندرويد 13 فما فوق
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final androidPlugin = _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        await androidPlugin?.requestNotificationsPermission();
+        await androidPlugin?.requestExactAlarmsPermission();
+      }
+
       _isInitialized = true;
     } catch (e) {
       debugPrint('[ReminderService] Notification init warning: $e');
     }
+  }
+
+  /// طلب وتأكيد أذونات الإشعارات والمنبه الدقيق (Exact Alarms) لأندرويد 13+ و iOS
+  Future<bool> requestPermissions() async {
+    await init();
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final androidPlugin = _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        if (androidPlugin != null) {
+          final notif = await androidPlugin.requestNotificationsPermission();
+          final alarm = await androidPlugin.requestExactAlarmsPermission();
+          return (notif ?? false) || (alarm ?? false);
+        }
+      } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+        final iosPlugin = _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+        if (iosPlugin != null) {
+          final granted = await iosPlugin.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+          return granted ?? false;
+        }
+      }
+    } catch (e) {
+      debugPrint('[ReminderService] Error requesting permissions: $e');
+    }
+    return false;
   }
 
   int _generateNotificationId(String orderId) {
@@ -54,7 +96,7 @@ class ReminderService {
   /// جدولة منبه وتنبيه استحقاق الدين بالوقت والتاريخ الدقيق
   Future<bool> scheduleDebtReminder(IndividualOrder order) async {
     if (order.debtDueDate == null) return false;
-    await init();
+    await requestPermissions();
 
     try {
       final notifId = _generateNotificationId(order.id);

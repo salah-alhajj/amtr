@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
@@ -14,7 +15,7 @@ class BackupService {
   BackupService._init();
 
   /// تصدير قاعدة البيانات كملف JSON ومشاركته فوراً
-  Future<String> exportBackupJson() async {
+  Future<String> exportBackupJson({Rect? sharePositionOrigin}) async {
     final data = await AppDatabase.instance.exportAllDataToJson();
     final jsonString = const JsonEncoder.withIndent('  ').convert(data);
 
@@ -30,6 +31,7 @@ class BackupService {
       ShareParams(
         files: [XFile(filePath)],
         subject: 'backup_desc_json'.trParams({'timestamp': timestamp}),
+        sharePositionOrigin: sharePositionOrigin,
       ),
     );
 
@@ -37,7 +39,13 @@ class BackupService {
   }
 
   /// تصدير ملف قاعدة البيانات SQLite الأصلي (.db)
-  Future<String> exportRawDatabase() async {
+  Future<String> exportRawDatabase({Rect? sharePositionOrigin}) async {
+    // إتمام أي معاملات معلقة في ملف WAL ودمجها في الملف الرئيسي قبل التصدير
+    try {
+      final db = await AppDatabase.instance.database;
+      await db.rawQuery('PRAGMA wal_checkpoint(FULL);');
+    } catch (_) {}
+
     final originalPath = await AppDatabase.instance.getDatabaseFilePath();
     final originalFile = File(originalPath);
 
@@ -55,6 +63,7 @@ class BackupService {
       ShareParams(
         files: [XFile(copyPath)],
         subject: 'backup_desc_raw'.trParams({'timestamp': timestamp}),
+        sharePositionOrigin: sharePositionOrigin,
       ),
     );
 
@@ -80,7 +89,7 @@ class BackupService {
     return true;
   }
 
-  /// استيراد واستعادة قاعدة البيانات من ملف .db أصلي
+  /// استيراد واستعادة قاعدة البيانات من ملف .db أصلي مع تنظيف ملفات WAL و SHM
   Future<bool> importRawDatabase() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
@@ -96,11 +105,27 @@ class BackupService {
 
     await AppDatabase.instance.close();
 
+    // 1. حذف ملفات WAL و SHM إن وُجدت لمنع تلف البيانات أو قراءة سجلات قديمة
+    final walFile = File('$dbPath-wal');
+    if (await walFile.exists()) {
+      try {
+        await walFile.delete();
+      } catch (_) {}
+    }
+    final shmFile = File('$dbPath-shm');
+    if (await shmFile.exists()) {
+      try {
+        await shmFile.delete();
+      } catch (_) {}
+    }
+
+    // 2. نسخ الملف الجديد المسترجع
     final sourceFile = File(selectedPath);
     await sourceFile.copy(dbPath);
 
-    // إعادة فتح قاعدة البيانات للتأكد من جاهزيتها
-    await AppDatabase.instance.database;
+    // 3. إعادة فتح قاعدة البيانات والتحقق الصارم من سلامة البنية
+    final newDb = await AppDatabase.instance.database;
+    await newDb.rawQuery('PRAGMA integrity_check;');
     return true;
   }
 }

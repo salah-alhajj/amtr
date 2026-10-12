@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/customer.dart';
+import '../../domain/customer_financial_helper.dart';
 
 import '../../../../core/utils/yemen_phone_helper.dart';
 
@@ -50,7 +51,9 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
     _nameCtrl = TextEditingController(text: widget.customerToEdit?.name ?? '');
     _phoneCtrl = TextEditingController(text: widget.customerToEdit?.phone ?? '');
     _whatsappCtrl = TextEditingController(text: widget.customerToEdit?.whatsapp ?? '');
-    _notesCtrl = TextEditingController(text: widget.customerToEdit?.notes ?? '');
+    _notesCtrl = TextEditingController(
+      text: CustomerFinancialHelper.cleanUserNotes(widget.customerToEdit?.notes),
+    );
 
     _phoneCtrl.addListener(_onFieldChanged);
     _whatsappCtrl.addListener(_onFieldChanged);
@@ -77,10 +80,20 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
     final name = _nameCtrl.text.trim();
     final rawPhone = _phoneCtrl.text.trim();
     final rawWhatsapp = _whatsappCtrl.text.trim();
-    final notes = _notesCtrl.text.trim();
+    final cleanNotes = _notesCtrl.text.trim();
 
     final phone = rawPhone.isNotEmpty ? YemenPhoneHelper.cleanPhoneNumber(rawPhone) : null;
     final whatsapp = rawWhatsapp.isNotEmpty ? YemenPhoneHelper.cleanPhoneNumber(rawWhatsapp) : null;
+
+    // الحفاظ على كائن التسوية المالية اليدوية دون فقدان أو تشويه
+    final override = CustomerFinancialHelper.parseOverride(widget.customerToEdit?.notes);
+    final mergedNotes = CustomerFinancialHelper.encodeNotesWithOverride(
+      cleanNotes.isNotEmpty ? cleanNotes : null,
+      override,
+    );
+    final finalNotes = (override.hasActiveOverride || cleanNotes.isNotEmpty)
+        ? (mergedNotes.isNotEmpty ? mergedNotes : null)
+        : null;
 
     final customer = widget.customerToEdit != null
         ? Customer(
@@ -88,7 +101,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             name: name,
             phone: phone,
             whatsapp: whatsapp,
-            notes: notes.isNotEmpty ? notes : null,
+            notes: finalNotes,
             createdAt: widget.customerToEdit!.createdAt,
           )
         : Customer(
@@ -96,7 +109,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             name: name,
             phone: phone,
             whatsapp: whatsapp,
-            notes: notes.isNotEmpty ? notes : null,
+            notes: finalNotes,
           );
 
     widget.onSave(customer);

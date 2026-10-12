@@ -123,28 +123,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       context,
       customerToEdit: _customer,
       onSave: (updated) async {
-        // الحفاظ على كائن التسوية اليدوية
-        final override = CustomerFinancialHelper.parseOverride(_customer.notes);
-        final cleanNotes = CustomerFinancialHelper.cleanUserNotes(
-          updated.notes,
-        );
-        final mergedNotes = CustomerFinancialHelper.encodeNotesWithOverride(
-          cleanNotes,
-          override,
-        );
-
-        final finalCustomer = Customer(
-          id: updated.id,
-          name: updated.name,
-          phone: updated.phone,
-          whatsapp: updated.whatsapp,
-          notes: mergedNotes.isNotEmpty ? mergedNotes : null,
-          createdAt: updated.createdAt,
-        );
-
-        context.read<CustomersBloc>().add(UpdateCustomerEvent(finalCustomer));
+        context.read<CustomersBloc>().add(UpdateCustomerEvent(updated));
         setState(() {
-          _customer = finalCustomer;
+          _customer = updated;
         });
         AppToast.showSuccess(
           context,

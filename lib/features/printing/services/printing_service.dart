@@ -77,7 +77,10 @@ class PrintingService {
     required List<IndividualOrder> orders,
     String? title,
   }) async {
-    if (orders.isEmpty) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final sharePositionOrigin = (box != null && box.hasSize)
+        ? (box.localToGlobal(Offset.zero) & box.size)
+        : null;
 
     try {
       final bytes = ExcelInvoiceGenerator.generateInvoicesExcel(
@@ -97,6 +100,7 @@ class PrintingService {
         ShareParams(
           files: [XFile(filePath)],
           text: title ?? 'excel_report_title'.i18n(),
+          sharePositionOrigin: sharePositionOrigin,
         ),
       );
     } catch (e) {

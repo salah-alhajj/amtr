@@ -285,7 +285,12 @@ class DebtDueReminderCard extends StatelessWidget {
           AppSwitchTile(
             value: hasDebtReminder,
             onChanged: debtDueDate != null
-                ? (val) => onReminderChanged(val)
+                ? (val) async {
+                    if (val) {
+                      await ReminderService.instance.requestPermissions();
+                    }
+                    onReminderChanged(val);
+                  }
                 : null,
             activeColor: AppColors.statusWarning,
             title: 'debt_due_toggle_title'.i18n(),

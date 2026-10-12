@@ -199,9 +199,9 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                       Container(
                         height: 140,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: context.surfaceMuted,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: context.borderSubtle),
                         ),
                         child: ListView.separated(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -223,9 +223,9 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                               ),
                               subtitle: Text(
                                 '${o.totalSellPrice.toStringAsFixed(1)} ${o.currency} • ${'print_items_count'.trParams({'count': o.items.length.toString()})}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.grey,
+                                  color: context.textSecondary,
                                   fontFamily: AppTheme.fontFamily,
                                 ),
                               ),
@@ -282,9 +282,9 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                           const SizedBox(height: 2),
                           Text(
                             'print_grid_subtitle'.i18n(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey,
+                              color: context.textSecondary,
                               fontFamily: AppTheme.fontFamily,
                             ),
                           ),
@@ -426,10 +426,10 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
+        color: context.textPrimary,
         fontFamily: AppTheme.fontFamily,
       ),
     );

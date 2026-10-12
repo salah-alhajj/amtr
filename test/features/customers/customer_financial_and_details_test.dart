@@ -290,5 +290,52 @@ void main() {
       expect(CustomerFinancialHelper.matchesFilter(customer: customerCreditor, summary: credSummary, filter: CustomerListFilter.hasWhatsApp), isTrue);
       expect(CustomerFinancialHelper.matchesFilter(customer: customerWithDebt, summary: debtSummary, filter: CustomerListFilter.hasWhatsApp), isFalse);
     });
+
+    test('Customer edit round-trip preserves manual override without polluting clean notes', () {
+      const override = CustomerFinancialOverride(
+        manualDebt: 5000.0,
+        manualCredit: 1000.0,
+        manualProfit: 2500.0,
+        isManualEnabled: true,
+        manualNotes: 'تسوية شهر أكتوبر',
+      );
+
+      final originalNotes = CustomerFinancialHelper.encodeNotesWithOverride(
+        'عميل مميز في الشحن الجوي',
+        override,
+      );
+
+      final customer = Customer(
+        id: 'cust_override_test',
+        name: 'سالم المتميز',
+        phone: '771234567',
+        notes: originalNotes,
+      );
+
+      // 1. التأكد من أن الملاحظات المعروضة للمستخدم خالية تماماً من أكواد JSON والتاغ
+      final userFacingNotes = CustomerFinancialHelper.cleanUserNotes(customer.notes);
+      expect(userFacingNotes, equals('عميل مميز في الشحن الجوي'));
+      expect(userFacingNotes.contains('<!--AMTR_FINANCIAL_OVERRIDE:'), isFalse);
+
+      // 2. محاكاة تعديل التاجر لملاحظات العميل في الواجهة
+      const updatedUserNotes = 'عميل كبار الشخصيات VIP';
+
+      // 3. الحفظ وإعادة الدمج يحافظ على التسوية المالية بكل دقة
+      final extractedOverride = CustomerFinancialHelper.parseOverride(customer.notes);
+      final reEncodedNotes = CustomerFinancialHelper.encodeNotesWithOverride(
+        updatedUserNotes,
+        extractedOverride,
+      );
+
+      final updatedCustomer = customer.copyWith(notes: reEncodedNotes);
+      final finalOverride = CustomerFinancialHelper.parseOverride(updatedCustomer.notes);
+
+      expect(finalOverride.isManualEnabled, isTrue);
+      expect(finalOverride.manualDebt, equals(5000.0));
+      expect(finalOverride.manualCredit, equals(1000.0));
+      expect(finalOverride.manualProfit, equals(2500.0));
+      expect(finalOverride.manualNotes, equals('تسوية شهر أكتوبر'));
+      expect(CustomerFinancialHelper.cleanUserNotes(updatedCustomer.notes), equals('عميل كبار الشخصيات VIP'));
+    });
   });
 }

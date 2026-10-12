@@ -4,6 +4,10 @@ import '../../../../core/localization/localization.dart';
 import '../../../../core/services/backup_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
+import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
+import '../../../orders/presentation/bloc/orders_bloc.dart';
+import '../../../customers/presentation/bloc/customers_bloc.dart';
+import '../../../shipments/presentation/bloc/shipments_bloc.dart';
 import '../widgets/backup_action_tile.dart';
 
 class BackupRestoreScreen extends StatefulWidget {
@@ -24,6 +28,15 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       if (!mounted) return;
 
       if (res != false) {
+        if (title == 'backup_import_restore_action'.i18n()) {
+          try {
+            context.read<DashboardBloc>().add(const LoadDashboardData());
+            context.read<OrdersBloc>().add(const LoadOrders());
+            context.read<CustomersBloc>().add(const LoadCustomers());
+            context.read<ShipmentsBloc>().add(const LoadShipments());
+          } catch (_) {}
+        }
+
         AppToast.showSuccess(
           context,
           'backup_action_success'.trParams({'title': title}),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import '../../../../core/localization/localization.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 import '../../models/print_options.dart';
@@ -108,9 +109,9 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                           const SizedBox(height: 2),
                           Text(
                             'print_grid_subtitle'.i18n(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey,
+                              color: context.textSecondary,
                               fontFamily: AppTheme.fontFamily,
                             ),
                           ),

@@ -66,5 +66,33 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- اللغات المدعومة لدعم الواجهات باللغة العربية والإنجليزية -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ar</string>
+		<string>en</string>
+	</array>
+
+	<!-- أذونات الكاميرا ومعرض الصور لطلب الفواتير والمرفقات -->
+	<key>NSCameraUsageDescription</key>
+	<string>يحتاج تطبيق عَمْتر إلى الكاميرا لتصوير مستندات ومرفقات الطلبات والفواتير.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>يحتاج تطبيق عَمْتر إلى الوصول لمعرض الصور لاختيار مرفقات الطلبات وسندات القبض.</string>
+
+	<!-- أذونات التقويم لتذكيرات استحقاق الديون -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>يحتاج التطبيق للوصول للتقويم لجدولة مواعيد استحقاق ديون العملاء.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>يسمح للتطبيق بإضافة تذكيرات مواعيد استحقاق الديون إلى تقويم هاتفك.</string>
+
+	<!-- مخططات التطبيقات الخارجية للواتساب والاتصال -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+		<string>tel</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
 </dict>
 </plist>
