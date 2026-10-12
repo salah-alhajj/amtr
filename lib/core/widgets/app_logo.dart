@@ -14,8 +14,8 @@ class AppLogo extends StatelessWidget {
     super.key,
     this.size = 48,
     this.borderRadius,
-    this.isTransparent = false,
-    this.showShadow = true,
+    this.isTransparent = true,
+    this.showShadow = false,
     this.onTap,
   });
 
@@ -32,27 +32,19 @@ class AppLogo extends StatelessWidget {
         height: size,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            'assets/icons/amtr_audit_icon.jpg',
+          return Container(
             width: size,
             height: size,
-            fit: BoxFit.contain,
-            errorBuilder: (context, err, stack) {
-              return Container(
-                width: size,
-                height: size,
-                color: AppColors.primaryBlue,
-                alignment: Alignment.center,
-                child: Text(
-                  'AMTR',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: size * 0.28,
-                  ),
-                ),
-              );
-            },
+            color: AppColors.primaryBlue,
+            alignment: Alignment.center,
+            child: Text(
+              'AMTR',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: size * 0.28,
+              ),
+            ),
           );
         },
       ),

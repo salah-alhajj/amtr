@@ -1,71 +1,25 @@
 #!/usr/bin/env python3
 import os
-from collections import deque
-from PIL import Image, ImageFilter
+from PIL import Image
 
-def isolate_logo(input_path):
-    print(f"Reading source logo from {input_path}...")
-    orig = Image.open(input_path).convert('RGB')
-    w, h = orig.size
-    pixels = orig.load()
-    bg = (242, 243, 237)
+def get_full_bleed_logo(input_png):
+    print(f"Reading master transparent logo from {input_png}...")
+    im = Image.open(input_png).convert('RGBA')
+    bbox = im.getbbox()
+    print(f"Original bbox: {bbox}")
+    cropped = im.crop(bbox)
+    # Full bleed 1024x1024 square with 0 empty margins
+    full_bleed = cropped.resize((1024, 1024), Image.Resampling.LANCZOS)
+    print(f"Full bleed bbox: {full_bleed.getbbox()}")
+    return full_bleed
 
-    # BFS from borders to find background with threshold 58
-    is_bg = [[False]*h for _ in range(w)]
-    q = deque()
-    for x in range(w):
-        q.append((x, 0))
-        q.append((x, h-1))
-        is_bg[x][0] = True
-        is_bg[x][h-1] = True
-    for y in range(h):
-        q.append((0, y))
-        q.append((w-1, y))
-        is_bg[0][y] = True
-        is_bg[w-1][y] = True
-
-    while q:
-        cx, cy = q.popleft()
-        for nx, ny in ((cx+1, cy), (cx-1, cy), (cx, cy+1), (cx, cy-1)):
-            if 0 <= nx < w and 0 <= ny < h and not is_bg[nx][ny]:
-                p = pixels[nx, ny]
-                diff = sum(abs(p[i] - bg[i]) for i in range(3))
-                if diff <= 58:
-                    is_bg[nx][ny] = True
-                    q.append((nx, ny))
-
-    # Create binary mask
-    mask = Image.new('L', (w, h), 0)
-    m_pixels = mask.load()
-    for x in range(w):
-        for y in range(h):
-            if not is_bg[x][y]:
-                m_pixels[x, y] = 255
-
-    # Subtle gaussian blur on mask for clean antialiased edge
-    smooth_mask = mask.filter(ImageFilter.GaussianBlur(radius=0.7))
-
-    rgba = orig.convert('RGBA')
-    rgba.putalpha(smooth_mask)
-
-    # Get tight bounding box of alpha
-    bbox = rgba.getbbox()
-    print(f"Isolated logo bbox: {bbox} (width: {bbox[2]-bbox[0]}, height: {bbox[3]-bbox[1]})")
-    cropped = rgba.crop(bbox)
-    return cropped
-
-def place_on_canvas(cropped_logo, canvas_size, scale_factor, bg_color=None):
-    """
-    canvas_size: (w, h) tuple or int
-    scale_factor: fraction of canvas that the logo should occupy (e.g. 0.85 for 85%)
-    bg_color: None for transparent (RGBA), or (R, G, B) for opaque
-    """
+def place_on_canvas(cropped_logo, canvas_size, scale_factor=1.0, bg_color=None):
     if isinstance(canvas_size, int):
         cw, ch = canvas_size, canvas_size
     else:
         cw, ch = canvas_size
 
-    mode = 'RGBA' if bg_color is None or len(bg_color) == 4 and bg_color[3] < 255 else 'RGB'
+    mode = 'RGBA' if bg_color is None or (len(bg_color) == 4 and bg_color[3] < 255) else 'RGB'
     if bg_color is None:
         canvas = Image.new('RGBA', (cw, ch), (0, 0, 0, 0))
     elif mode == 'RGBA':
@@ -87,21 +41,20 @@ def place_on_canvas(cropped_logo, canvas_size, scale_factor, bg_color=None):
     return canvas
 
 def main():
-    source_icon = 'assets/icons/amtr_audit_icon.jpg'
-    cropped_logo = isolate_logo(source_icon)
+    source_png = 'assets/icons/amtr_audit_icon.png'
+    master_logo = get_full_bleed_logo(source_png)
 
-    # 1. Update in-app assets:
-    # High-resolution transparent PNG with minimal safe padding (~92% of 1024x1024)
-    app_logo_transparent = place_on_canvas(cropped_logo, 1024, 0.92, bg_color=None)
-    app_logo_transparent.save('assets/icons/amtr_audit_icon.png', 'PNG', optimize=True)
-    print("Saved assets/icons/amtr_audit_icon.png")
+    # 1. Update in-app master transparent PNG: 100% full bleed, 0 empty margins
+    master_logo.save('assets/icons/amtr_audit_icon.png', 'PNG', optimize=True)
+    print("Saved full-bleed assets/icons/amtr_audit_icon.png with zero empty space.")
 
-    # High-resolution JPEG with white background and tight padding
-    app_logo_jpg = place_on_canvas(cropped_logo, 1024, 0.92, bg_color=(255, 255, 255))
-    app_logo_jpg.save('assets/icons/amtr_audit_icon.jpg', 'JPEG', quality=95)
-    print("Updated assets/icons/amtr_audit_icon.jpg")
+    # 2. Delete white background backup JPEG if exists
+    jpg_backup = 'assets/icons/amtr_audit_icon.jpg'
+    if os.path.exists(jpg_backup):
+        os.remove(jpg_backup)
+        print(f"Completely removed {jpg_backup}")
 
-    # 2. iOS AppIcon (all 15 standard sizes, opaque background, safe zone ~84% to fit squircle)
+    # 3. iOS AppIcon (all 15 sizes, full bleed 1.0, no empty margins)
     ios_base_dir = 'ios/Runner/Assets.xcassets/AppIcon.appiconset'
     os.makedirs(ios_base_dir, exist_ok=True)
     ios_sizes = {
@@ -123,12 +76,12 @@ def main():
     }
     for filename, sz in ios_sizes.items():
         out_path = os.path.join(ios_base_dir, filename)
-        icon_img = place_on_canvas(cropped_logo, sz, 0.84, bg_color=(255, 255, 255))
+        icon_img = place_on_canvas(master_logo, sz, scale_factor=1.0, bg_color=(255, 255, 255))
         icon_img.save(out_path, 'PNG', optimize=True)
-    print("Generated all iOS AppIcon sizes.")
+    print("Generated all iOS AppIcon sizes with zero empty margins.")
 
-    # 3. Android launcher icons (Legacy mipmaps + Adaptive icons)
-    # Legacy mipmaps:
+    # 4. Android launcher icons (Legacy mipmaps + Adaptive icons)
+    # Legacy mipmaps: 100% full bleed, zero margins, transparent background
     android_legacy_sizes = {
         'mipmap-mdpi': 48,
         'mipmap-hdpi': 72,
@@ -140,11 +93,10 @@ def main():
     for folder, sz in android_legacy_sizes.items():
         folder_path = os.path.join(res_dir, folder)
         os.makedirs(folder_path, exist_ok=True)
-        # For legacy, provide a clean icon with subtle squircle background or transparent
-        legacy_icon = place_on_canvas(cropped_logo, sz, 0.86, bg_color=None)
+        legacy_icon = place_on_canvas(master_logo, sz, scale_factor=1.0, bg_color=None)
         legacy_icon.save(os.path.join(folder_path, 'ic_launcher.png'), 'PNG', optimize=True)
 
-    # Android Adaptive foreground (108dp canvas, safe zone 66dp = ~61-66%)
+    # Android Adaptive foreground (108dp canvas, safe zone 72%)
     adaptive_sizes = {
         'mipmap-mdpi': 108,
         'mipmap-hdpi': 162,
@@ -154,7 +106,7 @@ def main():
     }
     for folder, sz in adaptive_sizes.items():
         folder_path = os.path.join(res_dir, folder)
-        fg_icon = place_on_canvas(cropped_logo, sz, 0.64, bg_color=None)
+        fg_icon = place_on_canvas(master_logo, sz, scale_factor=0.72, bg_color=None)
         fg_icon.save(os.path.join(folder_path, 'ic_launcher_foreground.png'), 'PNG', optimize=True)
 
     # Adaptive icon XML in mipmap-anydpi-v26
@@ -178,36 +130,36 @@ def main():
     <color name="ic_launcher_background">#FFFFFF</color>
 </resources>
 ''')
-    print("Generated Android legacy and adaptive launcher icons.")
+    print("Generated Android legacy and adaptive launcher icons with zero empty margins.")
 
-    # 4. Web Icons
+    # 5. Web Icons
     web_dir = 'web'
     web_icons_dir = 'web/icons'
     os.makedirs(web_icons_dir, exist_ok=True)
-    # Favicon (32x32)
-    fav = place_on_canvas(cropped_logo, 32, 0.90, bg_color=None)
+    # Favicon (32x32, 100% full bleed, zero margins)
+    fav = place_on_canvas(master_logo, 32, scale_factor=1.0, bg_color=None)
     fav.save(os.path.join(web_dir, 'favicon.png'), 'PNG', optimize=True)
 
-    # Icon-192.png & Icon-512.png (PWA standard)
-    i192 = place_on_canvas(cropped_logo, 192, 0.88, bg_color=None)
+    # Icon-192.png & Icon-512.png (PWA standard full bleed)
+    i192 = place_on_canvas(master_logo, 192, scale_factor=1.0, bg_color=None)
     i192.save(os.path.join(web_icons_dir, 'Icon-192.png'), 'PNG', optimize=True)
-    i512 = place_on_canvas(cropped_logo, 512, 0.88, bg_color=None)
+    i512 = place_on_canvas(master_logo, 512, scale_factor=1.0, bg_color=None)
     i512.save(os.path.join(web_icons_dir, 'Icon-512.png'), 'PNG', optimize=True)
 
-    # Maskable PWA icons (with 60% safe zone)
-    m192 = place_on_canvas(cropped_logo, 192, 0.65, bg_color=(255, 255, 255))
+    # Maskable PWA icons (72% safe zone)
+    m192 = place_on_canvas(master_logo, 192, scale_factor=0.72, bg_color=(255, 255, 255))
     m192.save(os.path.join(web_icons_dir, 'Icon-maskable-192.png'), 'PNG', optimize=True)
-    m512 = place_on_canvas(cropped_logo, 512, 0.65, bg_color=(255, 255, 255))
+    m512 = place_on_canvas(master_logo, 512, scale_factor=0.72, bg_color=(255, 255, 255))
     m512.save(os.path.join(web_icons_dir, 'Icon-maskable-512.png'), 'PNG', optimize=True)
-    print("Generated Web favicon and PWA icons.")
+    print("Generated Web favicon and PWA icons with zero empty margins.")
 
-    # 5. Windows app_icon.ico
+    # 6. Windows app_icon.ico
     win_res_dir = 'windows/runner/resources'
     os.makedirs(win_res_dir, exist_ok=True)
-    ico_master = place_on_canvas(cropped_logo, 256, 0.90, bg_color=None)
+    ico_master = place_on_canvas(master_logo, 256, scale_factor=1.0, bg_color=None)
     ico_path = os.path.join(win_res_dir, 'app_icon.ico')
     ico_master.save(ico_path, format='ICO', sizes=[(16,16), (24,24), (32,32), (48,48), (64,64), (128,128), (256,256)])
-    print("Generated Windows multi-resolution app_icon.ico.")
+    print("Generated Windows multi-resolution app_icon.ico with zero empty margins.")
 
 if __name__ == '__main__':
     main()
