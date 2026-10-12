@@ -6,12 +6,29 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:amtr/core/database/app_database.dart';
 import 'package:amtr/main.dart';
 
 void main() {
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
+  setUpAll(() async {
+    final db = await openDatabase(
+      inMemoryDatabasePath,
+      version: 1,
+      onCreate: (db, version) => AppDatabase.instance.createDBForTesting(db),
+    );
+    AppDatabase.setTestDatabase(db);
+  });
+
   testWidgets('App smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const RetailAssistantApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(RetailAssistantApp), findsOneWidget);
+    // تفريغ مؤقت فحص القفل التلقائي في مكتبة sqflite_common
+    await tester.pump(const Duration(seconds: 10));
   });
 }
