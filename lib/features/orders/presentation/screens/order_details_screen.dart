@@ -426,11 +426,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       ),
                       if (order.isSyncedWithCalendar)
                         AppBadge(
+                          icon: Icons.check_circle_rounded,
                           label: 'debt_due_synced_calendar'.i18n(),
                           color: AppColors.primaryGreen,
                         )
                       else if (order.hasDebtReminder)
                         AppBadge(
+                          icon: Icons.notifications_active_rounded,
                           label: 'debt_due_alarm_enabled'.i18n(),
                           color: AppColors.statusWarning,
                         ),
