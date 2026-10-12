@@ -67,9 +67,9 @@ class CustomerFinancialOverride {
 
 /// نتائج ومؤشرات الحالة المالية للعميل
 class CustomerFinancialSummary {
-  final double benefitedAmount; // 🟢 المبالغ المستفادة منه (تختفي إذا كان صفر)
-  final double debtsOwed; // 🔴 المبالغ مديونياته لنا (تختفي إذا كان صفر)
-  final double creditBalance; // 🔵 المبالغ المتبقية له لدينا (تختفي إذا كان صفر)
+  final double benefitedAmount; // المبالغ المستفادة منه (تختفي إذا كان صفر)
+  final double debtsOwed; // المبالغ مديونياته لنا (تختفي إذا كان صفر)
+  final double creditBalance; // المبالغ المتبقية له لدينا (تختفي إذا كان صفر)
 
   final double totalSales;
   final double totalCost;

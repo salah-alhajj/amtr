@@ -506,9 +506,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
           // -------------------------------------------------------------------
           // الحالة المالية الحالية الفعلية:
-          // 🟢 أخضر: المبالغ المستفادة منه وتختفي إذا كان صفر
-          // 🔴 أحمر: مديونياته لنا وتختفي إذا كان صفر
-          // 🔵 أزرق: المبالغ المتبقية له لدينا وتختفي إذا كان صفر
+          // أخضر: المبالغ المستفادة منه وتختفي إذا كان صفر
+          // أحمر: مديونياته لنا وتختفي إذا كان صفر
+          // أزرق: المبالغ المتبقية له لدينا وتختفي إذا كان صفر
           // -------------------------------------------------------------------
           _buildActualFinancialStatusCards(summary, isDark),
         ],
@@ -520,7 +520,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   Widget _buildActualFinancialStatusCards(CustomerFinancialSummary summary, bool isDark) {
     final List<Widget> cards = [];
 
-    // 🟢 أخضر: المبالغ المستفادة منه وتختفي تماماً إذا كان صفر
+    // أخضر: المبالغ المستفادة منه وتختفي تماماً إذا كان صفر
     if (summary.showBenefited) {
       cards.add(
         _buildFinancialTile(
@@ -534,7 +534,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       );
     }
 
-    // 🔴 أحمر: المبالغ مديونياته لنا وتختفي تماماً إذا كان صفر
+    // أحمر: المبالغ مديونياته لنا وتختفي تماماً إذا كان صفر
     if (summary.showDebt) {
       cards.add(
         _buildFinancialTile(
@@ -548,7 +548,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       );
     }
 
-    // 🔵 أزرق: المبالغ المتبقية له لدينا وتختفي تماماً إذا كان صفر
+    // أزرق: المبالغ المتبقية له لدينا وتختفي تماماً إذا كان صفر
     if (summary.showCredit) {
       cards.add(
         _buildFinancialTile(
