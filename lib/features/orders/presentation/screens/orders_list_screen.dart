@@ -82,6 +82,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   children: [
                     _buildFilterChip(context, 'status_all'.i18n(), 'all', selectedFilter),
                     _buildFilterChip(context, 'orders_filter_debt'.i18n(), 'debt', selectedFilter),
+                    _buildFilterChip(context, 'orders_filter_partial'.i18n(), 'partial', selectedFilter),
                     _buildFilterChip(context, 'orders_filter_prepaid'.i18n(), 'prepaid', selectedFilter),
                     _buildFilterChip(context, 'orders_filter_cod'.i18n(), 'cod', selectedFilter),
                     _buildFilterChip(context, 'orders_filter_unassigned'.i18n(), 'unassigned', selectedFilter),

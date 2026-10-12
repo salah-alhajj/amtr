@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 
 /// بطاقة ملخص الحسبة المالية وفاتورة الطلب
@@ -90,14 +90,12 @@ class OrderFinancialSummaryCard extends StatelessWidget {
             color: AppColors.primaryGreen,
           ),
           const SizedBox(height: 16),
-          ElevatedButton.icon(
+          AppPrimaryButton(
             onPressed: onUpdatePayment,
-            icon: const Icon(Icons.payment_rounded, size: 18),
-            label: Text('order_update_payment_btn'.i18n()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
-              minimumSize: const Size.fromHeight(44),
-            ),
+            icon: Icons.payment_rounded,
+            label: 'order_update_payment_btn'.i18n(),
+            backgroundColor: AppColors.primaryGreen,
+            height: 44,
           ),
         ],
       ),

@@ -130,6 +130,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             final totalCapital = _currencyService.fromBaseYer(stats.totalCapitalInYer, activeCurrency);
             final netProfit = _currencyService.fromBaseYer(stats.netProfitInYer, activeCurrency);
 
+            final weeklySales = stats.weeklySalesInYer.map((s) => _currencyService.fromBaseYer(s, activeCurrency)).toList();
+            final weeklySalesDayLabels = stats.weeklySalesDayKeys.map((k) => k.i18n()).toList();
+
             return RefreshIndicator(
               onRefresh: () async {
                 context.read<DashboardBloc>().add(const LoadDashboardData());
@@ -162,15 +165,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     debtAmount: debts,
                     totalRevenue: totalCapital,
                     activeCurrency: activeCurrency,
-                    weeklySales: [
-                      totalCapital * 0.28,
-                      totalCapital * 0.45,
-                      totalCapital * 0.40,
-                      totalCapital * 0.65,
-                      totalCapital * 0.85,
-                      totalCapital * 0.72,
-                      totalCapital,
-                    ],
+                    weeklySales: weeklySales,
+                    dayLabels: weeklySalesDayLabels,
                   ),
 
                   const SizedBox(height: 16),

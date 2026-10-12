@@ -12,6 +12,7 @@ class FinancialAnalyticsCard extends StatefulWidget {
   final double totalRevenue;
   final String activeCurrency;
   final List<double> weeklySales;
+  final List<String>? dayLabels;
 
   const FinancialAnalyticsCard({
     super.key,
@@ -21,6 +22,7 @@ class FinancialAnalyticsCard extends StatefulWidget {
     required this.totalRevenue,
     required this.activeCurrency,
     required this.weeklySales,
+    this.dayLabels,
   });
 
   @override
@@ -91,7 +93,7 @@ class _FinancialAnalyticsCardState extends State<FinancialAnalyticsCard> {
               values: widget.weeklySales.isEmpty
                   ? [widget.totalRevenue * 0.4, widget.totalRevenue * 0.6, widget.totalRevenue * 0.5, widget.totalRevenue * 0.8, widget.totalRevenue]
                   : widget.weeklySales,
-              labels: [
+              labels: widget.dayLabels ?? [
                 'day_saturday'.i18n(),
                 'day_sunday'.i18n(),
                 'day_monday'.i18n(),

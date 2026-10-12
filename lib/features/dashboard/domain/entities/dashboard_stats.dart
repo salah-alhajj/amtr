@@ -9,6 +9,8 @@ class DashboardStats {
   final int activeShipmentsCount;
   final int totalCustomersCount;
   final int debtorsCount; // عدد العملاء المدينين
+  final List<double> weeklySalesInYer; // مبيعات الأيام السبعة الماضية الحقيقية بالريال اليمني
+  final List<String> weeklySalesDayKeys; // مفاتيح أيام الأسبوع للأيام السبعة
 
   DashboardStats({
     required this.totalDebtsInYer,
@@ -21,6 +23,8 @@ class DashboardStats {
     required this.activeShipmentsCount,
     required this.totalCustomersCount,
     required this.debtorsCount,
+    this.weeklySalesInYer = const [0, 0, 0, 0, 0, 0, 0],
+    this.weeklySalesDayKeys = const [],
   });
 
   factory DashboardStats.empty() {
@@ -35,6 +39,8 @@ class DashboardStats {
       activeShipmentsCount: 0,
       totalCustomersCount: 0,
       debtorsCount: 0,
+      weeklySalesInYer: const [0, 0, 0, 0, 0, 0, 0],
+      weeklySalesDayKeys: const [],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants.dart';
+import '../../../core/services/currency_service.dart';
 import '../../../core/widgets/design_system.dart';
 import '../../../models/customer.dart';
 import '../../../models/individual_order.dart';
@@ -70,6 +71,7 @@ class CustomerWhatsAppHelper {
   static String buildMultipleOrdersStatusMessage({
     required Customer customer,
     required List<IndividualOrder> selectedOrders,
+    CurrencyService? currencyService,
   }) {
     final buffer = StringBuffer();
     buffer.writeln('السلام عليكم ورحمة الله وبركاته 🌸');
@@ -77,15 +79,26 @@ class CustomerWhatsAppHelper {
     buffer.writeln('إليك كشف ومتابعة حالة الطلبات المحددة (*${selectedOrders.length} طلبات*):');
     buffer.writeln('================================');
 
-    double totalSales = 0.0;
-    double totalPaid = 0.0;
-    double totalRemaining = 0.0;
+    final currencyServiceHelper = currencyService ?? CurrencyService.instance;
+    final Map<String, double> salesByCurrency = {};
+    final Map<String, double> paidByCurrency = {};
+    final Map<String, double> remainingByCurrency = {};
+
+    double totalSalesInBaseYer = 0.0;
+    double totalPaidInBaseYer = 0.0;
+    double totalRemainingInBaseYer = 0.0;
 
     for (int i = 0; i < selectedOrders.length; i++) {
       final o = selectedOrders[i];
-      totalSales += o.totalSellPrice;
-      totalPaid += o.paidAmount;
-      totalRemaining += o.remainingDebt;
+      final curr = o.currency.toUpperCase();
+
+      salesByCurrency[curr] = (salesByCurrency[curr] ?? 0.0) + o.totalSellPrice;
+      paidByCurrency[curr] = (paidByCurrency[curr] ?? 0.0) + o.paidAmount;
+      remainingByCurrency[curr] = (remainingByCurrency[curr] ?? 0.0) + o.remainingDebt;
+
+      totalSalesInBaseYer += currencyServiceHelper.toBaseYer(o.totalSellPrice, curr);
+      totalPaidInBaseYer += currencyServiceHelper.toBaseYer(o.paidAmount, curr);
+      totalRemainingInBaseYer += currencyServiceHelper.toBaseYer(o.remainingDebt, curr);
 
       final currSymbol = AppConstants.getCurrencySymbol(o.currency);
 
@@ -101,9 +114,35 @@ class CustomerWhatsAppHelper {
     }
 
     buffer.writeln('📊 *الإجمالي العام للطلبات المحددة:*');
-    buffer.writeln('💰 *إجمالي المبيعات:* ${totalSales.toStringAsFixed(0)}');
-    buffer.writeln('💵 *إجمالي المسدد:* ${totalPaid.toStringAsFixed(0)}');
-    buffer.writeln('📌 *صافي المتبقي:* *${totalRemaining.toStringAsFixed(0)}*');
+    if (salesByCurrency.length <= 1) {
+      final curr = salesByCurrency.isNotEmpty ? salesByCurrency.keys.first : AppConstants.currencyYer;
+      final symbol = AppConstants.getCurrencySymbol(curr);
+      final totalSales = salesByCurrency[curr] ?? 0.0;
+      final totalPaid = paidByCurrency[curr] ?? 0.0;
+      final totalRemaining = remainingByCurrency[curr] ?? 0.0;
+      buffer.writeln('💰 *إجمالي المبيعات:* ${totalSales.toStringAsFixed(0)} $symbol');
+      buffer.writeln('💵 *إجمالي المسدد:* ${totalPaid.toStringAsFixed(0)} $symbol');
+      buffer.writeln('📌 *صافي المتبقي:* *${totalRemaining.toStringAsFixed(0)} $symbol*');
+    } else {
+      // تفصيل حسب كل عملة
+      for (final curr in salesByCurrency.keys) {
+        final symbol = AppConstants.getCurrencySymbol(curr);
+        buffer.writeln('• عملة *$curr* ($symbol):');
+        buffer.writeln('   - المطلوب: ${salesByCurrency[curr]!.toStringAsFixed(0)} $symbol');
+        buffer.writeln('   - المسدد: ${paidByCurrency[curr]!.toStringAsFixed(0)} $symbol');
+        buffer.writeln('   - المتبقي: ${remainingByCurrency[curr]!.toStringAsFixed(0)} $symbol');
+      }
+      final activeCurr = currencyServiceHelper.activeDisplayCurrency;
+      final activeSymbol = AppConstants.getCurrencySymbol(activeCurr);
+      final grandSalesConverted = currencyServiceHelper.fromBaseYer(totalSalesInBaseYer, activeCurr);
+      final grandPaidConverted = currencyServiceHelper.fromBaseYer(totalPaidInBaseYer, activeCurr);
+      final grandRemainingConverted = currencyServiceHelper.fromBaseYer(totalRemainingInBaseYer, activeCurr);
+      buffer.writeln('--------------------------------');
+      buffer.writeln('🌐 *الإجمالي الموحد (المعادل بـ $activeCurr $activeSymbol):*');
+      buffer.writeln('💰 *المبيعات:* ${grandSalesConverted.toStringAsFixed(0)} $activeSymbol');
+      buffer.writeln('💵 *المسدد:* ${grandPaidConverted.toStringAsFixed(0)} $activeSymbol');
+      buffer.writeln('📌 *صافي المتبقي:* *${grandRemainingConverted.toStringAsFixed(0)} $activeSymbol*');
+    }
     buffer.writeln('================================');
     buffer.writeln('شاكرين ومقدرين حسن تعاملكم معنا ✨');
 

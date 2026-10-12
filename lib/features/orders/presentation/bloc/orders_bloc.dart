@@ -120,6 +120,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       if (filter == 'debt' && order.paymentStatus != AppConstants.paymentDebt) {
         return false;
       }
+      if (filter == 'partial' && order.paymentStatus != AppConstants.paymentPartial) {
+        return false;
+      }
       if (filter == 'prepaid' && order.paymentStatus != AppConstants.paymentPrepaid) {
         return false;
       }

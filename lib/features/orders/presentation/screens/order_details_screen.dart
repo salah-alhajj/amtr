@@ -11,6 +11,7 @@ import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 import '../../data/repositories/order_repository_impl.dart';
 import '../../domain/repositories/order_repository.dart';
+import '../bloc/orders_bloc.dart';
 import '../widgets/order_financial_summary_card.dart';
 import '../widgets/order_item_detail_tile.dart';
 import '../widgets/record_payment_sheet.dart';
@@ -60,9 +61,78 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         actualDeliveryDate: picked,
         orderStatus: AppConstants.orderStatusDelivered,
       );
-      await _orderRepo.updateOrder(updated, updated.items);
+      if (mounted) {
+        context.read<OrdersBloc>().add(UpdateOrderEvent(updated, updated.items));
+      } else {
+        await _orderRepo.updateOrder(updated, updated.items);
+      }
       _loadOrder();
     }
+  }
+
+  void _showChangeOrderStatusSheet() {
+    if (_order == null) return;
+    final statuses = [
+      (AppConstants.orderStatusPending, 'item_status_awaiting_purchase'.i18n(), Icons.hourglass_top_rounded),
+      (AppConstants.orderStatusPurchased, 'item_status_purchased'.i18n(), Icons.shopping_bag_outlined),
+      (AppConstants.orderStatusInCargo, 'item_status_in_transit'.i18n(), Icons.local_shipping_outlined),
+      (AppConstants.orderStatusReady, 'item_status_ready_for_delivery'.i18n(), Icons.check_circle_outline_rounded),
+      (AppConstants.orderStatusDelivered, 'item_status_delivered_to_customer'.i18n(), Icons.done_all_rounded),
+    ];
+
+    showAppModalSheet(
+      context: context,
+      title: 'shipment_order_change_status'.i18n(),
+      subtitle: 'order_number_title'.trParams({'number': _order!.orderNumber}),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...statuses.map((item) {
+            final code = item.$1;
+            final label = item.$2;
+            final icon = item.$3;
+            final isCurrent = _order!.orderStatus == code;
+            final color = AppConstants.getOrderStatusColor(code);
+
+            return ListTile(
+              dense: true,
+              leading: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 18, color: color),
+              ),
+              title: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
+                  color: isCurrent ? color : null,
+                ),
+              ),
+              trailing: isCurrent ? Icon(Icons.check, color: color) : null,
+              onTap: () async {
+                Navigator.pop(context);
+                final updated = _order!.copyWith(
+                  orderStatus: code,
+                  actualDeliveryDate: code == AppConstants.orderStatusDelivered
+                      ? (_order!.actualDeliveryDate ?? DateTime.now())
+                      : null,
+                );
+                if (mounted) {
+                  context.read<OrdersBloc>().add(UpdateOrderEvent(updated, updated.items));
+                  AppToast.showSuccess(context, 'shipment_order_status_updated'.i18n());
+                } else {
+                  await _orderRepo.updateOrder(updated, updated.items);
+                }
+                _loadOrder();
+              },
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   Future<void> _updateDebtDueDate() async {
@@ -99,7 +169,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       debtDueDate: combined,
       hasDebtReminder: true,
     );
-    await _orderRepo.updateOrder(updated, updated.items);
+    if (mounted) {
+      context.read<OrdersBloc>().add(UpdateOrderEvent(updated, updated.items));
+    } else {
+      await _orderRepo.updateOrder(updated, updated.items);
+    }
     await ReminderService.instance.scheduleDebtReminder(updated);
     _loadOrder();
   }
@@ -110,7 +184,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     if (!mounted) return;
     if (ok) {
       final updated = _order!.copyWith(isSyncedWithCalendar: true);
-      await _orderRepo.updateOrder(updated, updated.items);
+      if (mounted) {
+        context.read<OrdersBloc>().add(UpdateOrderEvent(updated, updated.items));
+      } else {
+        await _orderRepo.updateOrder(updated, updated.items);
+      }
       _loadOrder();
       if (!mounted) return;
       AppToast.showSuccess(context, 'debt_due_calendar_success'.i18n());
@@ -168,7 +246,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       context,
       order: _order!,
       onSave: (paymentStatus, paidAmount) async {
-        await _orderRepo.updatePaymentStatus(_order!.id, paymentStatus, paidAmount);
+        context.read<OrdersBloc>().add(RecordPaymentEvent(_order!.id, paymentStatus, paidAmount));
         _loadOrder();
       },
     );
@@ -221,7 +299,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 context,
                 MaterialPageRoute(builder: (_) => AddEditOrderScreen(orderToEdit: order)),
               );
-              if (result == true) _loadOrder();
+              if (result == true) {
+                if (context.mounted) {
+                  context.read<OrdersBloc>().add(const LoadOrders());
+                }
+                _loadOrder();
+              }
             },
           ),
           IconButton(
@@ -242,13 +325,30 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      order.customerName ?? 'order_guest_customer'.i18n(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    Expanded(
+                      child: Text(
+                        order.customerName ?? 'order_guest_customer'.i18n(),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    AppleBadge(
-                      label: AppConstants.getPaymentStatusLabel(order.paymentStatus),
-                      color: AppConstants.getPaymentStatusColor(order.paymentStatus),
+                    const SizedBox(width: 8),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: _showChangeOrderStatusSheet,
+                          child: AppleBadge(
+                            label: AppConstants.getOrderStatusLabel(order.orderStatus),
+                            color: AppConstants.getOrderStatusColor(order.orderStatus),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        AppleBadge(
+                          label: AppConstants.getPaymentStatusLabel(order.paymentStatus),
+                          color: AppConstants.getPaymentStatusColor(order.paymentStatus),
+                        ),
+                      ],
                     ),
                   ],
                 ),

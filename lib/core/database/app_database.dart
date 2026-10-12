@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// المحرك المحلي لقاعدة البيانات SQLite
@@ -146,7 +149,7 @@ class AppDatabase {
     return join(dbPath, 'amtr_local.db');
   }
 
-  /// تصدير كامل بيانات التطبيق في ملف JSON موحد
+  /// تصدير كامل بيانات التطبيق في ملف JSON موحد مع تضمين صور السلع المرفقة
   Future<Map<String, dynamic>> exportAllDataToJson() async {
     final db = await database;
     final customers = await db.query('customers');
@@ -154,6 +157,27 @@ class AppDatabase {
     final orders = await db.query('orders');
     final orderItems = await db.query('order_items');
     final exchangeRates = await db.query('exchange_rates');
+
+    // تضمين ملفات الصور المرفقة كـ Base64 لضمان عدم ضياعها
+    final photosData = <String, String>{};
+    for (final item in orderItems) {
+      if (item['photos'] != null) {
+        try {
+          final decoded = jsonDecode(item['photos'] as String);
+          if (decoded is List) {
+            for (final p in decoded) {
+              final pathStr = p.toString();
+              final file = File(pathStr);
+              if (await file.exists()) {
+                final fileName = basename(pathStr);
+                final bytes = await file.readAsBytes();
+                photosData[fileName] = base64Encode(bytes);
+              }
+            }
+          }
+        } catch (_) {}
+      }
+    }
 
     return {
       'version': 1,
@@ -163,14 +187,37 @@ class AppDatabase {
       'orders': orders,
       'order_items': orderItems,
       'exchange_rates': exchangeRates,
+      'photos_data': photosData,
     };
   }
 
-  /// استيراد كامل البيانات من JSON واستبدال أو دمج البيانات بأمان
+  /// استيراد كامل البيانات من JSON واستعادة الصور لمجلد المستندات الدائم
   Future<void> importAllDataFromJson(Map<String, dynamic> data) async {
+    // 1. استعادة وتفريغ الصور إلى مجلد المستندات الدائم
+    final docsDir = await getApplicationDocumentsDirectory();
+    final photosDir = Directory(join(docsDir.path, 'amtr_photos'));
+    if (!photosDir.existsSync()) {
+      await photosDir.create(recursive: true);
+    }
+
+    final restoredPhotosMap = <String, String>{};
+    if (data['photos_data'] is Map) {
+      final photosMap = data['photos_data'] as Map;
+      for (final entry in photosMap.entries) {
+        try {
+          final fileName = entry.key.toString();
+          final bytes = base64Decode(entry.value.toString());
+          final targetPath = join(photosDir.path, fileName);
+          final targetFile = File(targetPath);
+          await targetFile.writeAsBytes(bytes);
+          restoredPhotosMap[fileName] = targetPath;
+        } catch (_) {}
+      }
+    }
+
+    // 2. تحديث قاعدة البيانات ضمن معاملة آمنة
     final db = await database;
     await db.transaction((txn) async {
-      // تفريغ الجداول الحالية بأمان
       await txn.delete('order_items');
       await txn.delete('orders');
       await txn.delete('shipments');
@@ -194,7 +241,20 @@ class AppDatabase {
       }
       if (data['order_items'] is List) {
         for (final item in data['order_items']) {
-          await txn.insert('order_items', Map<String, dynamic>.from(item as Map));
+          final itemMap = Map<String, dynamic>.from(item as Map);
+          if (itemMap['photos'] != null && restoredPhotosMap.isNotEmpty) {
+            try {
+              final decoded = jsonDecode(itemMap['photos'] as String);
+              if (decoded is List) {
+                final updatedList = decoded.map((p) {
+                  final fn = basename(p.toString());
+                  return restoredPhotosMap[fn] ?? p.toString();
+                }).toList();
+                itemMap['photos'] = jsonEncode(updatedList);
+              }
+            } catch (_) {}
+          }
+          await txn.insert('order_items', itemMap);
         }
       }
       if (data['exchange_rates'] is List) {

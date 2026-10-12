@@ -34,11 +34,14 @@ class ConsolidatedShipment {
   })  : createdAt = createdAt ?? DateTime.now(),
         orders = orders ?? [];
 
-  /// حساب إجمالي سعر الشراء الأصلي للطلبات المجمعة (بالريال اليمني)
+  /// حساب إجمالي سعر الشراء الأصلي للطلبات المجمعة بالإضافة إلى التكاليف الإضافية (بالريال اليمني)
   double calculateTotalOriginalCostInYer([CurrencyService? service]) {
     final currencyService = service ?? CurrencyService.instance;
     double totalYer = 0.0;
     for (final order in orders) {
+      if (order.additionalCost > 0) {
+        totalYer += currencyService.toBaseYer(order.additionalCost, order.currency);
+      }
       for (final item in order.items) {
         totalYer += currencyService.toBaseYer(item.totalCost, item.currency);
       }

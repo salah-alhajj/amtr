@@ -108,7 +108,6 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
             inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
             validator: (val) => AppValidators.paidAmount(
               val,
-              maxAmount: widget.order.totalSellPrice > 0 ? widget.order.totalSellPrice : null,
               allowEmpty: false,
             ),
             textInputAction: TextInputAction.done,

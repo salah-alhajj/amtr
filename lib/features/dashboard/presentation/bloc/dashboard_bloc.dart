@@ -141,6 +141,36 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         totalProfitYer += (sellYer - costYer);
       }
 
+      // احتساب مبيعات الأيام السبعة الماضية الحقيقية من قاعدة البيانات
+      final now = DateTime.now();
+      final List<double> weeklySalesYer = [];
+      final List<String> weeklyDayKeys = [];
+      const dayKeyMap = {
+        DateTime.saturday: 'day_saturday',
+        DateTime.sunday: 'day_sunday',
+        DateTime.monday: 'day_monday',
+        DateTime.tuesday: 'day_tuesday',
+        DateTime.wednesday: 'day_wednesday',
+        DateTime.thursday: 'day_thursday',
+        DateTime.friday: 'day_friday',
+      };
+
+      for (int i = 6; i >= 0; i--) {
+        final targetDate = now.subtract(Duration(days: i));
+        final dayStart = DateTime(targetDate.year, targetDate.month, targetDate.day, 0, 0, 0);
+        final dayEnd = DateTime(targetDate.year, targetDate.month, targetDate.day, 23, 59, 59, 999);
+        weeklyDayKeys.add(dayKeyMap[targetDate.weekday] ?? 'day_saturday');
+
+        double daySalesYer = 0.0;
+        for (final o in orders) {
+          if (o.createdAt.isAfter(dayStart.subtract(const Duration(milliseconds: 1))) &&
+              o.createdAt.isBefore(dayEnd.add(const Duration(milliseconds: 1)))) {
+            daySalesYer += currencyService.toBaseYer(o.totalSellPrice, o.currency);
+          }
+        }
+        weeklySalesYer.add(daySalesYer);
+      }
+
       final totalCapitalYer = collectedCapitalYer + remainingCapitalYer;
 
       final stats = DashboardStats(
@@ -151,14 +181,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         netProfitInYer: totalProfitYer,
         totalOrdersCount: orders.length,
         pendingOrdersCount: pendingOrdersCount,
-        activeShipmentsCount: shipments.where((s) => s.status != AppConstants.shipmentDistribution).length,
+        activeShipmentsCount: shipments.where((s) => s.status != AppConstants.shipmentDelivered).length,
         totalCustomersCount: customers.length,
         debtorsCount: debtorsCount,
+        weeklySalesInYer: weeklySalesYer,
+        weeklySalesDayKeys: weeklyDayKeys,
       );
 
       final recentOrders = orders.take(5).toList();
       final activeShipments = shipments
-          .where((s) => s.status != AppConstants.shipmentDistribution)
+          .where((s) => s.status != AppConstants.shipmentDelivered)
           .take(3)
           .toList();
 

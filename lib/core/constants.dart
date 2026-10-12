@@ -73,10 +73,11 @@ class AppConstants {
     }
   }
 
-  // محطات الشحنة المجمعة الثلاث
+  // محطات الشحنة المجمعة
   static const String shipmentDispatched = 'dispatched'; // تم التسليم للنقل
   static const String shipmentCheckpoint = 'checkpoint_reached'; // وصل لنقطة الاستلام
   static const String shipmentDistribution = 'distribution_ready'; // وصل للتوزيع
+  static const String shipmentDelivered = 'delivered'; // مكتملة ومسلّمة بالكامل
 
   static String getShipmentStatusLabel(String status) {
     switch (status) {
@@ -86,6 +87,8 @@ class AppConstants {
         return 'stage_arrived_hub'.i18n();
       case shipmentDistribution:
         return 'stage_ready_distribution'.i18n();
+      case shipmentDelivered:
+        return 'stage_delivered'.i18n();
       default:
         return status;
     }
@@ -99,8 +102,25 @@ class AppConstants {
         return 1;
       case shipmentDistribution:
         return 2;
+      case shipmentDelivered:
+        return 3;
       default:
         return 0;
+    }
+  }
+
+  static Color getShipmentStatusColor(String status) {
+    switch (status) {
+      case shipmentDispatched:
+        return const Color(0xFF007AFF);
+      case shipmentCheckpoint:
+        return const Color(0xFFFF9500);
+      case shipmentDistribution:
+        return const Color(0xFF34C759);
+      case shipmentDelivered:
+        return const Color(0xFF10B981);
+      default:
+        return Colors.grey;
     }
   }
 
@@ -125,6 +145,23 @@ class AppConstants {
         return 'item_status_delivered_to_customer'.i18n();
       default:
         return status;
+    }
+  }
+
+  static Color getOrderStatusColor(String status) {
+    switch (status) {
+      case orderStatusPending:
+        return const Color(0xFF8E8E93);
+      case orderStatusPurchased:
+        return const Color(0xFF5856D6);
+      case orderStatusInCargo:
+        return const Color(0xFF007AFF);
+      case orderStatusReady:
+        return const Color(0xFFFF9500);
+      case orderStatusDelivered:
+        return const Color(0xFF34C759);
+      default:
+        return Colors.grey;
     }
   }
 }

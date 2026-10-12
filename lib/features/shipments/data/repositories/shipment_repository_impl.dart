@@ -65,9 +65,19 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
     await db.transaction((txn) async {
       await txn.insert('shipments', shipment.toMap());
       for (final orderId in orderIds) {
+        final Map<String, dynamic> updateData = {'shipmentId': shipment.id};
+        if (shipment.status == AppConstants.shipmentDispatched ||
+            shipment.status == AppConstants.shipmentCheckpoint) {
+          updateData['orderStatus'] = AppConstants.orderStatusInCargo;
+        } else if (shipment.status == AppConstants.shipmentDistribution) {
+          updateData['orderStatus'] = AppConstants.orderStatusReady;
+        } else if (shipment.status == AppConstants.shipmentDelivered) {
+          updateData['orderStatus'] = AppConstants.orderStatusDelivered;
+          updateData['actualDeliveryDate'] = DateTime.now().toIso8601String();
+        }
         await txn.update(
           'orders',
-          {'shipmentId': shipment.id},
+          updateData,
           where: 'id = ?',
           whereArgs: [orderId],
         );
@@ -86,7 +96,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         whereArgs: [shipment.id],
       );
 
-      // فك ربط الطلبات السابقة وإعادة ربط المحددة فقط
+      // فك ربط الطلبات السابقة التي تم استبعادها
       await txn.update(
         'orders',
         {'shipmentId': null},
@@ -95,9 +105,19 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
       );
 
       for (final orderId in orderIds) {
+        final Map<String, dynamic> updateData = {'shipmentId': shipment.id};
+        if (shipment.status == AppConstants.shipmentDispatched ||
+            shipment.status == AppConstants.shipmentCheckpoint) {
+          updateData['orderStatus'] = AppConstants.orderStatusInCargo;
+        } else if (shipment.status == AppConstants.shipmentDistribution) {
+          updateData['orderStatus'] = AppConstants.orderStatusReady;
+        } else if (shipment.status == AppConstants.shipmentDelivered) {
+          updateData['orderStatus'] = AppConstants.orderStatusDelivered;
+          updateData['actualDeliveryDate'] = DateTime.now().toIso8601String();
+        }
         await txn.update(
           'orders',
-          {'shipmentId': shipment.id},
+          updateData,
           where: 'id = ?',
           whereArgs: [orderId],
         );
@@ -123,10 +143,91 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   @override
   Future<void> updateShipmentStatus(String shipmentId, String newStatus) async {
     final db = await dbHelper.database;
+    await db.transaction((txn) async {
+      final Map<String, dynamic> shipmentUpdate = {'status': newStatus};
+      if (newStatus == AppConstants.shipmentDelivered) {
+        shipmentUpdate['actualDeliveryDate'] = DateTime.now().toIso8601String();
+      }
+
+      await txn.update(
+        'shipments',
+        shipmentUpdate,
+        where: 'id = ?',
+        whereArgs: [shipmentId],
+      );
+
+      // افتراضياً: مزامنة حالة كافة الطلبات الفردية التابعة للشحنة لتطابق حالة الشحنة المجمعة
+      if (newStatus == AppConstants.shipmentDispatched ||
+          newStatus == AppConstants.shipmentCheckpoint) {
+        await txn.update(
+          'orders',
+          {'orderStatus': AppConstants.orderStatusInCargo},
+          where: 'shipmentId = ?',
+          whereArgs: [shipmentId],
+        );
+      } else if (newStatus == AppConstants.shipmentDistribution) {
+        await txn.update(
+          'orders',
+          {'orderStatus': AppConstants.orderStatusReady},
+          where: 'shipmentId = ?',
+          whereArgs: [shipmentId],
+        );
+      } else if (newStatus == AppConstants.shipmentDelivered) {
+        await txn.update(
+          'orders',
+          {
+            'orderStatus': AppConstants.orderStatusDelivered,
+            'actualDeliveryDate': DateTime.now().toIso8601String(),
+          },
+          where: 'shipmentId = ?',
+          whereArgs: [shipmentId],
+        );
+      }
+    });
+  }
+
+  @override
+  Future<void> removeOrderFromShipment(String shipmentId, String orderId) async {
+    final db = await dbHelper.database;
+    await db.transaction((txn) async {
+      await txn.update(
+        'orders',
+        {
+          'shipmentId': null,
+          'orderStatus': AppConstants.orderStatusPurchased,
+        },
+        where: 'id = ? AND shipmentId = ?',
+        whereArgs: [orderId, shipmentId],
+      );
+    });
+  }
+
+  @override
+  Future<void> updateIndividualOrderStatus(String orderId, String newStatus) async {
+    final db = await dbHelper.database;
+    final Map<String, dynamic> updateData = {'orderStatus': newStatus};
+    if (newStatus == AppConstants.orderStatusDelivered) {
+      updateData['actualDeliveryDate'] = DateTime.now().toIso8601String();
+    }
     await db.update(
-      'shipments',
-      {'status': newStatus},
+      'orders',
+      updateData,
       where: 'id = ?',
+      whereArgs: [orderId],
+    );
+  }
+
+  @override
+  Future<void> verifyAllOrdersInShipment(String shipmentId, String targetStatus) async {
+    final db = await dbHelper.database;
+    final Map<String, dynamic> updateData = {'orderStatus': targetStatus};
+    if (targetStatus == AppConstants.orderStatusDelivered) {
+      updateData['actualDeliveryDate'] = DateTime.now().toIso8601String();
+    }
+    await db.update(
+      'orders',
+      updateData,
+      where: 'shipmentId = ?',
       whereArgs: [shipmentId],
     );
   }

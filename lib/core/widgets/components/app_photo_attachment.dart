@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../../localization/localization.dart';
 import '../../theme/app_colors.dart';
 import 'app_buttons.dart';
@@ -33,6 +36,27 @@ class AppPhotoAttachmentSection extends StatelessWidget {
     this.title,
     this.hint,
   });
+
+  Future<String> _persistPhoto(String sourcePath) async {
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final photosDir = Directory(p.join(docsDir.path, 'amtr_photos'));
+      if (!photosDir.existsSync()) {
+        await photosDir.create(recursive: true);
+      }
+      final ext = p.extension(sourcePath).isNotEmpty ? p.extension(sourcePath) : '.jpg';
+      final newFileName = 'amtr_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 8)}$ext';
+      final targetPath = p.join(photosDir.path, newFileName);
+      final sourceFile = File(sourcePath);
+      if (await sourceFile.exists()) {
+        await sourceFile.copy(targetPath);
+        return targetPath;
+      }
+      return sourcePath;
+    } catch (_) {
+      return sourcePath;
+    }
+  }
 
   Future<void> _handlePickPhotos(BuildContext context) async {
     if (photos.length >= maxPhotos) {
@@ -72,7 +96,12 @@ class AppPhotoAttachmentSection extends StatelessWidget {
     }
 
     if (newPaths.isNotEmpty) {
-      final updated = List<String>.from(photos)..addAll(newPaths);
+      final persisted = <String>[];
+      for (final rawPath in newPaths) {
+        final saved = await _persistPhoto(rawPath);
+        persisted.add(saved);
+      }
+      final updated = List<String>.from(photos)..addAll(persisted);
       onPhotosChanged(updated);
     }
   }

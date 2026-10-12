@@ -8,6 +8,7 @@ import '../../models/consolidated_shipment.dart';
 import '../../models/customer.dart';
 import '../../models/individual_order.dart';
 import '../customers/domain/repositories/customer_repository.dart';
+import '../customers/presentation/screens/customer_details_screen.dart';
 import '../orders/domain/repositories/order_repository.dart';
 import '../orders/presentation/screens/order_details_screen.dart';
 import '../shipments/domain/repositories/shipment_repository.dart';
@@ -141,6 +142,14 @@ class GlobalSearchDelegate extends SearchDelegate {
               ...customers.map(
                 (c) => AppleCard(
                   margin: const EdgeInsets.only(bottom: 8),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CustomerDetailsScreen(initialCustomer: c),
+                      ),
+                    );
+                  },
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(

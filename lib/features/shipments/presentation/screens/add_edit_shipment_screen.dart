@@ -6,10 +6,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../../../models/individual_order.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../orders/data/repositories/order_repository_impl.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
+import '../../../orders/presentation/bloc/orders_bloc.dart';
 import '../../data/repositories/shipment_repository_impl.dart';
 import '../../domain/repositories/shipment_repository.dart';
+import '../bloc/shipments_bloc.dart';
 import '../widgets/order_assignment_card.dart';
 
 class AddEditShipmentScreen extends StatefulWidget {
@@ -132,7 +135,13 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
       await _shipmentRepo.saveShipment(shipment, _selectedOrderIds.toList());
     }
 
-    if (mounted) Navigator.pop(context, true);
+    if (mounted) {
+      try {
+        context.read<ShipmentsBloc>().add(const LoadShipments());
+        context.read<OrdersBloc>().add(const LoadOrders());
+      } catch (_) {}
+      Navigator.pop(context, true);
+    }
   }
 
   @override

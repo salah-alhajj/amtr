@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
@@ -33,6 +34,8 @@ class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
       ),
       body: BlocBuilder<ShipmentsBloc, ShipmentsState>(
         builder: (context, state) {
+          final selectedFilter = state is ShipmentsLoaded ? state.selectedFilter : 'all';
+
           return Column(
             children: [
               Padding(
@@ -48,6 +51,23 @@ class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
                   },
                 ),
               ),
+
+              // أشرطة التصفية بحسب المحطة
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Row(
+                  children: [
+                    _buildFilterChip(context, 'status_all'.i18n(), 'all', selectedFilter),
+                    _buildFilterChip(context, 'stage_dispatched'.i18n(), AppConstants.shipmentDispatched, selectedFilter),
+                    _buildFilterChip(context, 'stage_arrived_hub'.i18n(), AppConstants.shipmentArrivedHub, selectedFilter),
+                    _buildFilterChip(context, 'stage_ready_distribution'.i18n(), AppConstants.shipmentReadyDistribution, selectedFilter),
+                    _buildFilterChip(context, 'stage_delivered'.i18n(), AppConstants.shipmentDelivered, selectedFilter),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+
               Expanded(
                 child: _buildShipmentsBody(context, state),
               ),
@@ -145,6 +165,21 @@ class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
     }
 
     return const SizedBox.shrink();
+  }
+
+  Widget _buildFilterChip(BuildContext context, String label, String value, String selectedValue) {
+    final isSelected = value == selectedValue;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 6),
+      child: AppFilterChip(
+        label: label,
+        isSelected: isSelected,
+        activeColor: AppColors.primaryGreen,
+        onSelected: (_) {
+          context.read<ShipmentsBloc>().add(FilterShipments(value));
+        },
+      ),
+    );
   }
 }
 

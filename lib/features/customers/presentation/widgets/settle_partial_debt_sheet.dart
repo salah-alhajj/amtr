@@ -233,24 +233,21 @@ class _SettlePartialDebtSheetState extends State<SettlePartialDebtSheet> {
               if (parsed == null || parsed <= 0) {
                 return 'validation_amount_positive'.i18n();
               }
-              if (parsed > _remainingDebt + 0.001) {
-                return 'customer_payment_exceeds_debt'.trParams({
-                  'amount': _remainingDebt.toStringAsFixed(0),
-                });
-              }
               return null;
             },
             textInputAction: TextInputAction.done,
           ),
           const SizedBox(height: 12),
 
-          // معاينة الدين المتبقي بعد السداد
+          // معاينة الدين المتبقي بعد السداد أو الرصيد الدائن الفائض
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: _expectedNewRemaining == 0
-                  ? AppColors.primaryGreen.withValues(alpha: 0.1)
-                  : AppColors.statusWarning.withValues(alpha: 0.1),
+              color: _currentInputAmount > _remainingDebt
+                  ? AppColors.primaryBlue.withValues(alpha: 0.1)
+                  : (_expectedNewRemaining == 0
+                      ? AppColors.primaryGreen.withValues(alpha: 0.1)
+                      : AppColors.statusWarning.withValues(alpha: 0.1)),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -259,30 +256,42 @@ class _SettlePartialDebtSheetState extends State<SettlePartialDebtSheet> {
                 Row(
                   children: [
                     Icon(
-                      _expectedNewRemaining == 0
-                          ? Icons.check_circle_outline_rounded
-                          : Icons.info_outline_rounded,
+                      _currentInputAmount > _remainingDebt
+                          ? Icons.account_balance_wallet_outlined
+                          : (_expectedNewRemaining == 0
+                              ? Icons.check_circle_outline_rounded
+                              : Icons.info_outline_rounded),
                       size: 16,
-                      color: _expectedNewRemaining == 0 ? AppColors.primaryGreen : AppColors.statusWarning,
+                      color: _currentInputAmount > _remainingDebt
+                          ? AppColors.primaryBlue
+                          : (_expectedNewRemaining == 0 ? AppColors.primaryGreen : AppColors.statusWarning),
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'customer_new_remaining_debt'.i18n(),
+                      _currentInputAmount > _remainingDebt
+                          ? 'رصيد دائن فائض للعميل'
+                          : 'customer_new_remaining_debt'.i18n(),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: _expectedNewRemaining == 0 ? AppColors.primaryGreen : context.textPrimary,
+                        color: _currentInputAmount > _remainingDebt
+                            ? AppColors.primaryBlue
+                            : (_expectedNewRemaining == 0 ? AppColors.primaryGreen : context.textPrimary),
                       ),
                     ),
                   ],
                 ),
                 CurrencyPriceDisplay(
-                  amount: _expectedNewRemaining,
+                  amount: _currentInputAmount > _remainingDebt
+                      ? (_currentInputAmount - _remainingDebt)
+                      : _expectedNewRemaining,
                   currency: widget.order.currency,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: _expectedNewRemaining == 0 ? AppColors.primaryGreen : AppColors.statusDanger,
+                    color: _currentInputAmount > _remainingDebt
+                        ? AppColors.primaryBlue
+                        : (_expectedNewRemaining == 0 ? AppColors.primaryGreen : AppColors.statusWarning),
                   ),
                 ),
               ],
