@@ -28,10 +28,7 @@ import '../../../printing/presentation/widgets/print_options_sheet.dart';
 class CustomerDetailsScreen extends StatefulWidget {
   final Customer initialCustomer;
 
-  const CustomerDetailsScreen({
-    super.key,
-    required this.initialCustomer,
-  });
+  const CustomerDetailsScreen({super.key, required this.initialCustomer});
 
   @override
   State<CustomerDetailsScreen> createState() => _CustomerDetailsScreenState();
@@ -72,13 +69,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     final override = CustomerFinancialHelper.parseOverride(_customer.notes);
     _isManualEnabled = override.isManualEnabled;
     _manualDebtCtrl = TextEditingController(
-      text: override.manualDebt > 0 ? override.manualDebt.toStringAsFixed(0) : '',
+      text: override.manualDebt > 0
+          ? override.manualDebt.toStringAsFixed(0)
+          : '',
     );
     _manualCreditCtrl = TextEditingController(
-      text: override.manualCredit > 0 ? override.manualCredit.toStringAsFixed(0) : '',
+      text: override.manualCredit > 0
+          ? override.manualCredit.toStringAsFixed(0)
+          : '',
     );
     _manualProfitCtrl = TextEditingController(
-      text: override.manualProfit > 0 ? override.manualProfit.toStringAsFixed(0) : '',
+      text: override.manualProfit > 0
+          ? override.manualProfit.toStringAsFixed(0)
+          : '',
     );
     _manualNotesCtrl = TextEditingController(text: override.manualNotes ?? '');
 
@@ -122,8 +125,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       onSave: (updated) async {
         // الحفاظ على كائن التسوية اليدوية
         final override = CustomerFinancialHelper.parseOverride(_customer.notes);
-        final cleanNotes = CustomerFinancialHelper.cleanUserNotes(updated.notes);
-        final mergedNotes = CustomerFinancialHelper.encodeNotesWithOverride(cleanNotes, override);
+        final cleanNotes = CustomerFinancialHelper.cleanUserNotes(
+          updated.notes,
+        );
+        final mergedNotes = CustomerFinancialHelper.encodeNotesWithOverride(
+          cleanNotes,
+          override,
+        );
 
         final finalCustomer = Customer(
           id: updated.id,
@@ -163,7 +171,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   // --- إرسال تقرير الطلبات المحددة عبر واتساب ---
   void _sendSelectedOrdersWhatsApp() {
     if (_selectedOrderIds.isEmpty) return;
-    final selectedOrders = _orders.where((o) => _selectedOrderIds.contains(o.id)).toList();
+    final selectedOrders = _orders
+        .where((o) => _selectedOrderIds.contains(o.id))
+        .toList();
     final message = CustomerWhatsAppHelper.buildMultipleOrdersStatusMessage(
       customer: _customer,
       selectedOrders: selectedOrders,
@@ -214,7 +224,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
 
     final cleanNotes = CustomerFinancialHelper.cleanUserNotes(_customer.notes);
-    final encodedNotes = CustomerFinancialHelper.encodeNotesWithOverride(cleanNotes, override);
+    final encodedNotes = CustomerFinancialHelper.encodeNotesWithOverride(
+      cleanNotes,
+      override,
+    );
 
     final updatedCustomer = Customer(
       id: _customer.id,
@@ -314,7 +327,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 allOrders: _orders,
                 customerName: _customer.name,
                 customerPhone: _customer.phone,
-                title: 'print_customer_invoices_title'.trParams({'name': _customer.name}),
+                title: 'print_customer_invoices_title'.trParams({
+                  'name': _customer.name,
+                }),
               );
             },
           ),
@@ -358,10 +373,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           : FloatingActionButton.extended(
               heroTag: 'customer_new_order_fab',
               backgroundColor: AppColors.primaryBlue,
-              icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
+              icon: const Icon(
+                Icons.add_shopping_cart_rounded,
+                color: Colors.white,
+              ),
               label: Text(
                 'customer_add_order_for_client'.i18n(),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               onPressed: _createNewOrder,
             ),
@@ -374,8 +395,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   Widget _buildHeader(bool isDark, CustomerFinancialSummary summary) {
     final cleanNotes = CustomerFinancialHelper.cleanUserNotes(_customer.notes);
     final hasPhone = _customer.phone != null && _customer.phone!.isNotEmpty;
-    final hasWhatsApp = _customer.whatsapp != null && _customer.whatsapp!.isNotEmpty;
-    final phoneOp = hasPhone ? YemenPhoneHelper.getOperator(_customer.phone) : YemenTelecomOperator.unknown;
+    final hasWhatsApp =
+        _customer.whatsapp != null && _customer.whatsapp!.isNotEmpty;
+    final phoneOp = hasPhone
+        ? YemenPhoneHelper.getOperator(_customer.phone)
+        : YemenTelecomOperator.unknown;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -435,8 +459,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       Row(
                         children: [
                           Text(
-                            YemenPhoneHelper.formatForDisplay(_customer.phone!) ?? _customer.phone!,
-                            style: TextStyle(fontSize: 12, color: context.textSecondary),
+                            YemenPhoneHelper.formatForDisplay(
+                                  _customer.phone!,
+                                ) ??
+                                _customer.phone!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.textSecondary,
+                            ),
                           ),
                           if (phoneOp != YemenTelecomOperator.unknown) ...[
                             const SizedBox(width: 6),
@@ -444,13 +474,17 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                               label: YemenPhoneHelper.getOperatorLabel(phoneOp),
                               color: AppColors.primaryBlue,
                               fontSize: 10,
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1,
+                              ),
                             ),
                           ],
                         ],
                       ),
                     ],
-                    if (hasWhatsApp && _customer.whatsapp != _customer.phone) ...[
+                    if (hasWhatsApp &&
+                        _customer.whatsapp != _customer.phone) ...[
                       const SizedBox(height: 2),
                       Row(
                         children: [
@@ -473,7 +507,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         cleanNotes,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11, color: context.textSecondary),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: context.textSecondary,
+                        ),
                       ),
                     ],
                   ],
@@ -496,7 +533,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   size: 36,
                   iconSize: 18,
                   tooltip: 'customer_call_btn'.i18n(),
-                  onPressed: () => launchUrl(Uri.parse('tel:${YemenPhoneHelper.cleanForDialing(_customer.phone)}')),
+                  onPressed: () => launchUrl(
+                    Uri.parse(
+                      'tel:${YemenPhoneHelper.cleanForDialing(_customer.phone)}',
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -517,7 +558,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   /// البطاقات الملونة الثلاث للحالة المالية الفعلية (الأخضر، الأحمر، الأزرق)
-  Widget _buildActualFinancialStatusCards(CustomerFinancialSummary summary, bool isDark) {
+  Widget _buildActualFinancialStatusCards(
+    CustomerFinancialSummary summary,
+    bool isDark,
+  ) {
     final List<Widget> cards = [];
 
     // أخضر: المبالغ المستفادة منه وتختفي تماماً إذا كان صفر
@@ -578,7 +622,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.check_circle_outline_rounded, size: 16, color: AppColors.primaryGreen),
+            const Icon(
+              Icons.check_circle_outline_rounded,
+              size: 16,
+              color: AppColors.primaryGreen,
+            ),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -618,10 +666,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.14 : 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.25),
-          width: 0.8,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
       ),
       child: Row(
         children: [
@@ -695,7 +740,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 const SizedBox(width: 4),
                 Text('customer_tab_orders'.i18n()),
                 const SizedBox(width: 4),
-                Text('(${_orders.length})', style: const TextStyle(fontSize: 11)),
+                Text(
+                  '(${_orders.length})',
+                  style: const TextStyle(fontSize: 11),
+                ),
               ],
             ),
           ),
@@ -709,14 +757,21 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 if (debtsCount > 0) ...[
                   const SizedBox(width: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.statusDanger,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '$debtsCount',
-                      style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -752,8 +807,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       return true;
     }).toList();
 
-    final pendingCount = _orders.where((o) => o.orderStatus != AppConstants.orderStatusDelivered).length;
-    final deliveredCount = _orders.where((o) => o.orderStatus == AppConstants.orderStatusDelivered).length;
+    final pendingCount = _orders
+        .where((o) => o.orderStatus != AppConstants.orderStatusDelivered)
+        .length;
+    final deliveredCount = _orders
+        .where((o) => o.orderStatus == AppConstants.orderStatusDelivered)
+        .length;
 
     return Column(
       children: [
@@ -774,7 +833,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         icon: Icons.list_alt_rounded,
                         color: AppColors.primaryBlue,
                         showColoredUnselected: true,
-                        onSelected: (_) => setState(() => _ordersStatusFilter = 'all'),
+                        onSelected: (_) =>
+                            setState(() => _ordersStatusFilter = 'all'),
                       ),
                       const SizedBox(width: 8),
                       AppFilterChip(
@@ -784,7 +844,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         icon: Icons.hourglass_top_rounded,
                         color: AppColors.statusWarning,
                         showColoredUnselected: true,
-                        onSelected: (_) => setState(() => _ordersStatusFilter = 'pending'),
+                        onSelected: (_) =>
+                            setState(() => _ordersStatusFilter = 'pending'),
                       ),
                       const SizedBox(width: 8),
                       AppFilterChip(
@@ -794,7 +855,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         icon: Icons.check_circle_outline_rounded,
                         color: AppColors.primaryGreen,
                         showColoredUnselected: true,
-                        onSelected: (_) => setState(() => _ordersStatusFilter = 'delivered'),
+                        onSelected: (_) =>
+                            setState(() => _ordersStatusFilter = 'delivered'),
                       ),
                     ],
                   ),
@@ -802,8 +864,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               const SizedBox(width: 8),
               AppIconButton(
-                icon: _isSelectionMode ? Icons.close_rounded : Icons.checklist_rounded,
-                color: _isSelectionMode ? AppColors.statusDanger : AppColors.primaryBlue,
+                icon: _isSelectionMode
+                    ? Icons.close_rounded
+                    : Icons.checklist_rounded,
+                color: _isSelectionMode
+                    ? AppColors.statusDanger
+                    : AppColors.primaryBlue,
                 size: 34,
                 iconSize: 18,
                 tooltip: _isSelectionMode
@@ -828,14 +894,22 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             decoration: BoxDecoration(
               color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppColors.primaryBlue.withValues(alpha: 0.2),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'customer_selected_orders_count'.trParams({'count': _selectedOrderIds.length.toString()}),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                  'customer_selected_orders_count'.trParams({
+                    'count': _selectedOrderIds.length.toString(),
+                  }),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryBlue,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
@@ -848,8 +922,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     });
                   },
                   child: Text(
-                    _selectedOrderIds.length == filtered.length ? 'إلغاء الكل' : 'customer_select_all'.i18n(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    _selectedOrderIds.length == filtered.length
+                        ? 'إلغاء الكل'
+                        : 'customer_select_all'.i18n(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -865,7 +944,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   subtitle: 'common_empty'.i18n(),
                 )
               : ListView.builder(
-                  padding: EdgeInsets.fromLTRB(16, 6, 16, _isSelectionMode && _selectedOrderIds.isNotEmpty ? 130 : 80),
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    6,
+                    16,
+                    _isSelectionMode && _selectedOrderIds.isNotEmpty ? 130 : 80,
+                  ),
                   itemCount: filtered.length,
                   itemBuilder: (ctx, idx) {
                     final o = filtered[idx];
@@ -885,7 +969,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         } else {
                           await Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => OrderDetailsScreen(orderId: o.id)),
+                            MaterialPageRoute(
+                              builder: (_) => OrderDetailsScreen(orderId: o.id),
+                            ),
                           );
                           _loadData();
                         }
@@ -900,8 +986,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                 children: [
                                   if (_isSelectionMode) ...[
                                     Icon(
-                                      isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                                      color: isSelected ? AppColors.primaryGreen : context.textSecondary,
+                                      isSelected
+                                          ? Icons.check_circle_rounded
+                                          : Icons
+                                                .radio_button_unchecked_rounded,
+                                      color: isSelected
+                                          ? AppColors.primaryGreen
+                                          : context.textSecondary,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
@@ -919,17 +1010,27 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                               Row(
                                 children: [
                                   AppBadge(
-                                    label: AppConstants.getOrderStatusLabel(o.orderStatus),
-                                    color: o.orderStatus == AppConstants.orderStatusDelivered
+                                    label: AppConstants.getOrderStatusLabel(
+                                      o.orderStatus,
+                                    ),
+                                    color:
+                                        o.orderStatus ==
+                                            AppConstants.orderStatusDelivered
                                         ? AppColors.primaryGreen
                                         : AppColors.primaryBlue,
                                   ),
                                   const SizedBox(width: 6),
                                   AppBadge(
-                                    label: AppConstants.getPaymentStatusLabel(o.paymentStatus),
-                                    color: o.paymentStatus == AppConstants.paymentPrepaid
+                                    label: AppConstants.getPaymentStatusLabel(
+                                      o.paymentStatus,
+                                    ),
+                                    color:
+                                        o.paymentStatus ==
+                                            AppConstants.paymentPrepaid
                                         ? AppColors.primaryGreen
-                                        : (o.remainingDebt > 0 ? AppColors.statusDanger : AppColors.statusWarning),
+                                        : (o.remainingDebt > 0
+                                              ? AppColors.statusDanger
+                                              : AppColors.statusWarning),
                                   ),
                                   if (!_isSelectionMode) ...[
                                     const SizedBox(width: 6),
@@ -937,8 +1038,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                       customIcon: const WhatsAppIcon(size: 16),
                                       color: AppColors.primaryGreen,
                                       size: 30,
-                                      tooltip: 'customer_send_order_status_whatsapp'.i18n(),
-                                      onPressed: () => _sendSingleOrderWhatsApp(o),
+                                      tooltip:
+                                          'customer_send_order_status_whatsapp'
+                                              .i18n(),
+                                      onPressed: () =>
+                                          _sendSingleOrderWhatsApp(o),
                                     ),
                                   ],
                                 ],
@@ -951,7 +1055,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                             children: [
                               Text(
                                 '${o.items.length} أغراض • ${o.createdAt.year}/${o.createdAt.month}/${o.createdAt.day}',
-                                style: TextStyle(fontSize: 12, color: context.textSecondary),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: context.textSecondary,
+                                ),
                               ),
                               CurrencyPriceDisplay(
                                 amount: o.totalSellPrice,
@@ -967,17 +1074,26 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           if (o.remainingDebt > 0) ...[
                             const SizedBox(height: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.statusDanger.withValues(alpha: 0.1),
+                                color: AppColors.statusDanger.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'customer_remaining_debt_on_order'.i18n(),
-                                    style: const TextStyle(fontSize: 11, color: AppColors.statusDanger),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.statusDanger,
+                                    ),
                                   ),
                                   CurrencyPriceDisplay(
                                     amount: o.remainingDebt,
@@ -1007,7 +1123,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               color: isDark ? AppColors.darkSurfaceCard : Colors.white,
               border: Border(
                 top: BorderSide(
-                  color: isDark ? AppColors.darkBorderSubtle : AppColors.borderSubtle,
+                  color: isDark
+                      ? AppColors.darkBorderSubtle
+                      : AppColors.borderSubtle,
                   width: 0.8,
                 ),
               ),
@@ -1027,8 +1145,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     flex: 3,
                     child: AppPrimaryButton(
                       backgroundColor: AppColors.primaryGreen,
-                      customIcon: const WhatsAppIcon(size: 18, color: Colors.white),
-                      label: 'customer_send_selected_orders_whatsapp'.trParams({'count': _selectedOrderIds.length.toString()}),
+                      customIcon: const WhatsAppIcon(
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      label: 'customer_send_selected_orders_whatsapp'.trParams({
+                        'count': _selectedOrderIds.length.toString(),
+                      }),
                       onPressed: _sendSelectedOrdersWhatsApp,
                     ),
                   ),
@@ -1037,7 +1160,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     flex: 2,
                     child: AppSecondaryButton(
                       icon: Icons.print,
-                      label: 'print_selected_btn'.trParams({'count': _selectedOrderIds.length.toString()}),
+                      label: 'print_selected_btn'.trParams({
+                        'count': _selectedOrderIds.length.toString(),
+                      }),
                       onPressed: () {
                         PrintOptionsSheet.show(
                           context,
@@ -1045,7 +1170,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           initialSelectedOrderIds: _selectedOrderIds,
                           customerName: _customer.name,
                           customerPhone: _customer.phone,
-                          title: 'print_customer_selected_invoices_title'.trParams({'name': _customer.name}),
+                          title: 'print_customer_selected_invoices_title'
+                              .trParams({'name': _customer.name}),
                         );
                       },
                     ),
@@ -1094,7 +1220,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           color: AppColors.statusDanger.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.receipt_long_rounded, color: AppColors.statusDanger, size: 16),
+                        child: const Icon(
+                          Icons.receipt_long_rounded,
+                          color: AppColors.statusDanger,
+                          size: 16,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -1110,7 +1240,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   Row(
                     children: [
                       AppBadge(
-                        label: AppConstants.getPaymentStatusLabel(order.paymentStatus),
+                        label: AppConstants.getPaymentStatusLabel(
+                          order.paymentStatus,
+                        ),
                         color: AppColors.statusDanger,
                       ),
                       const SizedBox(width: 6),
@@ -1131,7 +1263,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${'order_total_sell_price'.i18n()}:', style: TextStyle(fontSize: 12, color: context.textSecondary)),
+                  Text(
+                    '${'order_total_sell_price'.i18n()}:',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.textSecondary,
+                    ),
+                  ),
                   CurrencyPriceDisplay(
                     amount: order.totalSellPrice,
                     currency: order.currency,
@@ -1143,11 +1281,20 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('customer_current_paid'.i18n(), style: TextStyle(fontSize: 12, color: context.textSecondary)),
+                  Text(
+                    'customer_current_paid'.i18n(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.textSecondary,
+                    ),
+                  ),
                   CurrencyPriceDisplay(
                     amount: order.paidAmount,
                     currency: order.currency,
-                    style: const TextStyle(fontSize: 13, color: AppColors.primaryGreen),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.primaryGreen,
+                    ),
                   ),
                 ],
               ),
@@ -1157,27 +1304,34 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'customer_remaining_debt_on_order'.i18n(),
-                        style: TextStyle(fontSize: 11, color: context.textSecondary),
-                      ),
-                      CurrencyPriceDisplay(
-                        amount: order.remainingDebt,
-                        currency: order.currency,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.statusDanger,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'customer_remaining_debt_on_order'.i18n(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.textSecondary,
+                          ),
                         ),
-                      ),
-                    ],
+                        CurrencyPriceDisplay(
+                          amount: order.remainingDebt,
+                          currency: order.currency,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.statusDanger,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
 
                   // زر تسديد دفعة أو جزء من المبلغ
                   AppSecondaryButton(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
                     label: 'customer_pay_part_debt'.i18n(),
                     icon: Icons.payments_outlined,
                     color: AppColors.statusDanger,
@@ -1192,14 +1346,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 Row(
                   children: [
                     Icon(
-                      order.hasDebtReminder ? Icons.alarm_on_rounded : Icons.calendar_today_rounded,
+                      order.hasDebtReminder
+                          ? Icons.alarm_on_rounded
+                          : Icons.calendar_today_rounded,
                       size: 13,
                       color: AppColors.statusWarning,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'موعد الاستحقاق: ${order.debtDueDate!.year}/${order.debtDueDate!.month}/${order.debtDueDate!.day}',
-                      style: const TextStyle(fontSize: 11, color: AppColors.statusWarning),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.statusWarning,
+                      ),
                     ),
                   ],
                 ),
@@ -1250,27 +1409,42 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   icon: Icons.all_inclusive_rounded,
                   color: AppColors.primaryBlue,
                   showColoredUnselected: true,
-                  onSelected: (_) => setState(() => _calcFilter = CustomerOrderFilter.all),
+                  onSelected: (_) =>
+                      setState(() => _calcFilter = CustomerOrderFilter.all),
                 ),
                 const SizedBox(width: 8),
                 AppFilterChip(
                   label: 'customer_filter_completed_orders'.i18n(),
                   isSelected: _calcFilter == CustomerOrderFilter.completedOnly,
-                  count: _orders.where((o) => o.orderStatus == AppConstants.orderStatusDelivered).length,
+                  count: _orders
+                      .where(
+                        (o) =>
+                            o.orderStatus == AppConstants.orderStatusDelivered,
+                      )
+                      .length,
                   icon: Icons.task_alt_rounded,
                   color: AppColors.primaryGreen,
                   showColoredUnselected: true,
-                  onSelected: (_) => setState(() => _calcFilter = CustomerOrderFilter.completedOnly),
+                  onSelected: (_) => setState(
+                    () => _calcFilter = CustomerOrderFilter.completedOnly,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 AppFilterChip(
                   label: 'customer_filter_pending_orders'.i18n(),
                   isSelected: _calcFilter == CustomerOrderFilter.pendingOnly,
-                  count: _orders.where((o) => o.orderStatus != AppConstants.orderStatusDelivered).length,
+                  count: _orders
+                      .where(
+                        (o) =>
+                            o.orderStatus != AppConstants.orderStatusDelivered,
+                      )
+                      .length,
                   icon: Icons.hourglass_bottom_rounded,
                   color: AppColors.statusWarning,
                   showColoredUnselected: true,
-                  onSelected: (_) => setState(() => _calcFilter = CustomerOrderFilter.pendingOnly),
+                  onSelected: (_) => setState(
+                    () => _calcFilter = CustomerOrderFilter.pendingOnly,
+                  ),
                 ),
               ],
             ),
@@ -1338,7 +1512,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   ),
                   Text(
                     'customer_manual_section_desc'.i18n(),
-                    style: TextStyle(fontSize: 11, color: context.textSecondary),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: context.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -1355,7 +1532,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
           if (_isManualEnabled) ...[
             AppCard(
-              backgroundColor: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceCard,
+              backgroundColor: isDark
+                  ? AppColors.darkSurfaceMuted
+                  : AppColors.surfaceCard,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -1365,8 +1544,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     label: 'customer_manual_debt_label'.i18n(),
                     hint: '0.00',
                     prefixIcon: Icons.receipt_long_outlined,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: AppFormatters.positiveDecimal(
+                      decimalRange: 2,
+                    ),
                   ),
                   const SizedBox(height: 12),
 
@@ -1376,8 +1559,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     label: 'customer_manual_credit_label'.i18n(),
                     hint: '0.00',
                     prefixIcon: Icons.account_balance_wallet_outlined,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: AppFormatters.positiveDecimal(
+                      decimalRange: 2,
+                    ),
                   ),
                   const SizedBox(height: 12),
 
@@ -1387,8 +1574,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     label: 'customer_manual_profit_label'.i18n(),
                     hint: '0.00',
                     prefixIcon: Icons.trending_up_rounded,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: AppFormatters.positiveDecimal(
+                      decimalRange: 2,
+                    ),
                   ),
                   const SizedBox(height: 12),
 
@@ -1429,21 +1620,32 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceCard,
+                color: isDark
+                    ? AppColors.darkSurfaceMuted
+                    : AppColors.surfaceCard,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark ? AppColors.darkBorderSubtle : AppColors.borderSubtle,
+                  color: isDark
+                      ? AppColors.darkBorderSubtle
+                      : AppColors.borderSubtle,
                   width: 0.8,
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primaryBlue),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: AppColors.primaryBlue,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'customer_manual_disabled_hint'.i18n(),
-                      style: TextStyle(fontSize: 12, color: context.textSecondary),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.textSecondary,
+                      ),
                     ),
                   ),
                 ],

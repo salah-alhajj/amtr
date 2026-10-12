@@ -273,12 +273,15 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      s.title,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    Expanded(
+                      child: Text(
+                        s.title,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     AppleBadge(
                       label: AppConstants.getShipmentStatusLabel(s.status),
                       color: AppConstants.getShipmentStatusColor(s.status),

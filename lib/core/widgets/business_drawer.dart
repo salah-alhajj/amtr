@@ -654,7 +654,6 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
           Row(
             children: [
               Expanded(
-                flex: 3,
                 child: TextField(
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -667,11 +666,13 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
               ),
               const SizedBox(width: 10),
               Expanded(
-                flex: 2,
                 child: DropdownButtonFormField<String>(
                   initialValue: _sourceCurrency,
                   isExpanded: true,
-                  decoration: InputDecoration(labelText: 'converter_currency'.i18n()),
+                  decoration: InputDecoration(
+                    labelText: 'converter_currency'.i18n(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                  ),
                   items: [
                     DropdownMenuItem(
                       value: AppConstants.currencySar,
@@ -680,7 +681,12 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
                         children: [
                           const SaudiRiyalIcon(width: 14, height: 14),
                           const SizedBox(width: 6),
-                          Text('currency_sar'.i18n()),
+                          Flexible(
+                            child: Text(
+                              'currency_sar'.i18n(),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -690,7 +696,12 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Text('\$ ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('currency_usd'.i18n()),
+                          Flexible(
+                            child: Text(
+                              'currency_usd'.i18n(),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -700,7 +711,12 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text('${AppConstants.yerSymbol} ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                          Text('currency_yer'.i18n()),
+                          Flexible(
+                            child: Text(
+                              'currency_yer'.i18n(),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),

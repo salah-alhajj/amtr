@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../localization/localization.dart';
-import '../../services/currency_service.dart';
 import '../../theme/app_colors.dart';
+import '../currency_price_display.dart';
 
 /// مخطط بياني منحني انسيابي (Apple Stocks / Health style) لحجم المبيعات والأرباح
 class BezierSalesChart extends StatefulWidget {
@@ -97,11 +97,9 @@ class _BezierSalesChartState extends State<BezierSalesChart>
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    Text(
-                      CurrencyService.instance.formatAmount(
-                        widget.values[_selectedIndex!],
-                        currencyCode: widget.currencyCode,
-                      ),
+                    CurrencyPriceDisplay(
+                      amount: widget.values[_selectedIndex!],
+                      currency: widget.currencyCode,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -377,11 +375,9 @@ class _CashFlowDonutChartState extends State<CashFlowDonutChart>
                       const SizedBox(height: 2),
                       FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(
-                          CurrencyService.instance.formatAmount(
-                            total,
-                            currencyCode: widget.currencyCode,
-                          ),
+                        child: CurrencyPriceDisplay(
+                          amount: total,
+                          currency: widget.currencyCode,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -472,8 +468,9 @@ class _DonutLegendItem extends StatelessWidget {
                   color: context.textSecondary,
                 ),
               ),
-              Text(
-                CurrencyService.instance.formatAmount(amount, currencyCode: currencyCode),
+              CurrencyPriceDisplay(
+                amount: amount,
+                currency: currencyCode,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,

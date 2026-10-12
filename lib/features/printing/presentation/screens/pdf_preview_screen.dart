@@ -129,35 +129,35 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
 
                     // عدد الفواتير المتجاورة في الصف (الافتراضي 3 في A4)
                     if (!_options.paperSize.isThermalRoll) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'print_grid_title'.i18n(),
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                              Text(
-                                'print_grid_subtitle'.i18n(),
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
-                              ),
-                            ],
+                          Text(
+                            'print_grid_title'.i18n(),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                           ),
-                          SegmentedButton<int>(
-                            segments: [
-                              ButtonSegment(value: 1, label: Text('print_grid_1'.i18n())),
-                              ButtonSegment(value: 2, label: Text('print_grid_2'.i18n())),
-                              ButtonSegment(value: 3, label: Text('print_grid_3'.i18n())),
-                            ],
-                            selected: {_options.effectiveColumnsPerRow},
-                            onSelectionChanged: (val) {
-                              setModalState(() {
-                                _options = _options.copyWith(columnsPerRow: val.first);
-                              });
-                              setState(() {});
-                            },
+                          const SizedBox(height: 2),
+                          Text(
+                            'print_grid_subtitle'.i18n(),
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<int>(
+                              segments: [
+                                ButtonSegment(value: 1, label: Text('print_grid_1'.i18n())),
+                                ButtonSegment(value: 2, label: Text('print_grid_2'.i18n())),
+                                ButtonSegment(value: 3, label: Text('print_grid_3'.i18n())),
+                              ],
+                              selected: {_options.effectiveColumnsPerRow},
+                              onSelectionChanged: (val) {
+                                setModalState(() {
+                                  _options = _options.copyWith(columnsPerRow: val.first);
+                                });
+                                setState(() {});
+                              },
+                            ),
                           ),
                         ],
                       ),

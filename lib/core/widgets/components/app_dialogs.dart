@@ -179,7 +179,7 @@ class AppConfirmationDialog extends StatelessWidget {
                 Expanded(
                   child: AppOutlinedButton(
                     label: resolvedCancel,
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.pop(context, false),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -188,7 +188,7 @@ class AppConfirmationDialog extends StatelessWidget {
                     label: resolvedConfirm,
                     backgroundColor: isDestructive ? AppColors.statusDanger : AppColors.primaryBlue,
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pop(context, true);
                       onConfirm();
                     },
                   ),
@@ -242,7 +242,6 @@ Future<bool?> showAppConfirmationDialog({
       cancelLabel: cancelLabel,
       isDestructive: isDestructive,
       onConfirm: () {
-        Navigator.pop(ctx, true);
         onConfirm?.call();
       },
     ),

@@ -46,9 +46,10 @@ class _AppPrimaryButtonState extends State<AppPrimaryButton>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -83,10 +84,8 @@ class _AppPrimaryButtonState extends State<AppPrimaryButton>
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
-      builder: (context, child) => Transform.scale(
-        scale: _scaleAnimation.value,
-        child: child,
-      ),
+      builder: (context, child) =>
+          Transform.scale(scale: _scaleAnimation.value, child: child),
       child: GestureDetector(
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
@@ -167,6 +166,7 @@ class AppSecondaryButton extends StatelessWidget {
   final double? width;
   final double height;
   final double borderRadius;
+  final EdgeInsets? padding;
 
   const AppSecondaryButton({
     super.key,
@@ -178,6 +178,7 @@ class AppSecondaryButton extends StatelessWidget {
     this.width,
     this.height = 46,
     this.borderRadius = 12,
+    this.padding,
   });
 
   @override
@@ -187,6 +188,7 @@ class AppSecondaryButton extends StatelessWidget {
     return Container(
       width: width,
       height: height,
+      padding: padding,
       decoration: BoxDecoration(
         color: baseColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(borderRadius),
@@ -318,7 +320,10 @@ class AppIconButton extends StatelessWidget {
     this.size = 40,
     this.iconSize = 18,
     this.tooltip,
-  }) : assert(icon != null || customIcon != null, 'Either icon or customIcon must be provided');
+  }) : assert(
+         icon != null || customIcon != null,
+         'Either icon or customIcon must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -328,10 +333,7 @@ class AppIconButton extends StatelessWidget {
     final btn = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: bg,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       child: Material(
         color: Colors.transparent,
         child: InkWell(

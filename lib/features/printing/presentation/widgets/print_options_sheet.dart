@@ -327,31 +327,31 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
 
                     // 3. عدد الفواتير المتجاورة بالصف (الافتراضي في A4 هو 3 فواتير عمودية متجاورة)
                     if (!_paperSize.isThermalRoll) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionTitle('print_grid_title'.i18n()),
-                              Text(
-                                'print_grid_subtitle'.i18n(),
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
-                              ),
-                            ],
+                          _buildSectionTitle('print_grid_title'.i18n()),
+                          const SizedBox(height: 2),
+                          Text(
+                            'print_grid_subtitle'.i18n(),
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
                           ),
-                          SegmentedButton<int>(
-                            segments: [
-                              const ButtonSegment(value: 1, label: Text('1')),
-                              const ButtonSegment(value: 2, label: Text('2')),
-                              ButtonSegment(value: 3, label: Text('print_grid_3'.i18n())),
-                            ],
-                            selected: {_columnsPerRow.clamp(1, 3)},
-                            onSelectionChanged: (set) {
-                              setState(() {
-                                _columnsPerRow = set.first;
-                              });
-                            },
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<int>(
+                              segments: [
+                                const ButtonSegment(value: 1, label: Text('1')),
+                                const ButtonSegment(value: 2, label: Text('2')),
+                                ButtonSegment(value: 3, label: Text('print_grid_3'.i18n())),
+                              ],
+                              selected: {_columnsPerRow.clamp(1, 3)},
+                              onSelectionChanged: (set) {
+                                setState(() {
+                                  _columnsPerRow = set.first;
+                                });
+                              },
+                            ),
                           ),
                         ],
                       ),
