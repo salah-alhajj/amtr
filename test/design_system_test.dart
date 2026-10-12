@@ -45,7 +45,8 @@ void main() {
       expect(find.text('حفظ'), findsNothing);
     });
 
-    testWidgets('AppSecondaryButton renders correctly', (tester) async {
+    testWidgets('AppSecondaryButton renders correctly with default horizontal padding',
+        (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -58,6 +59,34 @@ void main() {
       );
 
       expect(find.text('إلغاء'), findsOneWidget);
+      final containerFinder = find.ancestor(
+        of: find.text('إلغاء'),
+        matching: find.byType(Container),
+      );
+      final container = tester.widget<Container>(containerFinder.first);
+      expect(container.padding, const EdgeInsets.symmetric(horizontal: 16));
+    });
+
+    testWidgets('AppSecondaryButton respects custom padding when provided',
+        (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: AppSecondaryButton(
+              label: 'إلغاء',
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              onPressed: null,
+            ),
+          ),
+        ),
+      );
+
+      final containerFinder = find.ancestor(
+        of: find.text('إلغاء'),
+        matching: find.byType(Container),
+      );
+      final container = tester.widget<Container>(containerFinder.first);
+      expect(container.padding, const EdgeInsets.symmetric(horizontal: 8));
     });
 
     testWidgets('AppOutlinedButton renders correctly', (tester) async {

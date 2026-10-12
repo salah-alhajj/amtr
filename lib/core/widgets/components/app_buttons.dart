@@ -166,7 +166,7 @@ class AppSecondaryButton extends StatelessWidget {
   final double? width;
   final double height;
   final double borderRadius;
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   const AppSecondaryButton({
     super.key,
@@ -178,7 +178,7 @@ class AppSecondaryButton extends StatelessWidget {
     this.width,
     this.height = 46,
     this.borderRadius = 12,
-    this.padding,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16),
   });
 
   @override
@@ -188,7 +188,7 @@ class AppSecondaryButton extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      padding: padding,
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: baseColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(borderRadius),
