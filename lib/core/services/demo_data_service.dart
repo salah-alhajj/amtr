@@ -76,10 +76,18 @@ class DemoDataService {
     int totalDeleted = 0;
 
     await db.transaction((txn) async {
+      // فك ارتباط أي طلبات غير تجريبية كانت مرتبطة بشحنات أو عملاء تجريبيين لتفادي أي مراجع معلقة
+      await txn.rawUpdate(
+        "UPDATE orders SET shipmentId = NULL WHERE shipmentId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE orders SET customerId = NULL WHERE customerId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+
       final itemsDeleted = await txn.delete(
         'order_items',
-        where: 'id LIKE ?',
-        whereArgs: ['demo_%'],
+        where: 'id LIKE ? OR orderId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
       );
       final ordersDeleted = await txn.delete(
         'orders',

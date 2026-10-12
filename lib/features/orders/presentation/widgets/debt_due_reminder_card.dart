@@ -1,4 +1,3 @@
-import 'package:amtr/core/widgets/components/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/localization/localization.dart';
@@ -6,7 +5,7 @@ import '../../../../core/constants.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/reminder_service.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 
 /// بطاقة مخصصة لتحديد تاريخ ووقت استحقاق الدين وضبط المنبه ومزامنة تقويم الهاتف
@@ -115,10 +114,9 @@ class DebtDueReminderCard extends StatelessWidget {
     final currencySymbol = AppConstants.getCurrencySymbol(currency);
     final remainingFormatted = CurrencyService.instance.formatAmount(
       remainingDebt,
-      currencyCode: currency,
     );
 
-    return AppleCard(
+    return AppCard(
       border: Border.all(color: AppColors.statusWarning.withValues(alpha: 0.4)),
       backgroundColor: context.isDarkMode
           ? AppColors.darkSurfaceCard
@@ -284,62 +282,26 @@ class DebtDueReminderCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // مفتاح تفعيل المنبه الدقيق
-          SwitchListTile.adaptive(
+          AppSwitchTile(
             value: hasDebtReminder,
             onChanged: debtDueDate != null
                 ? (val) => onReminderChanged(val)
                 : null,
-            contentPadding: EdgeInsets.zero,
-            activeTrackColor: AppColors.statusWarning,
-            title: Text(
-              'debt_due_toggle_title'.i18n(),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              'debt_due_toggle_desc'.i18n(),
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-              ),
-            ),
+            activeColor: AppColors.statusWarning,
+            title: 'debt_due_toggle_title'.i18n(),
+            subtitle: 'debt_due_toggle_desc'.i18n(),
           ),
 
-          Divider(height: 16, color: context.borderDivider),
+          const SizedBox(height: 12),
 
           // زر المزامنة مع تقويم الهاتف
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: debtDueDate != null
-                  ? () => _syncToCalendar(context)
-                  : null,
-              icon: const Icon(
-                Icons.calendar_month_rounded,
-                size: 16,
-                color: AppColors.primaryBlue,
-              ),
-              label: Text(
-                'debt_due_sync_btn'.i18n(),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 11,
-                  horizontal: 12,
-                ),
-                side: const BorderSide(
-                  color: AppColors.primaryBlue,
-                  width: 0.8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
+          AppOutlinedButton(
+            onPressed: debtDueDate != null
+                ? () => _syncToCalendar(context)
+                : null,
+            icon: Icons.calendar_month_rounded,
+            color: AppColors.primaryBlue,
+            label: 'debt_due_sync_btn'.i18n(),
           ),
         ],
       ),

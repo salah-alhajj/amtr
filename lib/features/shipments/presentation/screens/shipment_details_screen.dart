@@ -4,6 +4,7 @@ import '../../../../core/localization/localization.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../../../models/individual_order.dart';
@@ -62,7 +63,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
         final confirm = await showAppConfirmationDialog(
           context: context,
           title: 'shipment_advance_unverified_warning'.trParams({'count': unarrived.length.toString()}),
-          message: 'توجد طلبات لم يتم التحقق من وصولها بعد أو حالتها ما زالت في الشحن. عند تأكيد التسليم النهائي للشحنة، سيتم تحديث كافة الطلبات الفردية إلى "تم التسليم" افتراضياً ما لم تقم بإزالتها أولاً.',
+          message: 'shipment_advance_unverified_desc'.i18n(),
           confirmLabel: 'shipment_action_complete_delivery'.i18n(),
           cancelLabel: 'common_cancel'.i18n(),
         );
@@ -268,7 +269,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // بطاقة معلومات الشحنة
-          AppleCard(
+          AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -282,7 +283,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    AppleBadge(
+                    AppBadge(
                       label: AppConstants.getShipmentStatusLabel(s.status),
                       color: AppConstants.getShipmentStatusColor(s.status),
                     ),
@@ -317,7 +318,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
 
           // بطاقة التحقق من وصول كافة الطلبات الفردية ضمن الشحنة المجمعة
           if (s.orders.isNotEmpty) ...[
-            AppleCard(
+            AppCard(
               padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -348,7 +349,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                           ),
                         ],
                       ),
-                      AppleBadge(
+                      AppBadge(
                         label: '$arrivedCount / ${s.orders.length}',
                         color: allArrived ? AppColors.primaryGreen : AppColors.primaryBlue,
                       ),
@@ -402,14 +403,8 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
           ],
 
           // قائمة الطلبات الفردية المضمنة في هذه الشحنة
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'shipment_orders_in_cargo'.trParams({'count': s.orders.length.toString()}),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ],
+          AppSectionHeader(
+            title: 'shipment_orders_in_cargo'.trParams({'count': s.orders.length.toString()}),
           ),
           const SizedBox(height: 8),
 
@@ -417,7 +412,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
             final isArrived = o.orderStatus == AppConstants.orderStatusReady ||
                 o.orderStatus == AppConstants.orderStatusDelivered;
 
-            return AppleCard(
+            return AppCard(
               margin: const EdgeInsets.only(bottom: 8),
               onTap: () {
                 Navigator.push(
@@ -428,12 +423,11 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
               child: Row(
                 children: [
                   // زر التحقق من وصول الطلب الفردي أو إرجاعه
-                  IconButton(
-                    icon: Icon(
-                      isArrived ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                      color: isArrived ? AppColors.primaryGreen : AppColors.textSecondary.withValues(alpha: 0.4),
-                      size: 22,
-                    ),
+                  AppIconButton(
+                    icon: isArrived ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                    color: isArrived ? AppColors.primaryGreen : AppColors.textSecondary.withValues(alpha: 0.4),
+                    backgroundColor: Colors.transparent,
+                    iconSize: 22,
                     tooltip: isArrived
                         ? 'shipment_order_mark_in_cargo'.i18n()
                         : 'shipment_order_mark_arrived'.i18n(),
@@ -454,7 +448,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                               ),
                             ),
                             const SizedBox(width: 6),
-                            AppleBadge(
+                            AppBadge(
                               label: AppConstants.getOrderStatusLabel(o.orderStatus),
                               color: AppConstants.getOrderStatusColor(o.orderStatus),
                             ),
@@ -471,8 +465,9 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                               }),
                               style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                             ),
-                            Text(
-                              _currencyService.formatAmount(o.totalSellPrice, currencyCode: o.currency),
+                            CurrencyPriceDisplay(
+                              amount: o.totalSellPrice,
+                              currency: o.currency,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
@@ -507,7 +502,10 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                           children: [
                             const Icon(Icons.swap_horiz_rounded, size: 18, color: AppColors.primaryBlue),
                             const SizedBox(width: 8),
-                            Text('shipment_order_change_status'.i18n(), style: const TextStyle(fontSize: 12)),
+                            Text(
+                              'shipment_order_change_status'.i18n(),
+                              style: const TextStyle(fontSize: 12, fontFamily: AppTheme.fontFamily),
+                            ),
                           ],
                         ),
                       ),
@@ -519,7 +517,11 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'shipment_order_remove_from_cargo'.i18n(),
-                              style: const TextStyle(fontSize: 12, color: AppColors.statusDanger),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.statusDanger,
+                                fontFamily: AppTheme.fontFamily,
+                              ),
                             ),
                           ],
                         ),
@@ -530,7 +532,10 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                           children: [
                             const Icon(Icons.visibility_outlined, size: 18, color: AppColors.textPrimary),
                             const SizedBox(width: 8),
-                            Text('order_details'.i18n(), style: const TextStyle(fontSize: 12)),
+                            Text(
+                              'order_details'.i18n(),
+                              style: const TextStyle(fontSize: 12, fontFamily: AppTheme.fontFamily),
+                            ),
                           ],
                         ),
                       ),

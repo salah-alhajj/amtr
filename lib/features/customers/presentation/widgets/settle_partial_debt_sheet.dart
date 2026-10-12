@@ -269,7 +269,7 @@ class _SettlePartialDebtSheetState extends State<SettlePartialDebtSheet> {
                     const SizedBox(width: 6),
                     Text(
                       _currentInputAmount > _remainingDebt
-                          ? 'رصيد دائن فائض للعميل'
+                          ? 'customer_surplus_credit'.i18n()
                           : 'customer_new_remaining_debt'.i18n(),
                       style: TextStyle(
                         fontSize: 12,

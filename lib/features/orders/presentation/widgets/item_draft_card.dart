@@ -60,7 +60,7 @@ class ItemDraftCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppleCard(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,8 +70,11 @@ class ItemDraftCard extends StatelessWidget {
             children: [
               Text('item_number_fmt'.trParams({'number': (index + 1).toString()}), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               if (canDelete)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.statusDanger, size: 18),
+                AppIconButton(
+                  icon: Icons.delete_outline_rounded,
+                  color: AppColors.statusDanger,
+                  size: 32,
+                  iconSize: 18,
                   onPressed: onDelete,
                 ),
             ],

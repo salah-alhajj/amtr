@@ -322,8 +322,7 @@
   "backup_import_db_desc": "Restore all application data from a previously saved full backup",
   "settings_backup_title": "Data Backup & Restore",
   "settings_backup_desc": "Easily and securely save and restore your data",
-      "day_friday":"Friday",
-
+  "day_friday": "Friday",
   "demo_data_title": "Demo & Training Data",
   "demo_data_desc": "Generate hundreds of realistic interconnected records to simulate the entire app and test all features.",
   "demo_data_active_badge": "Active demo data in system ({total} records):",
@@ -732,5 +731,9 @@
   "shipment_order_removed_success": "Order removed from shipment successfully",
   "shipment_order_status_updated": "Order status updated successfully",
   "shipment_duplicate_order_prevented": "Duplicate order assignment was prevented",
-  "shipment_advance_unverified_warning": "Warning: {count} orders have not been verified yet"
+  "shipment_advance_unverified_warning": "Warning: {count} orders have not been verified yet",
+  "shipment_advance_unverified_desc": "There are orders that have not yet arrived or are still in transit. Confirming full shipment delivery will automatically mark all orders as Delivered unless they are removed first.",
+  "customer_deselect_all": "Deselect All",
+  "customer_surplus_credit": "Surplus Customer Credit",
+  "customer_due_date_prefix": "Due Date: {date}"
 }

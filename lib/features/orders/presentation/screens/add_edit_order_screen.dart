@@ -3,7 +3,6 @@ import '../../../../core/localization/localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants.dart';
-import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/reminder_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
@@ -590,32 +589,12 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
             const SizedBox(height: 16),
 
             // بنود وأغراض الطلب المفصلة
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'order_items_section'.i18n(),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: _addItemRow,
-                  icon: const Icon(
-                    Icons.add_circle_outline_rounded,
-                    size: 18,
-                    color: AppColors.primaryBlue,
-                  ),
-                  label: Text(
-                    'order_add_item_btn'.i18n(),
-                    style: const TextStyle(
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+            AppSectionHeader(
+              title: 'order_items_section'.i18n(),
+              actionTitle: 'order_add_item_btn'.i18n(),
+              actionIcon: Icons.add_circle_outline_rounded,
+              onActionTap: _addItemRow,
+              padding: EdgeInsets.zero,
             ),
             const SizedBox(height: 8),
 
@@ -653,50 +632,35 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
                   _buildLiveSummaryRow(
                     context,
                     'order_items_cost_only'.i18n(),
-                    CurrencyService.instance.formatAmount(
-                      _calculateItemsCost(),
-                      currencyCode: _currency,
-                    ),
+                    amount: _calculateItemsCost(),
                   ),
                   if (_calculateAdditionalCost() > 0) ...[
                     const SizedBox(height: 6),
                     _buildLiveSummaryRow(
                       context,
                       'order_additional_cost'.i18n(),
-                      CurrencyService.instance.formatAmount(
-                        _calculateAdditionalCost(),
-                        currencyCode: _currency,
-                      ),
+                      amount: _calculateAdditionalCost(),
                     ),
                   ],
                   const SizedBox(height: 6),
                   _buildLiveSummaryRow(
                     context,
                     'order_total_cost_price'.i18n(),
-                    CurrencyService.instance.formatAmount(
-                      _calculateTotalCost(),
-                      currencyCode: _currency,
-                    ),
+                    amount: _calculateTotalCost(),
                     isBold: true,
                   ),
                   const SizedBox(height: 6),
                   _buildLiveSummaryRow(
                     context,
                     'order_total_sell_price'.i18n(),
-                    CurrencyService.instance.formatAmount(
-                      _calculateTotalSell(),
-                      currencyCode: _currency,
-                    ),
+                    amount: _calculateTotalSell(),
                     isBold: true,
                   ),
                   const Divider(height: 16),
                   _buildLiveSummaryRow(
                     context,
                     'order_estimated_profit'.i18n(),
-                    CurrencyService.instance.formatAmount(
-                      _calculateEstimatedProfit(),
-                      currencyCode: _currency,
-                    ),
+                    amount: _calculateEstimatedProfit(),
                     isBold: true,
                     valueColor: _calculateEstimatedProfit() >= 0
                         ? AppColors.primaryGreen
@@ -753,8 +717,8 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
 
   Widget _buildLiveSummaryRow(
     BuildContext context,
-    String label,
-    String value, {
+    String label, {
+    required double amount,
     bool isBold = false,
     Color? valueColor,
   }) {
@@ -769,8 +733,9 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
-        Text(
-          value,
+        CurrencyPriceDisplay(
+          amount: amount,
+          currency: _currency,
           style: TextStyle(
             fontSize: isBold ? 14 : 13,
             fontWeight: isBold ? FontWeight.bold : FontWeight.w600,

@@ -10,7 +10,7 @@
 
 ## 1. بنية التوطين (Localization Engine)
 تنفيذاً للطلب الرابع: *"بخصوص الترجمات يجب استخدام ترجمات flutter_localization & localization & json files & .i18n() extnetion"*:
-- إيداع ملفات الترجمة النقية داخل `assets/i18n/ar.json` و `assets/i18n/en.json`.
+- إيداع ملفات الترجمة النقية داخل `i18n/ar.json` و `i18n/en.json` في جذر المشروع.
 - بناء محرك `LocalizationHelper` وامتداد النصوص `.i18n()` و `.trParams({'param': value})`.
 - إدارة لغة التطبيق عبر `LocaleBloc` الصافي وتخزين التفضيل تلقائياً في التخزين الدائم.
 

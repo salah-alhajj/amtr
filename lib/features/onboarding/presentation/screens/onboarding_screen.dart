@@ -1,4 +1,4 @@
-import 'package:amtr/core/widgets/apple_widgets.dart';
+import 'package:amtr/core/widgets/design_system.dart';
 import 'package:amtr/features/onboarding/data/onboarding_data.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
@@ -176,24 +176,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           AnimatedOpacity(
             duration: const Duration(milliseconds: 250),
             opacity: isLastSlide ? 0.0 : 1.0,
-            child: TextButton(
+            child: AppSecondaryButton(
               onPressed: isLastSlide ? null : _completeOnboarding,
-              style: TextButton.styleFrom(
-                foregroundColor: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              child: Text(
-                'common_skip'.i18n(),
-                style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+              label: 'common_skip'.i18n(),
+              height: 32,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
               ),
             ),
           ),
@@ -231,25 +220,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
                   opacity: isFirstSlide ? 0.0 : 1.0,
-                  child: TextButton.icon(
+                  child: AppSecondaryButton(
                     onPressed: isFirstSlide ? null : _goToPrevious,
-                    style: TextButton.styleFrom(
-                      foregroundColor: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                    ),
-                    // السهم يشير لليمين في العربية دلالة على الرجوع للخلف
-                    icon: const BackChevron(size: 14),
-                    label: Text(
-                      'common_previous'.i18n(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    label: 'common_previous'.i18n(),
+                    customIcon: const BackChevron(size: 14),
+                    height: 40,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
                     ),
                   ),
                 ),
@@ -268,47 +246,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
 
                 // زر التالي: في لغة RTL التقدم للأمام يشير لليسار (←)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: AppColors.appleGradient,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.35),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _goToNext,
-                      borderRadius: BorderRadius.circular(14),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 11,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'common_next'.i18n(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            // السهم يشير لليسار في RTL دلالة على التقدم للأمام
-                            const ForwardChevron(size: 14, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                AppPrimaryButton(
+                  onPressed: _goToNext,
+                  label: 'common_next'.i18n(),
+                  customIcon: const ForwardChevron(size: 14, color: Colors.white),
+                  gradient: AppColors.appleGradient,
+                  height: 42,
+                  borderRadius: 14,
                 ),
               ],
             ),
@@ -337,56 +281,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
 
         // الزر الرئيسي العريض مع تدرج آبل الفاخر
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primaryBlue, AppColors.primaryGreen],
-              begin: Alignment.centerRight,
-              end: Alignment.centerLeft,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryGreen.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
+        AppPrimaryButton(
+          onPressed: _completeOnboarding,
+          label: 'onboarding_get_started'.i18n(),
+          icon: Icons.rocket_launch_rounded,
+          gradient: const LinearGradient(
+            colors: [AppColors.primaryBlue, AppColors.primaryGreen],
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _completeOnboarding,
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.rocket_launch_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'onboarding_get_started'.i18n(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // السهم يشير لليسار في RTL للانطلاق للأمام
-                    const ForwardChevron(color: Colors.white, size: 16),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          height: 52,
+          borderRadius: 16,
         ),
       ],
     );

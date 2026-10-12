@@ -3,8 +3,7 @@ import '../../../../core/localization/localization.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
-import '../../../../core/widgets/saudi_riyal_icon.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/consolidated_shipment.dart';
 
 /// بطاقة ملخص الحسبة المالية وتدقيق صافي الأرباح للشحنة المجمعة
@@ -99,19 +98,22 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
           _buildAuditRow(
             context,
             'shipment_total_client_sales'.i18n(),
-            currencyService.formatAmount(totalClientSell, currencyCode: viewCurrency),
+            amount: totalClientSell,
+            currencyCode: viewCurrency,
           ),
           const SizedBox(height: 6),
           _buildAuditRow(
             context,
             'shipment_deduct_cost_price'.i18n(),
-            currencyService.formatAmount(totalCost, currencyCode: viewCurrency),
+            amount: totalCost,
+            currencyCode: viewCurrency,
           ),
           const SizedBox(height: 6),
           _buildAuditRow(
             context,
             'shipment_deduct_transport_cost'.i18n(),
-            currencyService.formatAmount(transportCost, currencyCode: viewCurrency),
+            amount: transportCost,
+            currencyCode: viewCurrency,
             subtitle: 'shipment_paid_transport_fmt'.trParams({
               'amount': shipment.transportCost.toString(),
               'currency': AppConstants.getCurrencySymbol(shipment.transportCostCurrency),
@@ -127,8 +129,9 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
                 'shipment_actual_net_profit'.i18n(),
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              Text(
-                currencyService.formatAmount(netProfit, currencyCode: viewCurrency),
+              CurrencyPriceDisplay(
+                amount: netProfit,
+                currency: viewCurrency,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -174,7 +177,13 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAuditRow(BuildContext context, String label, String value, {String? subtitle}) {
+  Widget _buildAuditRow(
+    BuildContext context,
+    String label, {
+    required double amount,
+    required String currencyCode,
+    String? subtitle,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -187,7 +196,11 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
             ],
           ],
         ),
-        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+        CurrencyPriceDisplay(
+          amount: amount,
+          currency: currencyCode,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
       ],
     );
   }

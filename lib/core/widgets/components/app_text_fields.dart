@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../apple_widgets.dart';
 
 import 'package:flutter/services.dart';
@@ -258,7 +259,7 @@ class AppDropdownField<T> extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: defaultLabelColor,
-            fontFamily: 'IBMPlexSansArabic',
+            fontFamily: AppTheme.fontFamily,
           ),
         ),
         const SizedBox(height: 6),
@@ -268,23 +269,48 @@ class AppDropdownField<T> extends StatelessWidget {
           validator: validator,
           autovalidateMode: autovalidateMode,
           items: items.map((item) {
-            if (item.child is Text) {
-              final text = item.child as Text;
-              return DropdownMenuItem<T>(
-                key: item.key,
-                value: item.value,
-                enabled: item.enabled,
-                alignment: item.alignment,
-                onTap: item.onTap,
-                child: Text(
-                  text.data ?? '',
-                  style: text.style,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
+            final child = item.child;
+            Widget styledChild;
+            if (child is Text) {
+              if (child.textSpan != null) {
+                styledChild = DefaultTextStyle.merge(
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                  child: child,
+                );
+              } else {
+                styledChild = Text(
+                  child.data ?? '',
+                  style: (child.style ?? const TextStyle()).copyWith(
+                    fontFamily: AppTheme.fontFamily,
+                  ),
+                  strutStyle: child.strutStyle,
+                  textAlign: child.textAlign,
+                  textDirection: child.textDirection,
+                  locale: child.locale,
+                  softWrap: child.softWrap,
+                  overflow: child.overflow ?? TextOverflow.ellipsis,
+                  textScaler: child.textScaler,
+                  maxLines: child.maxLines ?? 1,
+                  semanticsLabel: child.semanticsLabel,
+                  textWidthBasis: child.textWidthBasis,
+                  textHeightBehavior: child.textHeightBehavior,
+                  selectionColor: child.selectionColor,
+                );
+              }
+            } else {
+              styledChild = DefaultTextStyle.merge(
+                style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                child: child,
               );
             }
-            return item;
+            return DropdownMenuItem<T>(
+              key: item.key,
+              value: item.value,
+              enabled: item.enabled,
+              alignment: item.alignment,
+              onTap: item.onTap,
+              child: styledChild,
+            );
           }).toList(),
           onChanged: onChanged,
           icon: Icon(
@@ -296,17 +322,23 @@ class AppDropdownField<T> extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: defaultTextColor,
+            fontFamily: AppTheme.fontFamily,
           ),
           dropdownColor: isDark
               ? AppColors.darkSurfaceCard
               : AppColors.surfaceWhite,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(fontSize: 13, color: defaultHintColor),
+            hintStyle: TextStyle(
+              fontSize: 13,
+              color: defaultHintColor,
+              fontFamily: AppTheme.fontFamily,
+            ),
             errorStyle: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
               color: AppColors.statusDanger,
+              fontFamily: AppTheme.fontFamily,
             ),
             errorMaxLines: 2,
             filled: true,

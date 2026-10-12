@@ -88,6 +88,20 @@ class AppTheme {
         thickness: 0.8,
         space: 1,
       ),
+      dropdownMenuTheme: const DropdownMenuThemeData(
+        textStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      popupMenuTheme: const PopupMenuThemeData(
+        textStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          color: AppColors.textPrimary,
+        ),
+      ),
     );
   }
 
@@ -184,6 +198,20 @@ class AppTheme {
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.darkSurfaceCard,
         modalBackgroundColor: AppColors.darkSurfaceCard,
+      ),
+      dropdownMenuTheme: const DropdownMenuThemeData(
+        textStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          color: AppColors.darkTextPrimary,
+        ),
+      ),
+      popupMenuTheme: const PopupMenuThemeData(
+        textStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          color: AppColors.darkTextPrimary,
+        ),
       ),
     );
   }

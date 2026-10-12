@@ -20,12 +20,7 @@ class LocalizationHelper {
     }
     _currentLanguage = languageCode;
     try {
-      String jsonString;
-      try {
-        jsonString = await rootBundle.loadString('i18n/$languageCode.json');
-      } catch (_) {
-        jsonString = await rootBundle.loadString('assets/i18n/$languageCode.json');
-      }
+      final jsonString = await rootBundle.loadString('i18n/$languageCode.json');
       final Map<String, dynamic> jsonMap = json.decode(jsonString);
       final Map<String, String> mapped = {};
       jsonMap.forEach((key, value) {

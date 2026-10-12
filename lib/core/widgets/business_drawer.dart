@@ -5,10 +5,7 @@ import '../constants.dart';
 import '../localization/localization.dart';
 import '../services/currency_service.dart';
 import '../theme/app_colors.dart';
-import 'apple_widgets.dart';
-import 'country_flag_svg.dart';
-import 'saudi_riyal_icon.dart';
-import 'currency_price_display.dart';
+import 'design_system.dart';
 import '../../features/backup/presentation/screens/backup_restore_screen.dart';
 import '../../features/customers/presentation/screens/customers_list_screen.dart';
 import '../../features/orders/presentation/screens/orders_list_screen.dart';
@@ -101,7 +98,7 @@ class BusinessDrawer extends StatelessWidget {
                             const SizedBox(height: 2),
                             Row(
                               children: [
-                                const PulsingStatusDot(
+                                const AppPulsingDot(
                                   color: AppColors.primaryGreen,
                                   size: 6,
                                 ),
@@ -481,11 +478,11 @@ class BusinessDrawer extends StatelessWidget {
   }
 
   void _showQuickCurrencyConverter(BuildContext context) {
-    showModalBottomSheet(
+    showAppModalSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const _QuickCurrencyConverterSheet(),
+      title: 'converter_title'.i18n(),
+      subtitle: 'converter_subtitle'.i18n(),
+      child: const _QuickCurrencyConverterSheet(),
     );
   }
 }
@@ -589,218 +586,151 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
     final double usdVal = currencyService.convert(amount: amount, fromCurrency: _sourceCurrency, toCurrency: AppConstants.currencyUsd);
     final double yerVal = currencyService.convert(amount: amount, fromCurrency: _sourceCurrency, toCurrency: AppConstants.currencyYer);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 14,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // مقبض سحب iOS
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkBorderDivider : AppColors.borderDivider,
-                borderRadius: BorderRadius.circular(2),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // حقل إدخال المبلغ والعملة
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppTextField(
+                controller: _amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (_) => setState(() {}),
+                label: 'converter_amount_hint'.i18n(),
+                hint: '100',
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // العنوان
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.currency_exchange_rounded, color: AppColors.primaryBlue, size: 20),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'converter_title'.i18n(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: AppDropdownField<String>(
+                label: 'converter_currency'.i18n(),
+                value: _sourceCurrency,
+                items: [
+                  DropdownMenuItem(
+                    value: AppConstants.currencySar,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SaudiRiyalIcon(width: 14, height: 14),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'currency_sar'.i18n(),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'converter_subtitle'.i18n(),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // حقل إدخال المبلغ والعملة
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: 'converter_amount_hint'.i18n(),
-                    hintText: '100',
                   ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: _sourceCurrency,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'converter_currency'.i18n(),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                  DropdownMenuItem(
+                    value: AppConstants.currencyUsd,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('\$ ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Flexible(
+                          child: Text(
+                            'currency_usd'.i18n(),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  items: [
-                    DropdownMenuItem(
-                      value: AppConstants.currencySar,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SaudiRiyalIcon(width: 14, height: 14),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'currency_sar'.i18n(),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                  DropdownMenuItem(
+                    value: AppConstants.currencyYer,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${AppConstants.yerSymbol} ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Flexible(
+                          child: Text(
+                            'currency_yer'.i18n(),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    DropdownMenuItem(
-                      value: AppConstants.currencyUsd,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('\$ ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Flexible(
-                            child: Text(
-                              'currency_usd'.i18n(),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: AppConstants.currencyYer,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${AppConstants.yerSymbol} ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                          Flexible(
-                            child: Text(
-                              'currency_yer'.i18n(),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _sourceCurrency = val);
-                  },
-                ),
+                  ),
+                ],
+                onChanged: (val) {
+                  if (val != null) setState(() => _sourceCurrency = val);
+                },
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
 
-          // بطاقات النتائج المحولة
-          _buildResultCard(
-            title: 'converter_equiv_sar'.i18n(),
-            amountWidget: CurrencyPriceDisplay(
-              amount: sarVal,
-              currency: AppConstants.currencySar,
-              decimalDigits: 2,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: _sourceCurrency != AppConstants.currencySar ? AppColors.primaryGreen : AppColors.textPrimary,
-              ),
+        // بطاقات النتائج المحولة
+        _buildResultCard(
+          title: 'converter_equiv_sar'.i18n(),
+          amountWidget: CurrencyPriceDisplay(
+            amount: sarVal,
+            currency: AppConstants.currencySar,
+            decimalDigits: 2,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _sourceCurrency != AppConstants.currencySar ? AppColors.primaryGreen : AppColors.textPrimary,
             ),
-            icon: Icons.account_balance_wallet_outlined,
-            color: AppColors.primaryGreen,
-            isHighlight: _sourceCurrency != AppConstants.currencySar,
           ),
-          const SizedBox(height: 8),
-          _buildResultCard(
-            title: 'converter_equiv_usd'.i18n(),
-            amountWidget: CurrencyPriceDisplay(
-              amount: usdVal,
-              currency: AppConstants.currencyUsd,
-              decimalDigits: 2,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: _sourceCurrency != AppConstants.currencyUsd ? AppColors.primaryBlue : AppColors.textPrimary,
-              ),
+          icon: Icons.account_balance_wallet_outlined,
+          color: AppColors.primaryGreen,
+          isHighlight: _sourceCurrency != AppConstants.currencySar,
+        ),
+        const SizedBox(height: 8),
+        _buildResultCard(
+          title: 'converter_equiv_usd'.i18n(),
+          amountWidget: CurrencyPriceDisplay(
+            amount: usdVal,
+            currency: AppConstants.currencyUsd,
+            decimalDigits: 2,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _sourceCurrency != AppConstants.currencyUsd ? AppColors.primaryBlue : AppColors.textPrimary,
             ),
-            icon: Icons.attach_money_rounded,
-            color: AppColors.primaryBlue,
-            isHighlight: _sourceCurrency != AppConstants.currencyUsd,
           ),
-          const SizedBox(height: 8),
-          _buildResultCard(
-            title: 'converter_equiv_yer'.i18n(),
-            amountWidget: CurrencyPriceDisplay(
-              amount: yerVal,
-              currency: AppConstants.currencyYer,
-              decimalDigits: 1,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: _sourceCurrency != AppConstants.currencyYer ? AppColors.vibrantTeal : AppColors.textPrimary,
-              ),
+          icon: Icons.attach_money_rounded,
+          color: AppColors.primaryBlue,
+          isHighlight: _sourceCurrency != AppConstants.currencyUsd,
+        ),
+        const SizedBox(height: 8),
+        _buildResultCard(
+          title: 'converter_equiv_yer'.i18n(),
+          amountWidget: CurrencyPriceDisplay(
+            amount: yerVal,
+            currency: AppConstants.currencyYer,
+            decimalDigits: 1,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _sourceCurrency != AppConstants.currencyYer ? AppColors.vibrantTeal : AppColors.textPrimary,
             ),
-            icon: Icons.receipt_long_outlined,
-            color: AppColors.vibrantTeal,
-            isHighlight: _sourceCurrency != AppConstants.currencyYer,
           ),
-          const SizedBox(height: 16),
+          icon: Icons.receipt_long_outlined,
+          color: AppColors.vibrantTeal,
+          isHighlight: _sourceCurrency != AppConstants.currencyYer,
+        ),
+        const SizedBox(height: 16),
 
-          // زر التوجه للإعدادات لتحديث أسعار الصرف
-          OutlinedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
-            icon: const Icon(Icons.tune_rounded, size: 16),
-            label: Text('converter_edit_in_settings'.i18n()),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ],
-      ),
+        // زر التوجه للإعدادات لتحديث أسعار الصرف
+        AppOutlinedButton(
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            );
+          },
+          icon: Icons.tune_rounded,
+          label: 'converter_edit_in_settings'.i18n(),
+        ),
+      ],
     );
   }
 

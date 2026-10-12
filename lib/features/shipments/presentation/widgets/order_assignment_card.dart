@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/constants.dart';
-import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 
 /// بطاقة تحديد وإلحاق طلب فردي داخل حمولة الشحنة المجمعة
@@ -21,9 +20,7 @@ class OrderAssignmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyService = CurrencyService.instance;
-
-    return AppleCard(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       onTap: () => onToggle(!isSelected),
@@ -52,8 +49,9 @@ class OrderAssignmentCard extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            currencyService.formatAmount(order.totalSellPrice, currencyCode: order.currency),
+          CurrencyPriceDisplay(
+            amount: order.totalSellPrice,
+            currency: order.currency,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primaryGreen),
           ),
         ],

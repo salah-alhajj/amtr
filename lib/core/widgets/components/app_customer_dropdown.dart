@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/customer.dart';
 import '../../localization/localization.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../utils/yemen_phone_helper.dart';
 import '../../../features/customers/data/repositories/customer_repository_impl.dart';
 import '../../../features/customers/presentation/widgets/add_edit_customer_sheet.dart';
@@ -85,6 +86,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: defaultLabelColor,
+                fontFamily: AppTheme.fontFamily,
               ),
             ),
             if (!hasSelection)
@@ -100,6 +102,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryBlue,
+                        fontFamily: AppTheme.fontFamily,
                       ),
                     ),
                   ],
@@ -149,6 +152,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                               color: AppColors.primaryBlue,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
+                              fontFamily: AppTheme.fontFamily,
                             ),
                           )
                         : Icon(
@@ -174,6 +178,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: context.textPrimary,
+                                fontFamily: AppTheme.fontFamily,
                               ),
                             ),
                             if (customer.phone != null && customer.phone!.isNotEmpty) ...[
@@ -185,7 +190,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: context.textSecondary,
-                                      fontFamily: 'IBMPlexSansArabic',
+                                      fontFamily: AppTheme.fontFamily,
                                     ),
                                   ),
                                   if (customer.whatsapp != null && customer.whatsapp!.isNotEmpty) ...[
@@ -204,6 +209,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             color: context.textTertiary,
+                            fontFamily: AppTheme.fontFamily,
                           ),
                         ),
                 ),
@@ -351,6 +357,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: context.textPrimary,
+                        fontFamily: AppTheme.fontFamily,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -366,6 +373,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryBlue,
+                          fontFamily: AppTheme.fontFamily,
                         ),
                       ),
                     ),
@@ -428,6 +436,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: context.textSecondary,
+                fontFamily: AppTheme.fontFamily,
               ),
             ),
             trailing: widget.currentSelectedId == null || widget.currentSelectedId!.isEmpty
@@ -450,7 +459,11 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                         const SizedBox(height: 10),
                         Text(
                           'customer_no_search_results'.i18n(),
-                          style: TextStyle(fontSize: 13, color: context.textSecondary),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
                         ),
                         if (_query.trim().isNotEmpty) ...[
                           const SizedBox(height: 14),
@@ -489,6 +502,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                                 color: isSelected ? Colors.white : AppColors.primaryBlue,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
+                                fontFamily: AppTheme.fontFamily,
                               ),
                             ),
                           ),
@@ -499,6 +513,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                             fontSize: 14,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                             color: isSelected ? AppColors.primaryBlue : context.textPrimary,
+                            fontFamily: AppTheme.fontFamily,
                           ),
                         ),
                         subtitle: (c.phone != null && c.phone!.isNotEmpty) ||
@@ -511,7 +526,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: context.textSecondary,
-                                        fontFamily: 'IBMPlexSansArabic',
+                                        fontFamily: AppTheme.fontFamily,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -525,7 +540,7 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                                         fontSize: 11,
                                         color: AppColors.primaryGreen,
                                         fontWeight: FontWeight.w600,
-                                        fontFamily: 'IBMPlexSansArabic',
+                                        fontFamily: AppTheme.fontFamily,
                                       ),
                                     ),
                                   ],

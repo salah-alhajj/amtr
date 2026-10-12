@@ -322,7 +322,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // بطاقة رأس الطلب والعميل
-          AppleCard(
+          AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -342,13 +342,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       children: [
                         GestureDetector(
                           onTap: _showChangeOrderStatusSheet,
-                          child: AppleBadge(
+                          child: AppBadge(
                             label: AppConstants.getOrderStatusLabel(order.orderStatus),
                             color: AppConstants.getOrderStatusColor(order.orderStatus),
                           ),
                         ),
                         const SizedBox(width: 6),
-                        AppleBadge(
+                        AppBadge(
                           label: AppConstants.getPaymentStatusLabel(order.paymentStatus),
                           color: AppConstants.getPaymentStatusColor(order.paymentStatus),
                         ),
@@ -379,15 +379,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       }),
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
-                    TextButton.icon(
+                    AppSecondaryButton(
                       onPressed: _updateActualDeliveryDate,
-                      icon: const Icon(Icons.check_circle_outline, size: 16, color: AppColors.primaryGreen),
-                      label: Text(
-                        order.actualDeliveryDate != null
-                            ? 'order_delivered_date_fmt'.trParams({'date': '${order.actualDeliveryDate!.month}/${order.actualDeliveryDate!.day}'})
-                            : 'order_set_delivery_date'.i18n(),
-                        style: const TextStyle(fontSize: 11, color: AppColors.primaryGreen),
-                      ),
+                      icon: Icons.check_circle_outline,
+                      color: AppColors.primaryGreen,
+                      height: 34,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      label: order.actualDeliveryDate != null
+                          ? 'order_delivered_date_fmt'.trParams({'date': '${order.actualDeliveryDate!.month}/${order.actualDeliveryDate!.day}'})
+                          : 'order_set_delivery_date'.i18n(),
                     ),
                   ],
                 ),
@@ -398,7 +398,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           // بطاقة موعد استحقاق الدين والمنبه والتقويم
           if (order.remainingDebt > 0 || order.debtDueDate != null) ...[
             const SizedBox(height: 14),
-            AppleCard(
+            AppCard(
               backgroundColor: const Color(0xFFFFFBEB),
               border: Border.all(color: AppColors.statusWarning.withValues(alpha: 0.4)),
               child: Column(

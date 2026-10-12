@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../core/widgets/charts/financial_charts.dart';
 
 /// بطاقة التحليلات والرسوم البيانية المالية المتقدمة
@@ -34,7 +34,7 @@ class _FinancialAnalyticsCardState extends State<FinancialAnalyticsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedAppleCard(
+    return AppAnimatedCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

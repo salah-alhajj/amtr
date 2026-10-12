@@ -393,7 +393,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextButton(
+                      AppSecondaryButton(
                         onPressed: () {
                           setState(() {
                             if (_selectedOrderIds.length ==
@@ -406,12 +406,11 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                             }
                           });
                         },
-                        child: Text(
-                          _selectedOrderIds.length == _availableOrders.length
-                              ? 'shipment_deselect_all'.i18n()
-                              : 'shipment_select_all'.i18n(),
-                          style: const TextStyle(fontSize: 12),
-                        ),
+                        label: _selectedOrderIds.length == _availableOrders.length
+                            ? 'shipment_deselect_all'.i18n()
+                            : 'shipment_select_all'.i18n(),
+                        height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       ),
                     ],
                   ),

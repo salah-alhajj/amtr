@@ -251,7 +251,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   const SizedBox(height: 8),
 
                   if (state.activeShipments.isEmpty)
-                    AppleCard(
+                    AppCard(
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -286,7 +286,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   const SizedBox(height: 8),
 
                   if (state.recentOrders.isEmpty)
-                    AppleCard(
+                    AppCard(
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),

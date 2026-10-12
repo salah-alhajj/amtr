@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 import '../../models/print_options.dart';
 import '../../services/printing_service.dart';
@@ -129,84 +130,29 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
 
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.90,
+      child: AppModalSheet(
+        title: effectiveTitle,
+        subtitle: 'print_options_available_and_selected'.trParams({
+          'total': widget.allOrders.length.toString(),
+          'selected': activeOrders.length.toString(),
+        }),
+        trailing: AppIconButton(
+          icon: Icons.close_rounded,
+          size: 32,
+          iconSize: 18,
+          onPressed: () => Navigator.pop(context),
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 14,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // ترويسة الشيت
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.print, color: AppColors.primaryBlue, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.75,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // محتوى الإعدادات القابل للتمرير
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        effectiveTitle,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        'print_options_available_and_selected'.trParams({
-                          'total': widget.allOrders.length.toString(),
-                          'selected': activeOrders.length.toString(),
-                        }),
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // محتوى الإعدادات القابل للتمرير
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
                     // 1. نطاق الطلبات
                     _buildSectionTitle('print_scope_title'.i18n()),
                     const SizedBox(height: 8),
@@ -300,9 +246,9 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                       runSpacing: 8,
                       children: PrintPaperSize.values.map((size) {
                         final isSelected = _paperSize == size;
-                        return ChoiceChip(
-                          label: Text(size.displayName),
-                          selected: isSelected,
+                        return AppFilterChip(
+                          label: size.displayName,
+                          isSelected: isSelected,
                           onSelected: (val) {
                             if (val) {
                               setState(() {
@@ -313,12 +259,6 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                               });
                             }
                           },
-                          selectedColor: AppColors.primaryBlue.withValues(alpha: 0.15),
-                          labelStyle: TextStyle(
-                            color: isSelected ? AppColors.primaryBlue : Colors.black87,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            fontSize: 12,
-                          ),
                         );
                       }).toList(),
                     ),
@@ -359,30 +299,15 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                     ],
 
                     // 4. تضمين الصور لكل بند (افتراضياً غير مفعل)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: SwitchListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-                        title: Text(
-                          'print_photos_switch_title'.i18n(),
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          'print_photos_switch_subtitle'.i18n(),
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                        value: _includeItemPhotos,
-                        activeThumbColor: AppColors.primaryBlue,
-                        onChanged: (val) {
-                          setState(() {
-                            _includeItemPhotos = val;
-                          });
-                        },
-                      ),
+                    AppSwitchTile(
+                      title: 'print_photos_switch_title'.i18n(),
+                      subtitle: 'print_photos_switch_subtitle'.i18n(),
+                      value: _includeItemPhotos,
+                      onChanged: (val) {
+                        setState(() {
+                          _includeItemPhotos = val;
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -396,19 +321,10 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // زر الطباعة المباشرة للطابعة
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 2,
-                  ),
-                  icon: const Icon(Icons.print, size: 20),
-                  label: Text(
-                    'print_btn_direct'.trParams({'count': activeOrders.length.toString()}),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
+                AppPrimaryButton(
+                  icon: Icons.print,
+                  label: 'print_btn_direct'.trParams({'count': activeOrders.length.toString()}),
+                  height: 48,
                   onPressed: activeOrders.isEmpty
                       ? null
                       : () {
@@ -427,13 +343,10 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                   children: [
                     // زر المعاينة
                     Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        icon: const Icon(Icons.remove_red_eye_outlined, size: 18),
-                        label: Text('print_btn_preview'.i18n(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      child: AppOutlinedButton(
+                        icon: Icons.remove_red_eye_outlined,
+                        label: 'print_btn_preview'.i18n(),
+                        height: 44,
                         onPressed: activeOrders.isEmpty
                             ? null
                             : () {
@@ -451,13 +364,10 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
 
                     // زر تصدير PDF
                     Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                        label: Text('print_btn_pdf'.i18n(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      child: AppOutlinedButton(
+                        icon: Icons.picture_as_pdf_outlined,
+                        label: 'print_btn_pdf'.i18n(),
+                        height: 44,
                         onPressed: activeOrders.isEmpty
                             ? null
                             : () {
@@ -474,13 +384,10 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
 
                     // زر تصدير Excel
                     Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        icon: const Icon(Icons.table_chart_outlined, size: 18),
-                        label: Text('print_btn_excel'.i18n(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      child: AppOutlinedButton(
+                        icon: Icons.table_chart_outlined,
+                        label: 'print_btn_excel'.i18n(),
+                        height: 44,
                         onPressed: activeOrders.isEmpty
                             ? null
                             : () {
@@ -500,7 +407,8 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildSectionTitle(String title) {
@@ -520,14 +428,10 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
     required IconData icon,
   }) {
     final isSelected = _scope == scope;
-    return ChoiceChip(
-      avatar: Icon(
-        icon,
-        size: 16,
-        color: isSelected ? AppColors.primaryBlue : Colors.grey.shade600,
-      ),
-      label: Text(label),
-      selected: isSelected,
+    return AppFilterChip(
+      icon: icon,
+      label: label,
+      isSelected: isSelected,
       onSelected: (val) {
         if (val) {
           setState(() {
@@ -538,12 +442,6 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
           });
         }
       },
-      selectedColor: AppColors.primaryBlue.withValues(alpha: 0.14),
-      labelStyle: TextStyle(
-        color: isSelected ? AppColors.primaryBlue : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
     );
   }
 }

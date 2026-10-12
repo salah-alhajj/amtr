@@ -150,16 +150,16 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             inputFormatters: AppFormatters.phoneNumber(),
             validator: (val) => AppValidators.phone(val, isRequired: false),
             textInputAction: TextInputAction.next,
-            suffix: TextButton(
+            suffix: AppSecondaryButton(
+              height: 28,
+              borderRadius: 6,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               onPressed: () {
                 if (_phoneCtrl.text.trim().isNotEmpty) {
                   setState(() => _whatsappCtrl.text = _phoneCtrl.text.trim());
                 }
               },
-              child: Text(
-                'customer_copy_phone_to_whatsapp'.i18n(),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-              ),
+              label: 'customer_copy_phone_to_whatsapp'.i18n(),
             ),
           ),
           const SizedBox(height: 14),

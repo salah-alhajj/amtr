@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 
 /// صف أزرار الإجراءات السريعة في لوحة التحكم
 class DashboardActionsRow extends StatelessWidget {
@@ -56,7 +56,7 @@ class DashboardActionsRow extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return AppleCard(
+    return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       child: Column(

@@ -104,8 +104,10 @@ class ShipmentCard extends StatelessWidget {
                         'shipment_card_net_profit_prefix'.i18n(),
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.textSecondary),
                       ),
-                      Text(
-                        currencyService.formatAmount(netProfit, currencyCode: activeCurrency),
+                      const SizedBox(width: 4),
+                      CurrencyPriceDisplay(
+                        amount: netProfit,
+                        currency: activeCurrency,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,

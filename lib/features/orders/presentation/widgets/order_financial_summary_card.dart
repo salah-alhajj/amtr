@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
-import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
@@ -18,8 +17,6 @@ class OrderFinancialSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyService = CurrencyService.instance;
-
     return AppleCard(
       backgroundColor: context.surfaceCard,
       child: Column(
@@ -37,7 +34,8 @@ class OrderFinancialSummaryCard extends StatelessWidget {
           _buildRow(
             context,
             'order_total_cost_price'.i18n(),
-            currencyService.formatAmount(order.totalCostPrice, currencyCode: order.currency),
+            amount: order.totalCostPrice,
+            currencyCode: order.currency,
           ),
           if (order.additionalCost > 0) ...[
             const SizedBox(height: 6),
@@ -46,7 +44,8 @@ class OrderFinancialSummaryCard extends StatelessWidget {
               child: _buildRow(
                 context,
                 'order_items_cost_only'.i18n(),
-                currencyService.formatAmount(order.itemsCostOnly, currencyCode: order.currency),
+                amount: order.itemsCostOnly,
+                currencyCode: order.currency,
               ),
             ),
             const SizedBox(height: 4),
@@ -55,7 +54,8 @@ class OrderFinancialSummaryCard extends StatelessWidget {
               child: _buildRow(
                 context,
                 'order_additional_cost'.i18n(),
-                currencyService.formatAmount(order.additionalCost, currencyCode: order.currency),
+                amount: order.additionalCost,
+                currencyCode: order.currency,
               ),
             ),
           ],
@@ -63,29 +63,32 @@ class OrderFinancialSummaryCard extends StatelessWidget {
           _buildRow(
             context,
             'order_total_sell_price'.i18n(),
-            order.isFullyPriced
-                ? currencyService.formatAmount(order.totalSellPrice, currencyCode: order.currency)
-                : 'order_pricing_pending'.i18n(),
+            amount: order.isFullyPriced ? order.totalSellPrice : null,
+            currencyCode: order.currency,
+            textValue: order.isFullyPriced ? null : 'order_pricing_pending'.i18n(),
             highlight: true,
           ),
           const SizedBox(height: 8),
           _buildRow(
             context,
             'order_paid_deposit'.i18n(),
-            currencyService.formatAmount(order.paidAmount, currencyCode: order.currency),
+            amount: order.paidAmount,
+            currencyCode: order.currency,
           ),
           const SizedBox(height: 8),
           _buildRow(
             context,
             'order_remaining_debt'.i18n(),
-            currencyService.formatAmount(order.remainingDebt, currencyCode: order.currency),
+            amount: order.remainingDebt,
+            currencyCode: order.currency,
             isDanger: order.remainingDebt > 0,
           ),
           const Divider(height: 20),
           _buildRow(
             context,
             'order_estimated_profit'.i18n(),
-            currencyService.formatAmount(order.rawProfit, currencyCode: order.currency),
+            amount: order.rawProfit,
+            currencyCode: order.currency,
             highlight: true,
             color: AppColors.primaryGreen,
           ),
@@ -104,12 +107,15 @@ class OrderFinancialSummaryCard extends StatelessWidget {
 
   Widget _buildRow(
     BuildContext context,
-    String label,
-    String value, {
+    String label, {
+    double? amount,
+    String? currencyCode,
+    String? textValue,
     bool highlight = false,
     bool isDanger = false,
     Color? color,
   }) {
+    final effectiveColor = color ?? (isDanger ? AppColors.statusDanger : context.textPrimary);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -121,14 +127,25 @@ class OrderFinancialSummaryCard extends StatelessWidget {
             fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: highlight ? 14 : 13,
-            fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
-            color: color ?? (isDanger ? AppColors.statusDanger : context.textPrimary),
+        if (amount != null && currencyCode != null)
+          CurrencyPriceDisplay(
+            amount: amount,
+            currency: currencyCode,
+            style: TextStyle(
+              fontSize: highlight ? 14 : 13,
+              fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+              color: effectiveColor,
+            ),
+          )
+        else
+          Text(
+            textValue ?? '',
+            style: TextStyle(
+              fontSize: highlight ? 14 : 13,
+              fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+              color: effectiveColor,
+            ),
           ),
-        ),
       ],
     );
   }

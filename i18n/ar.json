@@ -322,8 +322,7 @@
   "backup_import_db_desc": "استرجاع كافة بيانات التطبيق من ملف نسخة احتياطية سابقة",
   "settings_backup_title": "النسخ الاحتياطي واستعادة البيانات",
   "settings_backup_desc": "حفظ نسخة احتياطية من بياناتك واستعادتها بسهولة وأمان",
-      "day_friday":"الجمعة",
-
+  "day_friday": "الجمعة",
   "demo_data_title": "البيانات التجريبية والتدريبية",
   "demo_data_desc": "توليد مئات البيانات الواقعية المترابطة لمحاكاة كاملة للتطبيق وتجربة الميزات والتقارير والأرباح بكل سهولة.",
   "demo_data_active_badge": "البيانات التجريبية الحالية في النظام ({total} سجل):",
@@ -732,5 +731,9 @@
   "shipment_order_removed_success": "تمت إزالة الطلب من الشحنة بنجاح",
   "shipment_order_status_updated": "تم تحديث حالة الطلب بنجاح",
   "shipment_duplicate_order_prevented": "تم منع إسناد الطلب لشحنتين مختلفتين",
-  "shipment_advance_unverified_warning": "تنبيه: يوجد {count} طلبات لم يتم التحقق من وصولها بعد"
+  "shipment_advance_unverified_warning": "تنبيه: يوجد {count} طلبات لم يتم التحقق من وصولها بعد",
+  "shipment_advance_unverified_desc": "توجد طلبات لم يتم التحقق من وصولها بعد أو حالتها ما زالت في الشحن. عند تأكيد التسليم النهائي للشحنة، سيتم تحديث كافة الطلبات الفردية إلى \"تم التسليم\" افتراضياً ما لم تقم بإزالتها أولاً.",
+  "customer_deselect_all": "إلغاء التحديد",
+  "customer_surplus_credit": "رصيد دائن فائض للعميل",
+  "customer_due_date_prefix": "موعد الاستحقاق: {date}"
 }

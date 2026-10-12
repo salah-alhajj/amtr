@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 
 /// رأس القسم في لوحة التحكم مع زر عرض الكل وسهم التقدم لليسار
 class DashboardSectionHeader extends StatelessWidget {
@@ -17,27 +17,11 @@ class DashboardSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        TextButton(
-          onPressed: onAction,
-          child: Row(
-            children: [
-              Text(
-                actionLabel ?? 'view_all'.i18n(),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 4),
-              const ForwardChevron(size: 11),
-            ],
-          ),
-        ),
-      ],
+    return AppSectionHeader(
+      title: title,
+      actionTitle: actionLabel ?? 'view_all'.i18n(),
+      onActionTap: onAction,
+      padding: EdgeInsets.zero,
     );
   }
 }

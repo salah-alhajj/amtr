@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 
@@ -77,19 +78,31 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
             items: [
               DropdownMenuItem(
                 value: AppConstants.paymentPrepaid,
-                child: Text(AppConstants.getPaymentStatusLabel(AppConstants.paymentPrepaid)),
+                child: Text(
+                  AppConstants.getPaymentStatusLabel(AppConstants.paymentPrepaid),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                ),
               ),
               DropdownMenuItem(
                 value: AppConstants.paymentDebt,
-                child: Text(AppConstants.getPaymentStatusLabel(AppConstants.paymentDebt)),
+                child: Text(
+                  AppConstants.getPaymentStatusLabel(AppConstants.paymentDebt),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                ),
               ),
               DropdownMenuItem(
                 value: AppConstants.paymentCod,
-                child: Text(AppConstants.getPaymentStatusLabel(AppConstants.paymentCod)),
+                child: Text(
+                  AppConstants.getPaymentStatusLabel(AppConstants.paymentCod),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                ),
               ),
               DropdownMenuItem(
                 value: AppConstants.paymentPartial,
-                child: Text(AppConstants.getPaymentStatusLabel(AppConstants.paymentPartial)),
+                child: Text(
+                  AppConstants.getPaymentStatusLabel(AppConstants.paymentPartial),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                ),
               ),
             ],
             onChanged: (val) {

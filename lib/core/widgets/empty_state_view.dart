@@ -374,9 +374,10 @@ class _EmptyStateViewState extends State<EmptyStateView>
             ),
           ),
           if (widget.onActionPressed != null)
-            TextButton(
+            AppSecondaryButton(
               onPressed: widget.onActionPressed,
-              child: Text(widget.actionLabel ?? 'إجراء'),
+              label: widget.actionLabel ?? 'إجراء',
+              height: 36,
             )
           else if (widget.action != null)
             widget.action!,

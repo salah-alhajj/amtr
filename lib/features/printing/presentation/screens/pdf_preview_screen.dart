@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import '../../../../core/localization/localization.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
 import '../../models/print_options.dart';
 import '../../services/pdf_invoice_generator.dart';
@@ -45,51 +45,18 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           builder: (context, setModalState) {
             return Directionality(
               textDirection: TextDirection.rtl,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                padding: EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 16,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              child: AppModalSheet(
+                title: 'print_options_title'.i18n(),
+                trailing: AppIconButton(
+                  icon: Icons.close_rounded,
+                  size: 32,
+                  iconSize: 18,
+                  onPressed: () => Navigator.pop(context),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'print_options_title'.i18n(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
                     // اختيار حجم الورقة
                     Text(
                       'print_paper_size_title'.i18n(),
@@ -101,9 +68,9 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                       runSpacing: 8,
                       children: PrintPaperSize.values.map((size) {
                         final isSelected = _options.paperSize == size;
-                        return ChoiceChip(
-                          label: Text(size.displayName),
-                          selected: isSelected,
+                        return AppFilterChip(
+                          label: size.displayName,
+                          isSelected: isSelected,
                           onSelected: (selected) {
                             if (selected) {
                               setModalState(() {
@@ -116,12 +83,6 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                               setState(() {});
                             }
                           },
-                          selectedColor: AppColors.primaryBlue.withValues(alpha: 0.15),
-                          labelStyle: TextStyle(
-                            color: isSelected ? AppColors.primaryBlue : Colors.black87,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            fontSize: 12,
-                          ),
                         );
                       }).toList(),
                     ),
@@ -165,18 +126,10 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                     ],
 
                     // خيار تضمين الصور
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        'print_photos_switch_title'.i18n(),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                      subtitle: Text(
-                        'print_photos_switch_subtitle'.i18n(),
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
+                    AppSwitchTile(
+                      title: 'print_photos_switch_title'.i18n(),
+                      subtitle: 'print_photos_switch_subtitle'.i18n(),
                       value: _options.includeItemPhotos,
-                      activeThumbColor: AppColors.primaryBlue,
                       onChanged: (val) {
                         setModalState(() {
                           _options = _options.copyWith(includeItemPhotos: val);
@@ -186,15 +139,10 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                     ),
 
                     const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                    AppPrimaryButton(
+                      label: 'print_apply_changes'.i18n(),
+                      height: 46,
                       onPressed: () => Navigator.pop(context),
-                      child: Text('print_apply_changes'.i18n(), style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),

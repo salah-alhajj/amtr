@@ -1,7 +1,7 @@
 import 'package:amtr/features/onboarding/models/onboarding_item.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 
 /// ويدجت شريحة الأونبوردينج الفاخرة مع دعم كامل للتأثيرات والانتقالات
 class OnboardingSlideWidget extends StatefulWidget {
@@ -80,7 +80,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           const SizedBox(height: 18),
 
           // 2. الشارة الفئوية
-          AppleBadge(
+          AppBadge(
             label: widget.item.badge,
             color: widget.item.badgeColor,
             icon: widget.item.isLogoSlide
@@ -275,7 +275,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
 
   /// بطاقة النقاط والميزات السريعة
   Widget _buildBulletPointsCard(bool isDark) {
-    return AppleCard(
+    return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       backgroundColor: isDark
           ? AppColors.darkSurfaceCard.withValues(alpha: 0.65)

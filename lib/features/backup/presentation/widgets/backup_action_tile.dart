@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 
 /// بطاقة خيار نسخ احتياطي أو استعادة بيانات
 class BackupActionTile extends StatelessWidget {
@@ -27,7 +27,7 @@ class BackupActionTile extends StatelessWidget {
         ? iconColor.withValues(alpha: 0.15)
         : avatarBgColor;
 
-    return AppleCard(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
       onTap: onTap,
       child: ListTile(

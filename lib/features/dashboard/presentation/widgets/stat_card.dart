@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../core/widgets/currency_price_display.dart';
 
 class StatCard extends StatelessWidget {
@@ -31,7 +31,7 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppleCard(
+    return AppCard(
       onTap: onTap,
       gradient: gradient,
       backgroundColor: cardColor ?? context.surfaceCard,

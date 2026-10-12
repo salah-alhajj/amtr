@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/constants.dart';
-import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
@@ -20,11 +19,6 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyService = CurrencyService.instance;
-    final sellPriceFormatted = order.isFullyPriced
-        ? currencyService.formatAmount(order.totalSellPrice, currencyCode: order.currency)
-        : 'order_pricing_pending'.i18n();
-
     return AppAnimatedCard(
       onTap: onTap,
       margin: const EdgeInsets.only(bottom: 12),
@@ -108,14 +102,25 @@ class OrderCard extends StatelessWidget {
                     'order_sell_price_to_customer'.i18n(),
                     style: TextStyle(fontSize: 11, color: context.textSecondary),
                   ),
-                  Text(
-                    sellPriceFormatted,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: order.isFullyPriced ? AppColors.primaryGreen : AppColors.statusWarning,
+                  if (order.isFullyPriced)
+                    CurrencyPriceDisplay(
+                      amount: order.totalSellPrice,
+                      currency: order.currency,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryGreen,
+                      ),
+                    )
+                  else
+                    Text(
+                      'order_pricing_pending'.i18n(),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.statusWarning,
+                      ),
                     ),
-                  ),
                 ],
               ),
               Row(

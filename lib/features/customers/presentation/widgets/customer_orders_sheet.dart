@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
-import '../../../../core/widgets/currency_price_display.dart';
-import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/design_system.dart';
 import '../../../../models/customer.dart';
 import '../../../../models/individual_order.dart';
 import '../../../orders/presentation/screens/order_details_screen.dart';
@@ -49,91 +47,69 @@ class CustomerOrdersSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurfaceCard : AppColors.scaffoldBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+    return AppModalSheet(
+      title: customer.name,
+      subtitle: customer.phone != null
+          ? (YemenPhoneHelper.formatForDisplay(customer.phone!) ?? customer.phone!)
+          : null,
+      trailing: AppIconButton(
+        icon: Icons.close_rounded,
+        size: 32,
+        iconSize: 18,
+        onPressed: () => Navigator.pop(context),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.65,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppCard(
+              backgroundColor: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceWhite,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    customer.name,
+                    'customer_total_outstanding_debt'.i18n(),
+                    style: TextStyle(fontSize: 13, color: context.textPrimary),
+                  ),
+                  CurrencyPriceDisplay(
+                    amount: totalDebt,
+                    currency: activeCurrency,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: context.textPrimary,
+                      color: totalDebt > 0 ? AppColors.statusDanger : AppColors.primaryGreen,
                     ),
                   ),
-                  if (customer.phone != null)
-                    Text(
-                      YemenPhoneHelper.formatForDisplay(customer.phone!) ?? customer.phone!,
-                      style: TextStyle(fontSize: 12, color: context.textSecondary),
-                    ),
                 ],
               ),
-              IconButton(
-                icon: Icon(Icons.close, color: context.textSecondary),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          AppleCard(
-            backgroundColor: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceWhite,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'customer_total_outstanding_debt'.i18n(),
-                  style: TextStyle(fontSize: 13, color: context.textPrimary),
-                ),
-                CurrencyPriceDisplay(
-                  amount: totalDebt,
-                  currency: activeCurrency,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: totalDebt > 0 ? AppColors.statusDanger : AppColors.primaryGreen,
-                  ),
-                ),
-              ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'customer_orders_history_title'.trParams({'count': orders.length.toString()}),
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.textPrimary),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: orders.isEmpty
-                ? EmptyStateView.section(
-                    icon: Icons.inventory_2_outlined,
-                    title: 'customer_no_orders_recorded'.i18n(),
-                    subtitle: 'common_empty'.i18n(),
-                  )
-                : ListView.builder(
-                    itemCount: orders.length,
-                    itemBuilder: (ctx, idx) {
-                      final o = orders[idx];
-                      return AppleCard(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => OrderDetailsScreen(orderId: o.id)),
-                          );
-                        },
+            const SizedBox(height: 16),
+            Text(
+              'customer_orders_history_title'.trParams({'count': orders.length.toString()}),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: orders.isEmpty
+                  ? EmptyStateView.section(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'customer_no_orders_recorded'.i18n(),
+                      subtitle: 'common_empty'.i18n(),
+                    )
+                  : ListView.builder(
+                      itemCount: orders.length,
+                      itemBuilder: (ctx, idx) {
+                        final o = orders[idx];
+                        return AppCard(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => OrderDetailsScreen(orderId: o.id)),
+                            );
+                          },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -172,6 +148,7 @@ class CustomerOrdersSheet extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }

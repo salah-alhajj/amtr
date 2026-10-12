@@ -779,12 +779,12 @@ class PdfInvoiceGenerator {
     );
   }
 
-  /// استرجاع رمز العملة المعتمد
+  /// استرجاع رمز العملة المعتمد للطباعة
   static String _getCurrencySymbol(String currencyCode) {
     switch (currencyCode.toUpperCase()) {
       case AppConstants.currencySar:
-        // الرمز المعتمد للريال السعودي طبقاً للبنك المركزي السعودي (SAMA) U+20C1
-        return AppConstants.sarSymbol;
+        // استخدام النص العربي المعتمد (ر.س) للطباعة لضمان التوافق التام مع خطوط PDF المضمنة
+        return 'ر.س';
       case AppConstants.currencyUsd:
         return AppConstants.usdSymbol;
       case AppConstants.currencyYer:

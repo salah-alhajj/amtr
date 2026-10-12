@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/localization/localization.dart';
+import '../../../core/widgets/design_system.dart';
 import '../../../models/individual_order.dart';
 import '../models/print_options.dart';
 import '../presentation/screens/pdf_preview_screen.dart';
@@ -19,9 +20,7 @@ class PrintingService {
     required PrintOptions options,
   }) async {
     if (orders.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('print_no_orders_selected'.i18n())),
-      );
+      AppToast.error(context, 'print_no_orders_selected'.i18n());
       return;
     }
 
@@ -39,8 +38,9 @@ class PrintingService {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('print_error_sending'.trParams({'error': e.toString()}))),
+        AppToast.error(
+          context,
+          'print_error_sending'.trParams({'error': e.toString()}),
         );
       }
     }
@@ -63,8 +63,9 @@ class PrintingService {
       await Printing.sharePdf(bytes: bytes, filename: filename);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('print_error_pdf'.trParams({'error': e.toString()}))),
+        AppToast.error(
+          context,
+          'print_error_pdf'.trParams({'error': e.toString()}),
         );
       }
     }
@@ -100,8 +101,9 @@ class PrintingService {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('print_error_excel'.trParams({'error': e.toString()}))),
+        AppToast.error(
+          context,
+          'print_error_excel'.trParams({'error': e.toString()}),
         );
       }
     }

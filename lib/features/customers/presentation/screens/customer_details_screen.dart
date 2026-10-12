@@ -911,7 +911,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     color: AppColors.primaryBlue,
                   ),
                 ),
-                TextButton(
+                AppSecondaryButton(
+                  label: _selectedOrderIds.length == filtered.length
+                      ? 'customer_deselect_all'.i18n()
+                      : 'customer_select_all'.i18n(),
+                  height: 30,
+                  borderRadius: 8,
                   onPressed: () {
                     setState(() {
                       if (_selectedOrderIds.length == filtered.length) {
@@ -921,15 +926,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       }
                     });
                   },
-                  child: Text(
-                    _selectedOrderIds.length == filtered.length
-                        ? 'إلغاء الكل'
-                        : 'customer_select_all'.i18n(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -1054,7 +1050,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '${o.items.length} أغراض • ${o.createdAt.year}/${o.createdAt.month}/${o.createdAt.day}',
+                                '${'items_count'.trParams({'count': o.items.length.toString()})} • ${o.createdAt.year}/${o.createdAt.month}/${o.createdAt.day}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: context.textSecondary,
@@ -1354,7 +1350,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'موعد الاستحقاق: ${order.debtDueDate!.year}/${order.debtDueDate!.month}/${order.debtDueDate!.day}',
+                      'customer_due_date_prefix'.trParams({
+                        'date': '${order.debtDueDate!.year}/${order.debtDueDate!.month}/${order.debtDueDate!.day}',
+                      }),
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.statusWarning,
@@ -1496,37 +1494,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           // -------------------------------------------------------------
           // خانة الإدخال والتسوية اليدوية (Manual Override & Adjustment)
           // -------------------------------------------------------------
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'customer_manual_section_title'.i18n(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: context.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'customer_manual_section_desc'.i18n(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: context.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              Switch.adaptive(
-                value: _isManualEnabled,
-                activeTrackColor: AppColors.primaryBlue,
-                onChanged: (val) {
-                  setState(() => _isManualEnabled = val);
-                },
-              ),
-            ],
+          AppSwitchTile(
+            title: 'customer_manual_section_title'.i18n(),
+            subtitle: 'customer_manual_section_desc'.i18n(),
+            value: _isManualEnabled,
+            activeColor: AppColors.primaryBlue,
+            onChanged: (val) {
+              setState(() => _isManualEnabled = val);
+            },
           ),
           const SizedBox(height: 10),
 

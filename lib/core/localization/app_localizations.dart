@@ -29,12 +29,10 @@ class AppLocalizations {
 
     final Map<String, String> merged = {};
 
-    // 1. تحميل الأساس الافتراضي أولاً من مجلد الترجمات الموحد (العربية كمرجع أساسي ثم الإنجليزية)
+    // 1. تحميل الأساس الافتراضي أولاً من مجلد الترجمات الموحد في جذر المشروع (العربية كمرجع أساسي ثم الإنجليزية)
     final fallbackCandidates = <String>[
       'i18n/ar.json',
-      'assets/i18n/ar.json',
       'i18n/en.json',
-      'assets/i18n/en.json',
     ];
 
     for (final path in fallbackCandidates) {
@@ -53,9 +51,7 @@ class AppLocalizations {
     // 2. إذا كانت اللغة المطلوبة مختلفة، تحميلها للكتابة فوق الأساس
     final targetCandidates = <String>[
       if (cc != null && cc.isNotEmpty) 'i18n/${lc}_$cc.json',
-      if (cc != null && cc.isNotEmpty) 'assets/i18n/${lc}_$cc.json',
       'i18n/$lc.json',
-      'assets/i18n/$lc.json',
     ];
 
     for (final path in targetCandidates) {
