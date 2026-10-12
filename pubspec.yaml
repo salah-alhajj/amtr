@@ -47,6 +47,14 @@ dependencies:
   uuid: ^4.5.1
   flutter_bloc: ^9.1.1
   flutter_svg: ^2.3.0
+  localization: ^2.1.1
+  shared_preferences: ^2.5.6
+  timezone: ^0.11.1
+  add_2_calendar: ^3.1.1
+  flutter_local_notifications: ^22.3.1
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  excel: ^4.0.6
 
 dev_dependencies:
   flutter_test:
@@ -58,12 +66,15 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  sqflite_common_ffi: ^2.4.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
+  config:
+    enable-swift-package-manager: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -84,6 +95,10 @@ flutter:
   assets:
     - assets/fonts/
     - assets/icons/
+    - assets/icons/flags/
+    - assets/i18n/
+    - i18n/
+    - assets/images/onboarding/
 
   fonts:
     - family: IBMPlexSansArabic
