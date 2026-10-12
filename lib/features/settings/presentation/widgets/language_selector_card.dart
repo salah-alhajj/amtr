@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
-import '../../../../core/widgets/country_flag_svg.dart';
 
 /// بطاقة اختيار لغة التطبيق بتصميم نمط أبل مع أعلام الدول بصيغة SVG فائقة النقاء
 class LanguageSelectorCard extends StatelessWidget {

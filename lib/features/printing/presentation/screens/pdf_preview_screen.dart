@@ -60,7 +60,11 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                     // اختيار حجم الورقة
                     Text(
                       'print_paper_size_title'.i18n(),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Wrap(
@@ -95,12 +99,20 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                         children: [
                           Text(
                             'print_grid_title'.i18n(),
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'print_grid_subtitle'.i18n(),
-                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           SizedBox(

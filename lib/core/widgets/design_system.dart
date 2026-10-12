@@ -3,6 +3,8 @@
 /// توحد الهوية البصرية، الأزرار، حقول الإدخال، البطاقات، الترويسات، والشارات
 library;
 
+export '../theme/app_theme.dart';
+
 // المكونات الأساسية القابلة لإعادة الاستخدام
 export 'components/app_buttons.dart';
 export 'components/app_text_fields.dart';

@@ -35,7 +35,7 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
     final transportCost = currencyService.fromBaseYer(transportCostYer, viewCurrency);
     final netProfit = currencyService.fromBaseYer(netProfitYer, viewCurrency);
 
-    return AppleCard(
+    return AppCard(
       gradient: context.isDarkMode
           ? const LinearGradient(
               colors: [AppColors.darkSurfaceCard, AppColors.darkSurfaceMuted],

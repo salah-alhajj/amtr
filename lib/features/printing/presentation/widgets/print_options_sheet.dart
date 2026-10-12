@@ -215,11 +215,19 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                               value: isChecked,
                               title: Text(
                                 '${'print_order_tag'.trParams({'number': o.orderNumber})} - ${o.customerName ?? 'print_no_customer'.i18n()}',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: AppTheme.fontFamily,
+                                ),
                               ),
                               subtitle: Text(
                                 '${o.totalSellPrice.toStringAsFixed(1)} ${o.currency} • ${'print_items_count'.trParams({'count': o.items.length.toString()})}',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                  fontFamily: AppTheme.fontFamily,
+                                ),
                               ),
                               onChanged: (val) {
                                 setState(() {
@@ -274,7 +282,11 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                           const SizedBox(height: 2),
                           Text(
                             'print_grid_subtitle'.i18n(),
-                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           SizedBox(
@@ -418,6 +430,7 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
         fontSize: 13,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
+        fontFamily: AppTheme.fontFamily,
       ),
     );
   }

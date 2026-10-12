@@ -236,7 +236,7 @@ class ShimmerBone extends StatelessWidget {
   }
 }
 
-/// بطاقة شيمر على نمط AppleCard
+/// بطاقة شيمر على نمط AppCard
 class ShimmerCard extends StatelessWidget {
   final double? width;
   final double height;

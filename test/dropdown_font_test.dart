@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/theme/app_theme.dart';
 import 'package:amtr/core/widgets/design_system.dart';
 import 'package:amtr/models/customer.dart';
 

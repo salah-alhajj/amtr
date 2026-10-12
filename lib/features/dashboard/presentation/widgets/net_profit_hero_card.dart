@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
-import '../../../../core/widgets/currency_price_display.dart';
 
 /// بطاقة إجمالي صافي الأرباح الرئيسية بتدرج آبل الأزرق والأخضر
 class NetProfitHeroCard extends StatelessWidget {
