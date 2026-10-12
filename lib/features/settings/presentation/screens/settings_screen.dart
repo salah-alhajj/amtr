@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../backup/presentation/screens/backup_restore_screen.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
+import '../../../about/presentation/screens/about_app_screen.dart';
 import '../widgets/database_backup_tile.dart';
 import '../widgets/demo_data_card.dart';
 import '../widgets/exchange_rates_card.dart';
@@ -154,19 +155,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 16),
 
-          // معلومات التطبيق
+          // معلومات التطبيق والمطور
           AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+              );
+            },
+            child: Row(
               children: [
-                Text('about_app'.i18n(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text(
-                  'app_tagline'.i18n(),
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.5),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.deepNavy, AppColors.primaryBlue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text('settings_app_version'.i18n(), style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'about_app_title'.i18n(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryGreen.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'settings_app_version'.i18n(),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryGreen,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'settings_about_app_hint'.i18n(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const ForwardChevron(size: 13),
               ],
             ),
           ),

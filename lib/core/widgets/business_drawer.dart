@@ -11,6 +11,7 @@ import '../../features/customers/presentation/screens/customers_list_screen.dart
 import '../../features/orders/presentation/screens/orders_list_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shipments/presentation/screens/shipments_list_screen.dart';
+import '../../features/about/presentation/screens/about_app_screen.dart';
 
 /// دراور تجاري ومالي احترافي مصقول يعكس هوية المال والأعمال والشحن
 class BusinessDrawer extends StatelessWidget {
@@ -300,6 +301,19 @@ class BusinessDrawer extends StatelessWidget {
                           MaterialPageRoute(builder: (_) => const SettingsScreen()),
                         );
                       }
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.auto_awesome_rounded,
+                    title: 'drawer_about_app'.i18n(),
+                    subtitle: 'drawer_about_app_desc'.i18n(),
+                    iconColor: AppColors.primaryBlue,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+                      );
                     },
                   ),
                 ],
