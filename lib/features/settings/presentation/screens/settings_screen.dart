@@ -7,6 +7,7 @@ import '../../../../core/widgets/design_system.dart';
 import '../../../backup/presentation/screens/backup_restore_screen.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 import '../widgets/database_backup_tile.dart';
+import '../widgets/demo_data_card.dart';
 import '../widgets/exchange_rates_card.dart';
 import '../widgets/language_selector_card.dart';
 import '../widgets/theme_selector_card.dart';
@@ -145,6 +146,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
+
+          const SizedBox(height: 16),
+
+          // قسم الداتا التجريبية والتدريبية
+          const DemoDataCard(),
 
           const SizedBox(height: 16),
 
