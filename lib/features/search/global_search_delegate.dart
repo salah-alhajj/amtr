@@ -3,7 +3,7 @@ import '../../core/constants.dart';
 import '../../core/localization/localization.dart';
 import '../../core/services/currency_service.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/apple_widgets.dart';
+import '../../core/widgets/design_system.dart';
 import '../../models/consolidated_shipment.dart';
 import '../../models/customer.dart';
 import '../../models/individual_order.dart';
@@ -140,7 +140,7 @@ class GlobalSearchDelegate extends SearchDelegate {
                 }),
               ),
               ...customers.map(
-                (c) => AppleCard(
+                (c) => AppCard(
                   margin: const EdgeInsets.only(bottom: 8),
                   onTap: () {
                     Navigator.push(
@@ -185,7 +185,7 @@ class GlobalSearchDelegate extends SearchDelegate {
                 'search_orders_header'.trParams({'count': '${orders.length}'}),
               ),
               ...orders.map(
-                (o) => AppleCard(
+                (o) => AppCard(
                   margin: const EdgeInsets.only(bottom: 8),
                   onTap: () {
                     Navigator.push(
