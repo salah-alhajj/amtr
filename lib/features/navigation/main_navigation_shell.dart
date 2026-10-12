@@ -8,6 +8,7 @@ import '../dashboard/presentation/screens/home_dashboard_screen.dart';
 import '../orders/presentation/screens/orders_list_screen.dart';
 import '../settings/presentation/screens/settings_screen.dart';
 import '../shipments/presentation/screens/shipments_list_screen.dart';
+import '../about/presentation/screens/about_app_screen.dart';
 import 'widgets/amtr_bottom_nav_bar.dart';
 import 'widgets/directional_slide_indexed_stack.dart';
 
@@ -89,6 +90,12 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
           onNavigateShipments: () => _onDestinationSelected(2),
           onNavigateCustomers: () => _onDestinationSelected(3),
           onNavigateSettings: () => _onDestinationSelected(4),
+          onNavigateAbout: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+            );
+          },
         ),
         body: DirectionalSlideIndexedStack(
           index: _currentIndex,

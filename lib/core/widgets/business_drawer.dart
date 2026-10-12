@@ -20,6 +20,7 @@ class BusinessDrawer extends StatelessWidget {
   final VoidCallback? onNavigateShipments;
   final VoidCallback? onNavigateCustomers;
   final VoidCallback? onNavigateSettings;
+  final VoidCallback? onNavigateAbout;
 
   const BusinessDrawer({
     super.key,
@@ -28,6 +29,7 @@ class BusinessDrawer extends StatelessWidget {
     this.onNavigateShipments,
     this.onNavigateCustomers,
     this.onNavigateSettings,
+    this.onNavigateAbout,
   });
 
   @override
@@ -104,11 +106,15 @@ class BusinessDrawer extends StatelessWidget {
                                   size: 6,
                                 ),
                                 const SizedBox(width: 6),
-                                Text(
-                                  'drawer_sqlite_offline'.i18n(),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                Expanded(
+                                  child: Text(
+                                    'drawer_sqlite_offline'.i18n(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -310,10 +316,14 @@ class BusinessDrawer extends StatelessWidget {
                     iconColor: AppColors.primaryBlue,
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AboutAppScreen()),
-                      );
+                      if (onNavigateAbout != null) {
+                        onNavigateAbout!();
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+                        );
+                      }
                     },
                   ),
                 ],
@@ -460,12 +470,16 @@ class BusinessDrawer extends StatelessWidget {
           children: [
             Icon(Icons.calculate_rounded, size: 13, color: primaryColor),
             const SizedBox(width: 3),
-            Text(
-              'حاسبة الصرف',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: primaryColor,
+            Flexible(
+              child: Text(
+                'حاسبة الصرف',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
               ),
             ),
           ],

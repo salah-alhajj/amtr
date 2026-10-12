@@ -13,6 +13,7 @@ import 'package:amtr/features/about/presentation/widgets/developer_profile_card.
 import 'package:amtr/features/about/presentation/widgets/feature_highlight_card.dart';
 import 'package:amtr/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:amtr/features/settings/presentation/screens/settings_screen.dart';
+import 'package:amtr/core/widgets/business_drawer.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -178,6 +179,43 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(AboutAppScreen), findsOneWidget);
+    });
+
+    testWidgets('BusinessDrawer renders About App menu item and triggers navigation callback', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      bool aboutNavigated = false;
+
+      await tester.pumpWidget(buildTestableWidget(
+        child: Scaffold(
+          drawer: BusinessDrawer(
+            onNavigateAbout: () => aboutNavigated = true,
+          ),
+          body: const SizedBox(),
+        ),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final scaffoldState = tester.firstState<ScaffoldState>(find.byType(Scaffold));
+      scaffoldState.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final drawerAboutItem = find.text('عن التطبيق والمطور');
+      expect(drawerAboutItem, findsOneWidget);
+
+      await tester.ensureVisible(drawerAboutItem);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(drawerAboutItem);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(aboutNavigated, isTrue);
     });
   });
 }
