@@ -15,7 +15,7 @@ class OrderItemDetailTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyService = CurrencyService.instance;
 
-    return AppleCard(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       child: Column(

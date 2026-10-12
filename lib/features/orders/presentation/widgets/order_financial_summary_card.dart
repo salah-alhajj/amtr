@@ -17,7 +17,7 @@ class OrderFinancialSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppleCard(
+    return AppCard(
       backgroundColor: context.surfaceCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
