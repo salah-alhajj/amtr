@@ -137,7 +137,7 @@ class _DemoDataCardState extends State<DemoDataCard> {
   Widget build(BuildContext context) {
     const accentPurple = Color(0xFF8B5CF6);
 
-    return AppleCard(
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

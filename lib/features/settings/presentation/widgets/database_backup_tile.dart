@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../core/widgets/design_system.dart';
 
 /// بطاقة الوصول السريع لإدارة النسخ الاحتياطي وقاعدة البيانات
 class DatabaseBackupTile extends StatelessWidget {
@@ -14,7 +14,7 @@ class DatabaseBackupTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppleCard(
+    return AppCard(
       onTap: onTap,
       child: ListTile(
         contentPadding: EdgeInsets.zero,
