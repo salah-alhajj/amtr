@@ -6,14 +6,9 @@
       <stop offset="50%" stop-color="#06B6D4" />
       <stop offset="100%" stop-color="#059669" />
     </linearGradient>
-
-    <!-- Subtle Drop Shadow -->
-    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#007AFF" flood-opacity="0.18" />
-    </filter>
   </defs>
 
-  <g filter="url(#softGlow)">
+  <g>
     <!-- Isometric Cube Outer Hexagon & Grid Structure -->
     <!-- Center Point: (250, 210), Radius: 120 -->
     <!-- Top vertex: (250, 90) -->
