@@ -84,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
 
           // جولة في ميزات التطبيق
-          AppleCard(
+          AppCard(
             onTap: () {
               Navigator.push(
                 context,
@@ -155,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
 
           // معلومات التطبيق
-          AppleCard(
+          AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
