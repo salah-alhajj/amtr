@@ -63,7 +63,7 @@ class BusinessDrawer extends StatelessWidget {
                     children: [
                       const AppLogo(
                         size: 44,
-                        borderRadius: 0,
+                        borderRadius: 12,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -310,9 +310,9 @@ class BusinessDrawer extends StatelessWidget {
               ),
             ),
 
-            // تذييل الدراور مع زر التبديل السريع للغة
+            // تذييل الدراور مع قائمة منسدلة لاختيار لغة التطبيق
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
                 border: Border(
@@ -324,41 +324,102 @@ class BusinessDrawer extends StatelessWidget {
               ),
               child: BlocBuilder<LocaleBloc, LocaleState>(
                 builder: (context, localeState) {
+                  final currentCode = localeState.locale.languageCode;
+
                   return Row(
                     children: [
-                      IconButton.filledTonal(
-                        onPressed: () {
-                          context.read<LocaleBloc>().add(const ToggleLocale());
-                        },
-                        icon: localeState.isArabic
-                            ? const CountryFlagSvg.sa(width: 22, height: 16.5, borderRadius: 3)
-                            : const CountryFlagSvg.us(width: 22, height: 16.5, borderRadius: 3),
-                        tooltip: 'change_language'.i18n(),
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: CountryFlagSvg.fromLanguageCode(
+                          currentCode,
+                          width: 22,
+                          height: 16.5,
+                          borderRadius: 3,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              localeState.isArabic ? 'language_arabic_rtl'.i18n() : 'language_english_ltr'.i18n(),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                              ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: AppLanguage.supported.any((l) => l.code == currentCode)
+                                ? currentCode
+                                : 'ar',
+                            isExpanded: true,
+                            isDense: true,
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                              size: 20,
                             ),
-                            Text(
-                              'drawer_version_offline'.i18n(),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.textTertiary,
-                              ),
-                            ),
-                          ],
+                            borderRadius: BorderRadius.circular(12),
+                            dropdownColor:
+                                isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
+                            items: AppLanguage.supported.map((lang) {
+                              final isSelected = lang.code == currentCode;
+                              return DropdownMenuItem<String>(
+                                value: lang.code,
+                                child: Row(
+                                  children: [
+                                    CountryFlagSvg.fromLanguageCode(
+                                      lang.code,
+                                      width: 20,
+                                      height: 15,
+                                      borderRadius: 2.5,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      lang.nativeName,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                        color: isSelected
+                                            ? (isDark
+                                                ? AppColors.darkPrimaryBlue
+                                                : AppColors.primaryBlue)
+                                            : (isDark
+                                                ? AppColors.darkTextPrimary
+                                                : AppColors.textPrimary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        '(${lang.translationKey.i18n()})',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isDark
+                                              ? AppColors.darkTextTertiary
+                                              : AppColors.textTertiary,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(
+                                        Icons.check_rounded,
+                                        size: 16,
+                                        color: isDark
+                                            ? AppColors.darkPrimaryBlue
+                                            : AppColors.primaryBlue,
+                                      ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (newCode) {
+                              if (newCode != null && newCode != currentCode) {
+                                context.read<LocaleBloc>().add(
+                                      ChangeLocale(Locale(newCode)),
+                                    );
+                              }
+                            },
+                          ),
                         ),
                       ),
-                      const ForwardChevron(size: 14),
                     ],
                   );
                 },

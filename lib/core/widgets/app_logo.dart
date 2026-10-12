@@ -13,7 +13,7 @@ class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,
     this.size = 48,
-    this.borderRadius = 0,
+    this.borderRadius,
     this.isTransparent = true,
     this.showShadow = false,
     this.onTap,
@@ -21,7 +21,7 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveRadius = borderRadius ?? 0;
+    final effectiveRadius = borderRadius ?? (size * 0.22);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget imageWidget = Image.asset(

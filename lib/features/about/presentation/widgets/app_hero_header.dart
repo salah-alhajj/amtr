@@ -37,7 +37,7 @@ class AppHeroHeader extends StatelessWidget {
           // أيقونة التطبيق الرسمية وفق إرشادات آبل
           const AppLogo(
             size: 80,
-            borderRadius: 0,
+            borderRadius: 22,
           ),
           const SizedBox(height: 16),
 
