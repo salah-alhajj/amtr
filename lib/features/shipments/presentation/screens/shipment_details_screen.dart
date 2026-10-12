@@ -6,6 +6,7 @@ import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/consolidated_shipment.dart';
+import '../../../../models/individual_order.dart';
 import '../../data/repositories/shipment_repository_impl.dart';
 import '../../domain/repositories/shipment_repository.dart';
 import '../../../orders/presentation/bloc/orders_bloc.dart';

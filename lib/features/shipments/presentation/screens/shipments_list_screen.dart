@@ -60,8 +60,8 @@ class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
                   children: [
                     _buildFilterChip(context, 'status_all'.i18n(), 'all', selectedFilter),
                     _buildFilterChip(context, 'stage_dispatched'.i18n(), AppConstants.shipmentDispatched, selectedFilter),
-                    _buildFilterChip(context, 'stage_arrived_hub'.i18n(), AppConstants.shipmentArrivedHub, selectedFilter),
-                    _buildFilterChip(context, 'stage_ready_distribution'.i18n(), AppConstants.shipmentReadyDistribution, selectedFilter),
+                    _buildFilterChip(context, 'stage_arrived_hub'.i18n(), AppConstants.shipmentCheckpoint, selectedFilter),
+                    _buildFilterChip(context, 'stage_ready_distribution'.i18n(), AppConstants.shipmentDistribution, selectedFilter),
                     _buildFilterChip(context, 'stage_delivered'.i18n(), AppConstants.shipmentDelivered, selectedFilter),
                   ],
                 ),

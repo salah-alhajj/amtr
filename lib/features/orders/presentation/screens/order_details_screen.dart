@@ -246,7 +246,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       context,
       order: _order!,
       onSave: (paymentStatus, paidAmount) async {
-        context.read<OrdersBloc>().add(RecordPaymentEvent(_order!.id, paymentStatus, paidAmount));
+        context.read<OrdersBloc>().add(RecordPaymentEvent(
+              orderId: _order!.id,
+              newStatus: paymentStatus,
+              paidAmount: paidAmount,
+            ));
         _loadOrder();
       },
     );

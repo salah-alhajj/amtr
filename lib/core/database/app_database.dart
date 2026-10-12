@@ -194,26 +194,28 @@ class AppDatabase {
   /// استيراد كامل البيانات من JSON واستعادة الصور لمجلد المستندات الدائم
   Future<void> importAllDataFromJson(Map<String, dynamic> data) async {
     // 1. استعادة وتفريغ الصور إلى مجلد المستندات الدائم
-    final docsDir = await getApplicationDocumentsDirectory();
-    final photosDir = Directory(join(docsDir.path, 'amtr_photos'));
-    if (!photosDir.existsSync()) {
-      await photosDir.create(recursive: true);
-    }
-
     final restoredPhotosMap = <String, String>{};
-    if (data['photos_data'] is Map) {
-      final photosMap = data['photos_data'] as Map;
-      for (final entry in photosMap.entries) {
-        try {
-          final fileName = entry.key.toString();
-          final bytes = base64Decode(entry.value.toString());
-          final targetPath = join(photosDir.path, fileName);
-          final targetFile = File(targetPath);
-          await targetFile.writeAsBytes(bytes);
-          restoredPhotosMap[fileName] = targetPath;
-        } catch (_) {}
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final photosDir = Directory(join(docsDir.path, 'amtr_photos'));
+      if (!photosDir.existsSync()) {
+        await photosDir.create(recursive: true);
       }
-    }
+
+      if (data['photos_data'] is Map) {
+        final photosMap = data['photos_data'] as Map;
+        for (final entry in photosMap.entries) {
+          try {
+            final fileName = entry.key.toString();
+            final bytes = base64Decode(entry.value.toString());
+            final targetPath = join(photosDir.path, fileName);
+            final targetFile = File(targetPath);
+            await targetFile.writeAsBytes(bytes);
+            restoredPhotosMap[fileName] = targetPath;
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
 
     // 2. تحديث قاعدة البيانات ضمن معاملة آمنة
     final db = await database;

@@ -137,7 +137,7 @@ class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
       if (query.trim().isNotEmpty) {
         final clean = query.trim().toLowerCase();
         final matchTracking = (shipment.trackingNumber ?? '').toLowerCase().contains(clean);
-        final matchCarrier = (shipment.carrier ?? '').toLowerCase().contains(clean);
+        final matchCarrier = (shipment.carrierName ?? '').toLowerCase().contains(clean);
         final matchNotes = (shipment.notes ?? '').toLowerCase().contains(clean);
         if (!matchTracking && !matchCarrier && !matchNotes) return false;
       }
