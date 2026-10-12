@@ -1,0 +1,137 @@
+import 'package:flutter/material.dart';
+import 'package:localization/localization.dart';
+import '../../../../core/services/currency_service.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/apple_widgets.dart';
+import '../../../../models/individual_order.dart';
+
+/// بطاقة ملخص الحسبة المالية وفاتورة الطلب
+class OrderFinancialSummaryCard extends StatelessWidget {
+  final IndividualOrder order;
+  final VoidCallback onUpdatePayment;
+
+  const OrderFinancialSummaryCard({
+    super.key,
+    required this.order,
+    required this.onUpdatePayment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final currencyService = CurrencyService.instance;
+
+    return AppleCard(
+      backgroundColor: context.surfaceCard,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'order_financial_summary_title'.i18n(),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: context.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildRow(
+            context,
+            'order_total_cost_price'.i18n(),
+            currencyService.formatAmount(order.totalCostPrice, currencyCode: order.currency),
+          ),
+          if (order.additionalCost > 0) ...[
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 12),
+              child: _buildRow(
+                context,
+                'order_items_cost_only'.i18n(),
+                currencyService.formatAmount(order.itemsCostOnly, currencyCode: order.currency),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 12),
+              child: _buildRow(
+                context,
+                'order_additional_cost'.i18n(),
+                currencyService.formatAmount(order.additionalCost, currencyCode: order.currency),
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          _buildRow(
+            context,
+            'order_total_sell_price'.i18n(),
+            order.isFullyPriced
+                ? currencyService.formatAmount(order.totalSellPrice, currencyCode: order.currency)
+                : 'order_pricing_pending'.i18n(),
+            highlight: true,
+          ),
+          const SizedBox(height: 8),
+          _buildRow(
+            context,
+            'order_paid_deposit'.i18n(),
+            currencyService.formatAmount(order.paidAmount, currencyCode: order.currency),
+          ),
+          const SizedBox(height: 8),
+          _buildRow(
+            context,
+            'order_remaining_debt'.i18n(),
+            currencyService.formatAmount(order.remainingDebt, currencyCode: order.currency),
+            isDanger: order.remainingDebt > 0,
+          ),
+          const Divider(height: 20),
+          _buildRow(
+            context,
+            'order_estimated_profit'.i18n(),
+            currencyService.formatAmount(order.rawProfit, currencyCode: order.currency),
+            highlight: true,
+            color: AppColors.primaryGreen,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onUpdatePayment,
+            icon: const Icon(Icons.payment_rounded, size: 18),
+            label: Text('order_update_payment_btn'.i18n()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGreen,
+              minimumSize: const Size.fromHeight(44),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool highlight = false,
+    bool isDanger = false,
+    Color? color,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: highlight ? context.textPrimary : context.textSecondary,
+            fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: highlight ? 14 : 13,
+            fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+            color: color ?? (isDanger ? AppColors.statusDanger : context.textPrimary),
+          ),
+        ),
+      ],
+    );
+  }
+}
