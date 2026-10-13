@@ -9,7 +9,7 @@ void main() {
   group('Localization & i18n Suite Tests', () {
     setUp(() {
       LocalizationHelper.setStrings({
-        'app_name': 'مساعد التجارة والشحن',
+        'app_name': 'مساعد',
         'dashboard_title': 'لوحة التحكم',
         'order_number': 'طلب #{id}',
         'items_count': '{count} أصناف',
@@ -17,7 +17,7 @@ void main() {
     });
 
     test('LocalizationHelper translates keys properly with Arabic', () {
-      expect(LocalizationHelper.translate('app_name'), 'مساعد التجارة والشحن');
+      expect(LocalizationHelper.translate('app_name'), 'مساعد');
       expect(LocalizationHelper.translate('dashboard_title'), 'لوحة التحكم');
     });
 

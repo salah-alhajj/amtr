@@ -4,7 +4,7 @@ platform :android do
   desc "Deploy a new version to the Google Play Store (Internal Track by default)"
   lane :deploy_play_store do |options|
     track = options[:track] || ENV["PLAY_STORE_TRACK"] || "internal"
-    package_name = ENV["APPLICATION_ID"] || "com.amtr.app"
+    package_name = ENV["APPLICATION_ID"] || "com.mosaed.app"
     aab_path = File.expand_path("../../build/app/outputs/bundle/release/app-release.aab", __FILE__)
 
     UI.message("Deploying AAB to Google Play Store...")
@@ -27,7 +27,7 @@ platform :android do
 
   desc "Promote internal track to production"
   lane :promote_to_production do
-    package_name = ENV["APPLICATION_ID"] || "com.amtr.app"
+    package_name = ENV["APPLICATION_ID"] || "com.mosaed.app"
     upload_to_play_store(
       package_name: package_name,
       json_key: "google-service-account.json",

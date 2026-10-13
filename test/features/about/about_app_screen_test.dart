@@ -77,7 +77,7 @@ void main() {
 
       // فحص ترويسة التطبيق واسمه
       expect(find.byType(AppHeroHeader), findsOneWidget);
-      expect(find.text('مساعد التجارة والشحن'), findsOneWidget);
+      expect(find.text('مساعد'), findsOneWidget);
       expect(find.text('نظام محلي متكامل لإدارة الطلبات، التجميع والشحن'), findsOneWidget);
       expect(find.text('نسخة آمنة ومحلية 100%'), findsOneWidget);
 
@@ -145,7 +145,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('About App & Developer'), findsWidgets);
-      expect(find.text('Retail & Cargo Assistant'), findsOneWidget);
+      expect(find.text('Mosaed'), findsOneWidget);
       expect(find.text('100% Offline & Private'), findsOneWidget);
       expect(find.text('What is this app?'), findsOneWidget);
       expect(find.text('Easy Orders & Sales Management'), findsOneWidget);

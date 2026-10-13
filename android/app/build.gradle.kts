@@ -14,7 +14,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.amtr"
+    namespace = "com.mosaed.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = (project.findProperty("APPLICATION_ID") as String?) ?: "com.amtr.app"
+        applicationId = (project.findProperty("APPLICATION_ID") as String?) ?: "com.mosaed.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

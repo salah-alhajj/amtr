@@ -12,7 +12,7 @@ env:
     FLUTTER_CHANNEL: "stable"
     FLUTTER_VERSION: "3.47.7"
     PLAY_STORE_TRACK: "internal"
-    APPLICATION_ID: "com.amtr.app"
+    APPLICATION_ID: "com.mosaed.app"
 
 phases:
   install:
