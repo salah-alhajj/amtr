@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:amtr/core/database/app_database.dart';
-import 'package:amtr/core/services/demo_data_service.dart';
+import 'package:mosaed/core/database/app_database.dart';
+import 'package:mosaed/core/services/demo_data_service.dart';
 
 void main() {
   sqfliteFfiInit();

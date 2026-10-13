@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/constants.dart';
-import 'package:amtr/models/individual_order.dart';
-import 'package:amtr/models/order_item.dart';
-import 'package:amtr/features/printing/models/print_options.dart';
-import 'package:amtr/features/printing/services/excel_invoice_generator.dart';
-import 'package:amtr/features/printing/services/pdf_invoice_generator.dart';
+import 'package:mosaed/core/constants.dart';
+import 'package:mosaed/models/individual_order.dart';
+import 'package:mosaed/models/order_item.dart';
+import 'package:mosaed/features/printing/models/print_options.dart';
+import 'package:mosaed/features/printing/services/excel_invoice_generator.dart';
+import 'package:mosaed/features/printing/services/pdf_invoice_generator.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

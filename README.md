@@ -1,17 +1,11 @@
-# amtr
+# مساعد (Mosaed) - Offline Retail & Logistics Assistant
 
-A new Flutter project.
+نظام محلي متكامل وذكي لإدارة تجارة التجزئة، مبيعات الجملة، الشحنات المجمعة، ومتابعة ديون وحسابات الزبائن بكل دقة وبدون الحاجة لإنترنت.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## المميزات الرئيسية
+- **إدارة الطلبات والمبيعات:** تسجيل كامل لحالات الطلب، التسعير، الدفعات، والمديونيات.
+- **الشحنات المجمعة:** تتبع رحلات البضائع وحساب الأرباح المجمعة متعددة العملات بدقة مصرفية.
+- **دفتر ديون الزبائن والواتساب:** كشوفات حساب تفاعلية وإمكانية مراسلة وتذكير العملاء بنقرة واحدة عبر واتساب.
+- **تعدد العملات والتحويل الفوري:** دعم الريال اليمني، الريال السعودي، والدولار الأمريكي مع حاسبة صرف متطورة.
+- **تصدير الفواتير والتقارير:** إنشاء ومشاركة فواتير احترافية بصيغة PDF وجداول Excel وحرارية Thermal Roll.
+- **حفظ محلي آمن 100%:** تشغيل بدون إنترنت، ونسخ احتياطي واسترجاع فوري للبيانات بصيغ JSON و SQLite.

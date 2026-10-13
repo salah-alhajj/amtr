@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:amtr/core/localization/localization.dart';
-import 'package:amtr/core/services/preferences_service.dart';
-import 'package:amtr/core/theme/theme.dart';
-import 'package:amtr/features/about/presentation/screens/about_app_screen.dart';
-import 'package:amtr/features/about/presentation/widgets/app_hero_header.dart';
-import 'package:amtr/features/about/presentation/widgets/developer_profile_card.dart';
-import 'package:amtr/features/about/presentation/widgets/feature_highlight_card.dart';
-import 'package:amtr/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:amtr/features/settings/presentation/screens/settings_screen.dart';
-import 'package:amtr/core/widgets/business_drawer.dart';
+import 'package:mosaed/core/localization/localization.dart';
+import 'package:mosaed/core/services/preferences_service.dart';
+import 'package:mosaed/core/theme/theme.dart';
+import 'package:mosaed/features/about/presentation/screens/about_app_screen.dart';
+import 'package:mosaed/features/about/presentation/widgets/app_hero_header.dart';
+import 'package:mosaed/features/about/presentation/widgets/developer_profile_card.dart';
+import 'package:mosaed/features/about/presentation/widgets/feature_highlight_card.dart';
+import 'package:mosaed/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:mosaed/features/settings/presentation/screens/settings_screen.dart';
+import 'package:mosaed/core/widgets/business_drawer.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

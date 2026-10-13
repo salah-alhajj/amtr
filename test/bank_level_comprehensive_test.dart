@@ -1,18 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:amtr/core/constants.dart';
-import 'package:amtr/core/database/app_database.dart';
-import 'package:amtr/core/services/currency_service.dart';
-import 'package:amtr/models/customer.dart';
-import 'package:amtr/models/individual_order.dart';
-import 'package:amtr/models/order_item.dart';
-import 'package:amtr/features/customers/data/repositories/customer_repository_impl.dart';
-import 'package:amtr/features/customers/presentation/bloc/customers_bloc.dart';
-import 'package:amtr/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:amtr/features/orders/data/repositories/order_repository_impl.dart';
-import 'package:amtr/features/orders/presentation/bloc/orders_bloc.dart';
-import 'package:amtr/features/shipments/data/repositories/shipment_repository_impl.dart';
-import 'package:amtr/features/shipments/presentation/bloc/shipments_bloc.dart';
+import 'package:mosaed/core/constants.dart';
+import 'package:mosaed/core/database/app_database.dart';
+import 'package:mosaed/core/services/currency_service.dart';
+import 'package:mosaed/models/customer.dart';
+import 'package:mosaed/models/individual_order.dart';
+import 'package:mosaed/models/order_item.dart';
+import 'package:mosaed/features/customers/data/repositories/customer_repository_impl.dart';
+import 'package:mosaed/features/customers/presentation/bloc/customers_bloc.dart';
+import 'package:mosaed/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:mosaed/features/orders/data/repositories/order_repository_impl.dart';
+import 'package:mosaed/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:mosaed/features/shipments/data/repositories/shipment_repository_impl.dart';
+import 'package:mosaed/features/shipments/presentation/bloc/shipments_bloc.dart';
 
 void main() {
   sqfliteFfiInit();

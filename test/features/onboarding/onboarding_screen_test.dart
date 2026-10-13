@@ -1,8 +1,8 @@
-import 'package:amtr/core/services/preferences_service.dart';
-import 'package:amtr/core/theme/theme.dart';
-import 'package:amtr/features/onboarding/data/onboarding_data.dart';
-import 'package:amtr/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:amtr/core/localization/localization.dart';
+import 'package:mosaed/core/services/preferences_service.dart';
+import 'package:mosaed/core/theme/theme.dart';
+import 'package:mosaed/features/onboarding/data/onboarding_data.dart';
+import 'package:mosaed/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:mosaed/core/localization/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';

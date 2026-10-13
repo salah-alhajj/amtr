@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/localization/localization.dart';
-import 'package:amtr/core/utils/app_validators.dart';
-import 'package:amtr/core/utils/yemen_phone_helper.dart';
+import 'package:mosaed/core/localization/localization.dart';
+import 'package:mosaed/core/utils/app_validators.dart';
+import 'package:mosaed/core/utils/yemen_phone_helper.dart';
 
 void main() {
   setUpAll(() {

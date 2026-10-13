@@ -114,7 +114,8 @@ class CustomerFinancialSummary {
 }
 
 class CustomerFinancialHelper {
-  static const String _overrideTagPrefix = '<!--AMTR_FINANCIAL_OVERRIDE:';
+  static const String _overrideTagPrefix = '<!--MOSAED_FINANCIAL_OVERRIDE:';
+  static const String _legacyTagPrefix = '<!--AMTR_FINANCIAL_OVERRIDE:';
   static const String _overrideTagSuffix = '-->';
 
   /// استخراج كائن التسوية اليدوية من حقل الملاحظات
@@ -124,11 +125,17 @@ class CustomerFinancialHelper {
     }
 
     try {
-      final startIndex = notes.indexOf(_overrideTagPrefix);
+      int startIndex = notes.indexOf(_overrideTagPrefix);
+      int prefixLen = _overrideTagPrefix.length;
+      if (startIndex == -1) {
+        startIndex = notes.indexOf(_legacyTagPrefix);
+        prefixLen = _legacyTagPrefix.length;
+      }
+
       if (startIndex != -1) {
         final endIndex = notes.indexOf(_overrideTagSuffix, startIndex);
         if (endIndex != -1) {
-          final jsonStr = notes.substring(startIndex + _overrideTagPrefix.length, endIndex);
+          final jsonStr = notes.substring(startIndex + prefixLen, endIndex);
           final map = jsonDecode(jsonStr) as Map<String, dynamic>;
           return CustomerFinancialOverride.fromMap(map);
         }
@@ -142,15 +149,19 @@ class CustomerFinancialHelper {
   /// تنظيف حقل الملاحظات لإظهار النص فقط للمستخدم في واجهات التعديل
   static String cleanUserNotes(String? notes) {
     if (notes == null || notes.isEmpty) return '';
-    final startIndex = notes.indexOf(_overrideTagPrefix);
-    if (startIndex == -1) return notes.trim();
-
-    final endIndex = notes.indexOf(_overrideTagSuffix, startIndex);
-    if (endIndex == -1) return notes.trim();
-
-    final before = notes.substring(0, startIndex);
-    final after = notes.substring(endIndex + _overrideTagSuffix.length);
-    return '$before $after'.trim();
+    String result = notes;
+    for (final prefix in [_overrideTagPrefix, _legacyTagPrefix]) {
+      final startIndex = result.indexOf(prefix);
+      if (startIndex != -1) {
+        final endIndex = result.indexOf(_overrideTagSuffix, startIndex);
+        if (endIndex != -1) {
+          final before = result.substring(0, startIndex);
+          final after = result.substring(endIndex + _overrideTagSuffix.length);
+          result = '$before $after';
+        }
+      }
+    }
+    return result.trim();
   }
 
   /// دمج ملاحظات المستخدم العادية مع كائن التسوية اليدوية لحفظها في SQLite

@@ -1,5 +1,5 @@
-import 'package:amtr/core/widgets/design_system.dart';
-import 'package:amtr/features/onboarding/data/onboarding_data.dart';
+import 'package:mosaed/core/widgets/design_system.dart';
+import 'package:mosaed/features/onboarding/data/onboarding_data.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/preferences_service.dart';

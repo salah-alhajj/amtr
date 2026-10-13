@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/localization/localization.dart';
-import 'package:amtr/core/widgets/country_flag_svg.dart';
+import 'package:mosaed/core/localization/localization.dart';
+import 'package:mosaed/core/widgets/country_flag_svg.dart';
 
 void main() {
   group('Localization & i18n Suite Tests', () {

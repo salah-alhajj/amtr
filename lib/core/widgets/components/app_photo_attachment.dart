@@ -40,12 +40,12 @@ class AppPhotoAttachmentSection extends StatelessWidget {
   Future<String> _persistPhoto(String sourcePath) async {
     try {
       final docsDir = await getApplicationDocumentsDirectory();
-      final photosDir = Directory(p.join(docsDir.path, 'amtr_photos'));
+      final photosDir = Directory(p.join(docsDir.path, 'mosaed_photos'));
       if (!photosDir.existsSync()) {
         await photosDir.create(recursive: true);
       }
       final ext = p.extension(sourcePath).isNotEmpty ? p.extension(sourcePath) : '.jpg';
-      final newFileName = 'amtr_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 8)}$ext';
+      final newFileName = 'mosaed_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 8)}$ext';
       final targetPath = p.join(photosDir.path, newFileName);
       final sourceFile = File(sourcePath);
       if (await sourceFile.exists()) {

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "amtr" "\0"
+            VALUE "CompanyName", "com.mosaed" "\0"
+            VALUE "FileDescription", "Mosaed" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "amtr" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "amtr.exe" "\0"
-            VALUE "ProductName", "amtr" "\0"
+            VALUE "InternalName", "mosaed" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.mosaed. All rights reserved." "\0"
+            VALUE "OriginalFilename", "mosaed.exe" "\0"
+            VALUE "ProductName", "Mosaed" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

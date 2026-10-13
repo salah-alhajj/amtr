@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/widgets/design_system.dart';
-import 'package:amtr/models/customer.dart';
+import 'package:mosaed/core/widgets/design_system.dart';
+import 'package:mosaed/models/customer.dart';
 
 void main() {
   group('AppTheme Dropdown & Menu Font Configuration', () {

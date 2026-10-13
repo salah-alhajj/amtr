@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:amtr/core/localization/localization.dart';
-import 'package:amtr/core/services/preferences_service.dart';
-import 'package:amtr/core/theme/theme.dart';
-import 'package:amtr/features/settings/presentation/widgets/theme_selector_card.dart';
+import 'package:mosaed/core/localization/localization.dart';
+import 'package:mosaed/core/services/preferences_service.dart';
+import 'package:mosaed/core/theme/theme.dart';
+import 'package:mosaed/features/settings/presentation/widgets/theme_selector_card.dart';
 
 void main() {
   group('PreferencesService & Theme Tests', () {

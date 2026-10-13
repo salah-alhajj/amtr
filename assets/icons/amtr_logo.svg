@@ -58,7 +58,7 @@
         font-weight="700" 
         letter-spacing="4" 
         text-anchor="middle" 
-        fill="url(#amtrGrad)">amtr</text>
+        fill="url(#amtrGrad)">Mosaed</text>
   
   <!-- Subtitle Tagline -->
   <text x="250" y="445" 

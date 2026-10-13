@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/localization/localization.dart';
-import 'package:amtr/features/dashboard/presentation/widgets/financial_analytics_card.dart';
+import 'package:mosaed/core/localization/localization.dart';
+import 'package:mosaed/features/dashboard/presentation/widgets/financial_analytics_card.dart';
 
 void main() {
   group('FinancialAnalyticsCard Tests', () {

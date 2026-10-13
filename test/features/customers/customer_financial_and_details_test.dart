@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/constants.dart';
-import 'package:amtr/core/services/currency_service.dart';
-import 'package:amtr/features/customers/domain/customer_financial_helper.dart';
-import 'package:amtr/models/customer.dart';
-import 'package:amtr/models/individual_order.dart';
-import 'package:amtr/models/order_item.dart';
+import 'package:mosaed/core/constants.dart';
+import 'package:mosaed/core/services/currency_service.dart';
+import 'package:mosaed/features/customers/domain/customer_financial_helper.dart';
+import 'package:mosaed/models/customer.dart';
+import 'package:mosaed/models/individual_order.dart';
+import 'package:mosaed/models/order_item.dart';
 
 void main() {
   late CurrencyService currencyService;
@@ -315,6 +315,7 @@ void main() {
       // 1. التأكد من أن الملاحظات المعروضة للمستخدم خالية تماماً من أكواد JSON والتاغ
       final userFacingNotes = CustomerFinancialHelper.cleanUserNotes(customer.notes);
       expect(userFacingNotes, equals('عميل مميز في الشحن الجوي'));
+      expect(userFacingNotes.contains('<!--MOSAED_FINANCIAL_OVERRIDE:'), isFalse);
       expect(userFacingNotes.contains('<!--AMTR_FINANCIAL_OVERRIDE:'), isFalse);
 
       // 2. محاكاة تعديل التاجر لملاحظات العميل في الواجهة

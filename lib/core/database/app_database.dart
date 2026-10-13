@@ -22,13 +22,24 @@ class AppDatabase {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('amtr_local.db');
+    _database = await _initDB('mosaed_local.db');
     return _database!;
   }
 
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+
+    // الهجرة التلقائية السلسة من اسم قاعدة البيانات القديم إن وُجد
+    final legacyPath = join(dbPath, 'amtr_local.db');
+    if (!await databaseExists(path) && await databaseExists(legacyPath)) {
+      try {
+        final legacyFile = File(legacyPath);
+        if (await legacyFile.exists()) {
+          await legacyFile.copy(path);
+        }
+      } catch (_) {}
+    }
 
     return await openDatabase(
       path,
@@ -146,7 +157,11 @@ class AppDatabase {
   /// مسار ملف قاعدة البيانات الفعلي للاستخدام في التصدير
   Future<String> getDatabaseFilePath() async {
     final dbPath = await getDatabasesPath();
-    return join(dbPath, 'amtr_local.db');
+    final newPath = join(dbPath, 'mosaed_local.db');
+    if (await databaseExists(newPath)) return newPath;
+    final legacyPath = join(dbPath, 'amtr_local.db');
+    if (await databaseExists(legacyPath)) return legacyPath;
+    return newPath;
   }
 
   /// تصدير كامل بيانات التطبيق في ملف JSON موحد مع تضمين صور السلع المرفقة
@@ -197,7 +212,7 @@ class AppDatabase {
     final restoredPhotosMap = <String, String>{};
     try {
       final docsDir = await getApplicationDocumentsDirectory();
-      final photosDir = Directory(join(docsDir.path, 'amtr_photos'));
+      final photosDir = Directory(join(docsDir.path, 'mosaed_photos'));
       if (!photosDir.existsSync()) {
         await photosDir.create(recursive: true);
       }

@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:amtr/core/constants.dart';
-import 'package:amtr/core/database/app_database.dart';
-import 'package:amtr/core/services/currency_service.dart';
-import 'package:amtr/models/consolidated_shipment.dart';
-import 'package:amtr/models/customer.dart';
-import 'package:amtr/models/individual_order.dart';
-import 'package:amtr/models/order_item.dart';
+import 'package:mosaed/core/constants.dart';
+import 'package:mosaed/core/database/app_database.dart';
+import 'package:mosaed/core/services/currency_service.dart';
+import 'package:mosaed/models/consolidated_shipment.dart';
+import 'package:mosaed/models/customer.dart';
+import 'package:mosaed/models/individual_order.dart';
+import 'package:mosaed/models/order_item.dart';
 
 void main() {
   // تهيئة FFI لمحاكاة قاعدة بيانات SQLite في بيئة الاختبارات

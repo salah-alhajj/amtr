@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:amtr/core/localization/locale_bloc.dart';
-import 'package:amtr/core/localization/localization_helper.dart';
-import 'package:amtr/features/navigation/widgets/directional_slide_indexed_stack.dart';
-import 'package:amtr/features/navigation/widgets/amtr_bottom_nav_bar.dart';
-import 'package:amtr/features/navigation/main_navigation_shell.dart';
+import 'package:mosaed/core/localization/locale_bloc.dart';
+import 'package:mosaed/core/localization/localization_helper.dart';
+import 'package:mosaed/features/navigation/widgets/directional_slide_indexed_stack.dart';
+import 'package:mosaed/features/navigation/widgets/amtr_bottom_nav_bar.dart';
+import 'package:mosaed/features/navigation/main_navigation_shell.dart';
 
 void main() {
   group('DirectionalSlideIndexedStack Tests', () {

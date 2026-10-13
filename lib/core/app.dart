@@ -3,16 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'localization/localization.dart';
 import 'theme/theme.dart';
-import 'package:amtr/core/services/preferences_service.dart';
-import 'package:amtr/features/customers/data/repositories/customer_repository_impl.dart';
-import 'package:amtr/features/customers/presentation/bloc/customers_bloc.dart';
-import 'package:amtr/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:amtr/features/navigation/main_navigation_shell.dart';
-import 'package:amtr/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:amtr/features/orders/data/repositories/order_repository_impl.dart';
-import 'package:amtr/features/orders/presentation/bloc/orders_bloc.dart';
-import 'package:amtr/features/shipments/data/repositories/shipment_repository_impl.dart';
-import 'package:amtr/features/shipments/presentation/bloc/shipments_bloc.dart';
+import 'package:mosaed/core/services/preferences_service.dart';
+import 'package:mosaed/features/customers/data/repositories/customer_repository_impl.dart';
+import 'package:mosaed/features/customers/presentation/bloc/customers_bloc.dart';
+import 'package:mosaed/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:mosaed/features/navigation/main_navigation_shell.dart';
+import 'package:mosaed/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:mosaed/features/orders/data/repositories/order_repository_impl.dart';
+import 'package:mosaed/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:mosaed/features/shipments/data/repositories/shipment_repository_impl.dart';
+import 'package:mosaed/features/shipments/presentation/bloc/shipments_bloc.dart';
 
 class RetailAssistantApp extends StatelessWidget {
   const RetailAssistantApp({super.key});

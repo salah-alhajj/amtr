@@ -21,7 +21,7 @@ class BackupService {
 
     final tempDir = await getTemporaryDirectory();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final fileName = 'amtr_backup_$timestamp.json';
+    final fileName = 'mosaed_backup_$timestamp.json';
     final filePath = join(tempDir.path, fileName);
 
     final file = File(filePath);
@@ -55,7 +55,7 @@ class BackupService {
 
     final tempDir = await getTemporaryDirectory();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final copyPath = join(tempDir.path, 'amtr_backup_$timestamp.db');
+    final copyPath = join(tempDir.path, 'mosaed_backup_$timestamp.db');
 
     await originalFile.copy(copyPath);
 

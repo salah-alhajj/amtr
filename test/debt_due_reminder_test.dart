@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amtr/core/constants.dart';
-import 'package:amtr/models/individual_order.dart';
-import 'package:amtr/models/order_item.dart';
+import 'package:mosaed/core/constants.dart';
+import 'package:mosaed/models/individual_order.dart';
+import 'package:mosaed/models/order_item.dart';
 
 void main() {
   group('Debt Due Date & Alarm Reminder Suite Tests', () {
