@@ -1,0 +1,73 @@
+version: 0.2
+
+env:
+  parameter-store:
+    KEYSTORE_BASE64: "/flutter_app/android/keystore_base64"
+    KEYSTORE_PASSWORD: "/flutter_app/android/keystore_password"
+    KEY_ALIAS: "/flutter_app/android/key_alias"
+    KEY_PASSWORD: "/flutter_app/android/key_password"
+    GOOGLE_PLAY_JSON_BASE64: "/flutter_app/android/google_play_json_base64"
+  
+  variables:
+    FLUTTER_CHANNEL: "stable"
+    FLUTTER_VERSION: "3.47.7"
+    PLAY_STORE_TRACK: "internal"
+    APPLICATION_ID: "com.amtr.app"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto-17
+      ruby: 3.2
+    commands:
+      - echo "===> [Phase 1] Installing Flutter SDK & Bundler dependencies..."
+      - git clone --depth 1 -b $FLUTTER_CHANNEL https://github.com/flutter/flutter.git /tmp/flutter
+      - export PATH="/tmp/flutter/bin:/tmp/flutter/bin/cache/dart-sdk/bin:$PATH"
+      - flutter doctor -v
+      - echo "===> Installing Fastlane via Bundler..."
+      - cd android && bundle install && cd ..
+
+  pre_build:
+    commands:
+      - echo "===> [Phase 2] Setting up Signing Keys & Dependencies..."
+      - export PATH="/tmp/flutter/bin:/tmp/flutter/bin/cache/dart-sdk/bin:$PATH"
+      
+      # 1. إرجاع ملف Keystore وتوليد ملف التوقيع key.properties
+      - echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+      - |
+        cat <<EOF > android/key.properties
+        storePassword=$KEYSTORE_PASSWORD
+        keyPassword=$KEY_PASSWORD
+        keyAlias=$KEY_ALIAS
+        storeFile=app/upload-keystore.jks
+        EOF
+      
+      # 2. إرجاع ملف اعتماد جوجل بلاي الخاص بـ Fastlane
+      - echo "$GOOGLE_PLAY_JSON_BASE64" | base64 --decode > android/google-service-account.json
+
+      # 3. جلب حزم فلاتر
+      - flutter pub get
+
+  build:
+    commands:
+      - echo "===> [Phase 3] Building Signed Android App Bundle (AAB)..."
+      - export PATH="/tmp/flutter/bin:/tmp/flutter/bin/cache/dart-sdk/bin:$PATH"
+      - flutter build appbundle --release
+
+  post_build:
+    commands:
+      - echo "===> [Phase 4] Deploying to Google Play Console via Fastlane..."
+      - cd android
+      - bundle exec fastlane deploy_play_store track:$PLAY_STORE_TRACK
+      - cd ..
+      
+      - echo "===> [Phase 5] Cleaning up sensitive security files..."
+      - rm -f android/app/upload-keystore.jks
+      - rm -f android/key.properties
+      - rm -f android/google-service-account.json
+      - echo "Build and Deployment Finished Successfully!"
+
+artifacts:
+  files:
+    - build/app/outputs/bundle/release/app-release.aab
+  discard-paths: yes

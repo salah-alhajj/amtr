@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants.dart';
+import '../../../core/localization/localization.dart';
 import '../../../core/services/currency_service.dart';
 import '../../../core/widgets/design_system.dart';
 import '../../../models/customer.dart';
@@ -160,8 +161,8 @@ class CustomerWhatsAppHelper {
     if (cleanPhone.isEmpty) {
       AppToast.showWarning(
         context,
-        'لا يوجد رقم هاتف أو واتساب مسجل لهذا العميل',
-        title: 'واتساب',
+        'customer_whatsapp_no_phone'.i18n(),
+        title: 'customer_whatsapp_btn'.i18n(),
       );
       return;
     }
@@ -202,16 +203,16 @@ class CustomerWhatsAppHelper {
       if (context.mounted) {
         AppToast.showInfo(
           context,
-          'تم نسخ نص الرسالة إلى الحافظة لعدم توفر تطبيق واتساب مباشرة على هذا الجهاز',
-          title: 'تم النسخ',
+          'customer_whatsapp_copied_msg'.i18n(),
+          title: 'customer_whatsapp_copied_title'.i18n(),
         );
       }
     } else {
       if (context.mounted) {
         AppToast.showWarning(
           context,
-          'تعذر فتح تطبيق واتساب على جهازك، يرجى التأكد من تثبيته',
-          title: 'واتساب',
+          'customer_whatsapp_open_error'.i18n(),
+          title: 'customer_whatsapp_btn'.i18n(),
         );
       }
     }

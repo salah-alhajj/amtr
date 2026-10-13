@@ -1,0 +1,41 @@
+default_platform(:android)
+
+platform :android do
+  desc "Deploy a new version to the Google Play Store (Internal Track by default)"
+  lane :deploy_play_store do |options|
+    track = options[:track] || ENV["PLAY_STORE_TRACK"] || "internal"
+    package_name = ENV["APPLICATION_ID"] || "com.amtr.app"
+    aab_path = File.expand_path("../../build/app/outputs/bundle/release/app-release.aab", __FILE__)
+
+    UI.message("Deploying AAB to Google Play Store...")
+    UI.message("Package Name: #{package_name}")
+    UI.message("Track: #{track}")
+    UI.message("AAB Path: #{aab_path}")
+
+    upload_to_play_store(
+      package_name: package_name,
+      json_key: "google-service-account.json",
+      aab: aab_path,
+      track: track,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+      release_status: "completed"
+    )
+  end
+
+  desc "Promote internal track to production"
+  lane :promote_to_production do
+    package_name = ENV["APPLICATION_ID"] || "com.amtr.app"
+    upload_to_play_store(
+      package_name: package_name,
+      json_key: "google-service-account.json",
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

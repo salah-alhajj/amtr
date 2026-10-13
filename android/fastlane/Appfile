@@ -1,0 +1,2 @@
+json_key_file("google-service-account.json")
+package_name(ENV["APPLICATION_ID"] || "com.amtr.app")

@@ -791,5 +791,9 @@
   "contacts_pick_tooltip": "Kişilerden seç",
   "contacts_permission_denied": "Kişiler izni reddedildi, cihaz ayarlarından etkinleştirebilirsiniz.",
   "contacts_no_phone_found": "Seçilen kişinin kayıtlı telefon numarası yok.",
-  "contacts_select_phone_title": "Telefon Numarası Seçin"
+  "contacts_select_phone_title": "Telefon Numarası Seçin",
+  "customer_whatsapp_no_phone": "Bu müşteri için kayıtlı telefon veya WhatsApp numarası yok",
+  "customer_whatsapp_copied_msg": "Bu cihazda WhatsApp doğrudan mevcut olmadığından mesaj panoya kopyalandı",
+  "customer_whatsapp_copied_title": "Kopyalandı",
+  "customer_whatsapp_open_error": "Cihazınızda WhatsApp açılamadı, lütfen yüklü olduğundan emin olun"
 }

@@ -790,5 +790,9 @@
   "contacts_pick_tooltip": "Pick from contacts",
   "contacts_permission_denied": "Contacts permission was denied. You can enable it in device settings.",
   "contacts_no_phone_found": "The selected contact has no registered phone numbers.",
-  "contacts_select_phone_title": "Select Phone Number"
+  "contacts_select_phone_title": "Select Phone Number",
+  "customer_whatsapp_no_phone": "No phone or WhatsApp number registered for this customer",
+  "customer_whatsapp_copied_msg": "Message copied to clipboard because WhatsApp is not available directly on this device",
+  "customer_whatsapp_copied_title": "Copied",
+  "customer_whatsapp_open_error": "Could not open WhatsApp on your device, please make sure it is installed"
 }
