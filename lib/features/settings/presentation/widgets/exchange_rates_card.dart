@@ -43,11 +43,18 @@ class _ExchangeRatesCardState extends State<ExchangeRatesCard> {
           children: [
             Row(
               children: [
-                const Icon(Icons.currency_exchange_rounded, color: AppColors.primaryBlue, size: 20),
+                const Icon(
+                  Icons.currency_exchange_rounded,
+                  color: AppColors.primaryBlue,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'exchange_rates_header'.i18n(),
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -69,16 +76,22 @@ class _ExchangeRatesCardState extends State<ExchangeRatesCard> {
                 children: [
                   Text(
                     'exchange_base_currency_label'.i18n(),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${'currency_yer'.i18n()} (${AppConstants.yerSymbol})',
+                      '${'currency_yer'.i18n()} (${AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase()})',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -92,7 +105,9 @@ class _ExchangeRatesCardState extends State<ExchangeRatesCard> {
             const SizedBox(height: 16),
             AppTextField(
               controller: widget.sarController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               label: 'exchange_sar_to_yer_label'.i18n(),
               hint: '0.00',
               prefixWidget: const SaudiRiyalIcon(
@@ -109,7 +124,7 @@ class _ExchangeRatesCardState extends State<ExchangeRatesCard> {
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: Text(
-                    AppConstants.yerSymbol,
+                    AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase(),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -122,7 +137,9 @@ class _ExchangeRatesCardState extends State<ExchangeRatesCard> {
             const SizedBox(height: 14),
             AppTextField(
               controller: widget.usdController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               label: 'exchange_usd_to_yer_label'.i18n(),
               hint: '0.00',
               prefixWidget: const Text(
@@ -142,7 +159,7 @@ class _ExchangeRatesCardState extends State<ExchangeRatesCard> {
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: Text(
-                    AppConstants.yerSymbol,
+                    AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase(),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,

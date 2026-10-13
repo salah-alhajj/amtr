@@ -24,15 +24,27 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
     final currencyService = CurrencyService.instance;
 
     // الحسبة المالية
-    final totalClientSellYer = shipment.calculateTotalClientSellPriceInYer(currencyService);
-    final totalCostYer = shipment.calculateTotalOriginalCostInYer(currencyService);
-    final transportCostYer = shipment.calculateTransportCostInYer(currencyService);
+    final totalClientSellYer = shipment.calculateTotalClientSellPriceInYer(
+      currencyService,
+    );
+    final totalCostYer = shipment.calculateTotalOriginalCostInYer(
+      currencyService,
+    );
+    final transportCostYer = shipment.calculateTransportCostInYer(
+      currencyService,
+    );
     final netProfitYer = shipment.calculateNetProfitInYer(currencyService);
 
     // تحويل الأرقام إلى العملة المعروضة حالياً
-    final totalClientSell = currencyService.fromBaseYer(totalClientSellYer, viewCurrency);
+    final totalClientSell = currencyService.fromBaseYer(
+      totalClientSellYer,
+      viewCurrency,
+    );
     final totalCost = currencyService.fromBaseYer(totalCostYer, viewCurrency);
-    final transportCost = currencyService.fromBaseYer(transportCostYer, viewCurrency);
+    final transportCost = currencyService.fromBaseYer(
+      transportCostYer,
+      viewCurrency,
+    );
     final netProfit = currencyService.fromBaseYer(netProfitYer, viewCurrency);
 
     return AppCard(
@@ -70,7 +82,10 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
                 children: [
                   _buildCurrencyChip(
                     context,
-                    label: AppConstants.yerSymbol,
+                    label: AppConstants.yerSymbol
+                        .toLowerCase()
+                        .i18n()
+                        .toUpperCase(),
                     code: AppConstants.currencyYer,
                   ),
                   const SizedBox(width: 4),
@@ -80,7 +95,9 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
                     customWidget: SaudiRiyalIcon(
                       width: 13,
                       height: 12,
-                      color: viewCurrency == AppConstants.currencySar ? Colors.white : context.textSecondary,
+                      color: viewCurrency == AppConstants.currencySar
+                          ? Colors.white
+                          : context.textSecondary,
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -116,7 +133,9 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
             currencyCode: viewCurrency,
             subtitle: 'shipment_paid_transport_fmt'.trParams({
               'amount': shipment.transportCost.toString(),
-              'currency': AppConstants.getCurrencySymbol(shipment.transportCostCurrency),
+              'currency': AppConstants.getCurrencySymbol(
+                shipment.transportCostCurrency,
+              ),
             }),
           ),
 
@@ -127,7 +146,10 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
             children: [
               Text(
                 'shipment_actual_net_profit'.i18n(),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               CurrencyPriceDisplay(
                 amount: netProfit,
@@ -135,7 +157,9 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: netProfit >= 0 ? AppColors.primaryGreen : AppColors.statusDanger,
+                  color: netProfit >= 0
+                      ? AppColors.primaryGreen
+                      : AppColors.statusDanger,
                 ),
               ),
             ],
@@ -164,7 +188,8 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
             color: isSelected ? AppColors.primaryGreen : context.borderSubtle,
           ),
         ),
-        child: customWidget ??
+        child:
+            customWidget ??
             Text(
               label ?? code,
               style: TextStyle(
@@ -189,10 +214,16 @@ class ShipmentFinancialSummaryCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(label, style: TextStyle(fontSize: 12, color: context.textSecondary)),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: context.textSecondary),
+            ),
             if (subtitle != null) ...[
               const SizedBox(width: 4),
-              Text(subtitle, style: TextStyle(fontSize: 10, color: context.textTertiary)),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 10, color: context.textTertiary),
+              ),
             ],
           ],
         ),
