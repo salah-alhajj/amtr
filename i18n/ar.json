@@ -426,6 +426,7 @@
   "currency_yer_with_symbol": "الريال اليمني (ر.ي)",
   "currency_sar_with_symbol": "الريال السعودي",
   "currency_usd_with_symbol": "الدولار الأمريكي ($)",
+  "yer": "ر.ي",
   "order_number_title": "طلب #{number}",
   "order_update_payment_btn": "تحديث حالة وسجل الدفع",
   "order_estimated_profit": "الربح التقديري",

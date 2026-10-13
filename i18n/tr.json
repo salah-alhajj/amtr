@@ -27,6 +27,8 @@
   "search_orders_hint": "Sipariş numarasına veya müşteri adına göre arayın...",
   "status_all": "Tümü",
   "status_draft": "Taslak",
+    "yer":"YER",
+
   "status_pending": "Beklemede",
   "status_confirmed": "Onaylandı",
   "status_prepared": "Hazırlandı",

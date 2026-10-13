@@ -4,13 +4,13 @@ import 'localization/localization.dart';
 /// الثوابت وقيم التهيئة العامة للتطبيق
 class AppConstants {
   // معرفات العملات
-  static const String currencyYer = 'YER'; // ريال يمني (العملة الأساسية)
+  static const String currencyYer = 'yer'; // ريال يمني (العملة الأساسية)
   static const String currencySar = 'SAR'; // ريال سعودي
   static const String currencyUsd = 'USD'; // دولار أمريكي
 
   /// الرمز المعتمد للريال السعودي طبقاً للبنك المركزي السعودي (SAMA) - الرمز الرسمي U+20C1
   static const String sarSymbol = '\u{20C1}';
-  static const String yerSymbol = 'ر.ي';
+  static final String yerSymbol = 'yer';
   static const String usdSymbol = '\$';
 
   static String getCurrencySymbol(String currencyCode) {
@@ -21,7 +21,7 @@ class AppConstants {
         return usdSymbol;
       case currencyYer:
       default:
-        return yerSymbol;
+        return yerSymbol.i18n();
     }
   }
 
@@ -75,8 +75,10 @@ class AppConstants {
 
   // محطات الشحنة المجمعة
   static const String shipmentDispatched = 'dispatched'; // تم التسليم للنقل
-  static const String shipmentCheckpoint = 'checkpoint_reached'; // وصل لنقطة الاستلام
-  static const String shipmentDistribution = 'distribution_ready'; // وصل للتوزيع
+  static const String shipmentCheckpoint =
+      'checkpoint_reached'; // وصل لنقطة الاستلام
+  static const String shipmentDistribution =
+      'distribution_ready'; // وصل للتوزيع
   static const String shipmentDelivered = 'delivered'; // مكتملة ومسلّمة بالكامل
 
   static String getShipmentStatusLabel(String status) {

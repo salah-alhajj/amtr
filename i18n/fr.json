@@ -29,6 +29,8 @@
   "status_draft": "Brouillon",
   "status_pending": "En attente",
   "status_confirmed": "Confirmé",
+    "yer":"YER",
+
   "status_prepared": "Préparé",
   "status_shipped": "Expédié",
   "status_delivered": "Livré",

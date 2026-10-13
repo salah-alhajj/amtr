@@ -12,7 +12,8 @@ class CurrencyService extends ChangeNotifier {
 
   double _sarToYer = 535.0; // 1 ريال سعودي = 535 ريال يمني
   double _usdToYer = 2040.0; // 1 دولار أمريكي = 2040 ريال يمني
-  String _activeDisplayCurrency = AppConstants.currencyYer; // العملة المختارة للعرض في الهوم
+  String _activeDisplayCurrency =
+      AppConstants.currencyYer; // العملة المختارة للعرض في الهوم
 
   double get sarToYer => _sarToYer;
   double get usdToYer => _usdToYer;
@@ -97,7 +98,11 @@ class CurrencyService extends ChangeNotifier {
   }
 
   /// تنسيق المبلغ مع رمزه المعتمد رسمياً (مثل رمز الريال السعودي SAMA: \u{20C1})
-  String formatAmount(double amount, {String? currencyCode, int decimalDigits = 2}) {
+  String formatAmount(
+    double amount, {
+    String? currencyCode,
+    int decimalDigits = 2,
+  }) {
     final currency = currencyCode ?? _activeDisplayCurrency;
     final symbol = AppConstants.getCurrencySymbol(currency);
     final formatter = NumberFormat.currency(

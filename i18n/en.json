@@ -26,6 +26,7 @@
   "orders_title": "Orders",
   "search_orders_hint": "Search by order number or customer name...",
   "status_all": "All",
+  "yer":"YER",
   "status_draft": "Draft",
   "status_pending": "Pending",
   "status_confirmed": "Confirmed",

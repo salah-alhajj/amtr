@@ -26,6 +26,8 @@
   "orders_title": "Pedidos",
   "search_orders_hint": "Buscar por número de pedido o nombre de cliente...",
   "status_all": "Todos",
+    "yer":"YER",
+
   "status_draft": "Borrador",
   "status_pending": "Pendiente",
   "status_confirmed": "Confirmado",

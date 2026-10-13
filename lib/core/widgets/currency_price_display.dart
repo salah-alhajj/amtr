@@ -1,3 +1,4 @@
+import 'package:amtr/core/localization/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants.dart';
@@ -28,15 +29,11 @@ class CurrencyPriceDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveStyle = (style ?? Theme.of(context).textTheme.bodyMedium)?.copyWith(
-      color: color ?? style?.color,
-    );
+    final effectiveStyle = (style ?? Theme.of(context).textTheme.bodyMedium)
+        ?.copyWith(color: color ?? style?.color);
 
     final digits = decimalDigits ?? (amount % 1 == 0 ? 0 : 2);
-    final formatter = NumberFormat.currency(
-      symbol: '',
-      decimalDigits: digits,
-    );
+    final formatter = NumberFormat.currency(symbol: '', decimalDigits: digits);
     final formattedAmount = formatter.format(amount).trim();
 
     if (!showSymbol) {
@@ -44,21 +41,19 @@ class CurrencyPriceDisplay extends StatelessWidget {
     }
 
     final isSar = currency.toUpperCase() == AppConstants.currencySar;
-    final isYer = currency.toUpperCase() == AppConstants.currencyYer;
+    final isYer =
+        currency.toUpperCase().substring(0, 3) ==
+        AppConstants.currencyYer.toUpperCase();
     final isUsd = currency.toUpperCase() == AppConstants.currencyUsd;
 
     final fontSize = effectiveStyle?.fontSize ?? 14.0;
     final effectiveIconSize = iconSize ?? (fontSize * 0.95);
     final iconColor = effectiveStyle?.color ?? AppColors.textPrimary;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          formattedAmount,
-          style: effectiveStyle,
-        ),
+        Text(formattedAmount, style: effectiveStyle),
         const SizedBox(width: 4),
         if (isSar)
           SaudiRiyalIcon(
@@ -68,7 +63,7 @@ class CurrencyPriceDisplay extends StatelessWidget {
           )
         else
           Text(
-            isYer ? AppConstants.yerSymbol : (isUsd ? AppConstants.usdSymbol : currency),
+            isYer ? 'yer'.i18n() : (isUsd ? AppConstants.usdSymbol : currency),
             style: effectiveStyle?.copyWith(
               fontWeight: FontWeight.w600,
               fontSize: fontSize * 0.85,
