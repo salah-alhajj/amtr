@@ -1,4 +1,8 @@
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../localization/localization.dart';
+import '../widgets/design_system.dart';
 
 /// مشغلو شبكات الاتصالات في اليمن
 enum YemenTelecomOperator {
@@ -16,21 +20,52 @@ enum YemenTelecomOperator {
 class YemenPhoneHelper {
   YemenPhoneHelper._();
 
-  /// تحويل الأرقام العربية المشرقية (٠-٩) إلى أرقام لاتينية (0-9)
+  /// تحويل الأرقام العربية المشرقية (٠-٩) والفارسية (۰-۹) إلى أرقام لاتينية (0-9)
   static String convertArabicIndicDigits(String input) {
     const arabicIndic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const easternIndic = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
     String result = input;
-    for (int i = 0; i < arabicIndic.length; i++) {
+    for (int i = 0; i < 10; i++) {
       result = result.replaceAll(arabicIndic[i], '$i');
+      result = result.replaceAll(easternIndic[i], '$i');
     }
     return result;
+  }
+
+  /// تحويل الأرقام اللاتينية (0-9) إلى أرقام عربية مشرقية (٠-٩)
+  static String convertToIndicDigits(String input) {
+    const arabicIndic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    String result = input;
+    for (int i = 0; i < 10; i++) {
+      result = result.replaceAll('$i', arabicIndic[i]);
+    }
+    return result;
+  }
+
+  /// تحويل الأرقام حسب لغة العرض
+  /// إذا كانت اللغة عربية (ar): يتم إرجاع الأرقام المشرقية (٠-٩)
+  /// لجميع اللغات الأخرى (en, tr, fr, es): يتم إرجاع الأرقام اللاتينية (0-9)
+  static String localizeDigits(
+    String input, {
+    BuildContext? context,
+    String? languageCode,
+  }) {
+    final lang = languageCode ??
+        (context != null ? Localizations.maybeLocaleOf(context)?.languageCode : null) ??
+        LocalizationHelper.currentLanguage;
+    final isArabic = lang == 'ar';
+    if (isArabic) {
+      return convertToIndicDigits(input);
+    } else {
+      return convertArabicIndicDigits(input);
+    }
   }
 
   /// تنظيف النص البرمجي للرقم مع الإبقاء على الأرقام وعلامة + الأولى
   static String cleanPhoneNumber(String? raw) {
     if (raw == null || raw.trim().isEmpty) return '';
     final converted = convertArabicIndicDigits(raw.trim());
-    final hasPlus = converted.startsWith('+');
+    final hasPlus = converted.contains('+');
     final digitsOnly = converted.replaceAll(RegExp(r'[^0-9]'), '');
     return hasPlus ? '+$digitsOnly' : digitsOnly;
   }
@@ -40,6 +75,43 @@ class YemenPhoneHelper {
     if (raw == null || raw.trim().isEmpty) return '';
     final cleaned = cleanPhoneNumber(raw);
     return cleaned.replaceAll(RegExp(r'[\s\-]'), '');
+  }
+
+  /// فتح تطبيق الاتصال الهاتفي بالنظام بطريقة آمنة ومتوافقة 100% مع أندرويد و iOS
+  static Future<bool> launchPhoneCall(BuildContext context, String? raw) async {
+    if (raw == null || raw.trim().isEmpty) {
+      if (context.mounted) {
+        AppToast.showWarning(context, 'validation_phone_required'.i18n());
+      }
+      return false;
+    }
+
+    final cleaned = cleanForDialing(raw);
+    if (cleaned.isEmpty) {
+      if (context.mounted) {
+        AppToast.showError(context, 'validation_phone_invalid'.i18n());
+      }
+      return false;
+    }
+
+    final uri = Uri.parse('tel:$cleaned');
+    try {
+      if (await canLaunchUrl(uri)) {
+        return await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        return await launchUrl(uri);
+      }
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: cleaned));
+      if (context.mounted) {
+        AppToast.showInfo(
+          context,
+          'تم نسخ رقم الهاتف ($cleaned) إلى الحافظة لعدم توفر تطبيق اتصال مباشر',
+          title: 'رقم الهاتف',
+        );
+      }
+      return false;
+    }
   }
 
   /// تجهيز الرقم لرابط واتساب بالصيغة الدولية المعتمدة (E.164 بدون علامة + وبدون أصفار البداية)
@@ -161,57 +233,67 @@ class YemenPhoneHelper {
   }
 
   /// تنسيق الرقم للعرض الأنيق والقابل للقراءة (مثال: 771 234 567 أو +967 771 234 567)
-  static String? formatForDisplay(String? raw) {
+  /// يعتمد العرض على لغة التطبيق:
+  /// إذا كانت اللغة عربية: تظهر الأرقام المشرقية العربية (٠-٩)
+  /// إذا كانت إنجليزية أو لغة أخرى: تظهر الأرقام اللاتينية (0-9)
+  static String? formatForDisplay(
+    String? raw, {
+    BuildContext? context,
+    String? languageCode,
+  }) {
     if (raw == null || raw.trim().isEmpty) return null;
     final converted = convertArabicIndicDigits(raw.trim());
-    final hasPlus = converted.startsWith('+');
+    final hasPlus = converted.contains('+');
     final digits = converted.replaceAll(RegExp(r'[^0-9]'), '');
+
+    String formatted;
 
     // يمني دولي يبدأ بـ 967
     if ((hasPlus && digits.startsWith('967') && digits.length == 12) ||
         (!hasPlus && digits.startsWith('967') && digits.length == 12)) {
       final local = digits.substring(3); // 9 digits
-      return '+967 ${local.substring(0, 3)} ${local.substring(3, 6)} ${local.substring(6)}';
-    }
-
-    // يمني دولي يبدأ بـ 00967
-    if (digits.startsWith('00967') && digits.length == 14) {
+      formatted = '+967 ${local.substring(0, 3)} ${local.substring(3, 6)} ${local.substring(6)}';
+    } else if (digits.startsWith('00967') && digits.length == 14) {
+      // يمني دولي يبدأ بـ 00967
       final local = digits.substring(5);
-      return '+967 ${local.substring(0, 3)} ${local.substring(3, 6)} ${local.substring(6)}';
-    }
-
-    // رقم يمني جوال محلي 9 أرقام (مثال: 771234567)
-    if (digits.length == 9 && digits.startsWith('7')) {
-      return '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6)}';
-    }
-
-    // رقم يمني يبدأ بـ 07 (10 أرقام)
-    if (digits.length == 10 && digits.startsWith('07')) {
+      formatted = '+967 ${local.substring(0, 3)} ${local.substring(3, 6)} ${local.substring(6)}';
+    } else if (digits.length == 9 && digits.startsWith('7')) {
+      // رقم يمني جوال محلي 9 أرقام (مثال: 771234567)
+      formatted = '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6)}';
+    } else if (digits.length == 10 && digits.startsWith('07')) {
+      // رقم يمني يبدأ بـ 07 (10 أرقام)
       final local = digits.substring(1);
-      return '${local.substring(0, 3)} ${local.substring(3, 6)} ${local.substring(6)}';
-    }
-
-    // هاتف أرضي يمني (01xxxxxx, 02xxxxxx)
-    if (digits.length >= 7 && digits.length <= 8 && digits.startsWith('0')) {
-      return '${digits.substring(0, 2)} ${digits.substring(2, 5)} ${digits.substring(5)}';
-    }
-
-    // رقم سعودي محلي (05xxxxxxxx)
-    if (digits.length == 10 && digits.startsWith('05')) {
-      return '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6)}';
-    }
-
-    // رقم سعودي دولي (+966 5xxxxxxxx)
-    if (digits.startsWith('9665') && digits.length == 12) {
+      formatted = '${local.substring(0, 3)} ${local.substring(3, 6)} ${local.substring(6)}';
+    } else if (digits.length >= 7 && digits.length <= 8 && digits.startsWith('0')) {
+      // هاتف أرضي يمني (01xxxxxx, 02xxxxxx)
+      formatted = '${digits.substring(0, 2)} ${digits.substring(2, 5)} ${digits.substring(5)}';
+    } else if (digits.length == 10 && digits.startsWith('05')) {
+      // رقم سعودي محلي (05xxxxxxxx)
+      formatted = '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6)}';
+    } else if (digits.startsWith('9665') && digits.length == 12) {
+      // رقم سعودي دولي (+966 5xxxxxxxx)
       final local = digits.substring(3);
-      return '+966 ${local.substring(0, 2)} ${local.substring(2, 5)} ${local.substring(5)}';
+      formatted = '+966 ${local.substring(0, 2)} ${local.substring(2, 5)} ${local.substring(5)}';
+    } else if (hasPlus) {
+      formatted = '+$digits';
+    } else {
+      formatted = converted;
     }
 
-    // إذا كان يحتوي بالفعل على تنسيق محدد أو رقم دولي آخر
-    if (hasPlus) {
-      return '+$digits';
+    final targetLang = languageCode ??
+        (context != null ? Localizations.maybeLocaleOf(context)?.languageCode : null) ??
+        LocalizationHelper.currentLanguage;
+
+    final localized = localizeDigits(
+      formatted,
+      languageCode: targetLang,
+    );
+
+    // إضافة علامة LRM عند وجود + لضمان ثبات اتجاه علامة الزائد يساراً
+    if (formatted.startsWith('+')) {
+      return '\u200E$localized';
     }
-    return converted;
+    return localized;
   }
 
   /// التحقق الشامل من صحة رقم الهاتف في سياق اليمن والأرقام الدولية

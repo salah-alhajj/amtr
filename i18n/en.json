@@ -134,8 +134,8 @@
   "drawer_exchange_rates": "Exchange Rates (SAR / USD)",
   "drawer_export_json": "Save & Share Backup",
   "drawer_language_theme_info": "Language, Theme & Info",
-  "language_arabic_rtl": "العربية",
-  "language_english_ltr": "English",
+  "language_arabic_rtl": "Arabic (RTL)",
+  "language_english_ltr": "English (LTR)",
   "drawer_version_offline": "Version 1.0.0 • Secure & Offline",
   "converter_title": "Instant Currency Converter",
   "converter_subtitle": "Based on saved local exchange rates",
@@ -782,5 +782,12 @@
   "language_turkish": "Turkish (Türkçe)",
   "language_french": "French (Français)",
   "language_spanish": "Spanish (Español)",
-  "select_language": "Select Language"
+  "select_language": "Select Language",
+  "contacts_permission_title": "Contacts Permission",
+  "contacts_permission_desc": "The app needs access to your contacts so you can quickly pick and fill customer phone or WhatsApp numbers directly without typing.",
+  "contacts_permission_request_btn": "Request Permissions",
+  "contacts_pick_tooltip": "Pick from contacts",
+  "contacts_permission_denied": "Contacts permission was denied. You can enable it in device settings.",
+  "contacts_no_phone_found": "The selected contact has no registered phone numbers.",
+  "contacts_select_phone_title": "Select Phone Number"
 }

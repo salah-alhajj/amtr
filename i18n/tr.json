@@ -782,5 +782,12 @@
   "shipment_advance_unverified_desc": "Henüz ulaşmamış veya hâlâ nakliye aşamasında olan siparişler var. Tam gönderi teslimatının onaylanması, önce kaldırılmadıkları sürece tüm siparişleri otomatik olarak Teslim Edildi olarak işaretleyecektir.",
   "customer_deselect_all": "Tüm Seçimi Kaldır",
   "customer_surplus_credit": "Fazla Müşteri Kredisi",
-  "customer_due_date_prefix": "Son Tarih: {date}"
+  "customer_due_date_prefix": "Son Tarih: {date}",
+  "contacts_permission_title": "Kişiler İzni",
+  "contacts_permission_desc": "Uygulama, müşteri telefon veya WhatsApp numarasını doğrudan seçip doldurabilmeniz için kişiler listenize erişim gerektirir.",
+  "contacts_permission_request_btn": "İzin İste",
+  "contacts_pick_tooltip": "Kişilerden seç",
+  "contacts_permission_denied": "Kişiler izni reddedildi, cihaz ayarlarından etkinleştirebilirsiniz.",
+  "contacts_no_phone_found": "Seçilen kişinin kayıtlı telefon numarası yok.",
+  "contacts_select_phone_title": "Telefon Numarası Seçin"
 }

@@ -782,5 +782,12 @@
   "shipment_advance_unverified_desc": "Hay pedidos que aún no han llegado o aún están en tránsito. Al confirmar la entrega completa del envío, se marcarán automáticamente todos los pedidos como Entregados a menos que se eliminen primero.",
   "customer_deselect_all": "Deseleccionar todo",
   "customer_surplus_credit": "Crédito de cliente excedente",
-  "customer_due_date_prefix": "Fecha de vencimiento: {date}"
+  "customer_due_date_prefix": "Fecha de vencimiento: {date}",
+  "contacts_permission_title": "Permiso de Contactos",
+  "contacts_permission_desc": "La aplicación necesita acceso a sus contactos para que pueda seleccionar y completar números de teléfono o WhatsApp de clientes directamente sin escribir.",
+  "contacts_permission_request_btn": "Solicitar Permisos",
+  "contacts_pick_tooltip": "Seleccionar de contactos",
+  "contacts_permission_denied": "Se denegó el permiso de contactos. Puede habilitarlo en la configuración del dispositivo.",
+  "contacts_no_phone_found": "El contacto seleccionado no tiene números de teléfono registrados.",
+  "contacts_select_phone_title": "Seleccionar Número de Teléfono"
 }

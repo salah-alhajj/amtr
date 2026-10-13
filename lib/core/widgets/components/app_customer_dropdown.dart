@@ -186,7 +186,8 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    YemenPhoneHelper.formatForDisplay(customer.phone) ?? customer.phone!,
+                                    YemenPhoneHelper.formatForDisplay(customer.phone, context: context) ?? customer.phone!,
+                                    textDirection: TextDirection.ltr,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: context.textSecondary,
@@ -197,6 +198,23 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                                     const SizedBox(width: 6),
                                     const WhatsAppIcon(size: 12),
                                   ],
+                                ],
+                              ),
+                            ] else if (customer.whatsapp != null && customer.whatsapp!.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  const WhatsAppIcon(size: 12),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    YemenPhoneHelper.formatForDisplay(customer.whatsapp, context: context) ?? customer.whatsapp!,
+                                    textDirection: TextDirection.ltr,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.primaryGreen,
+                                      fontFamily: AppTheme.fontFamily,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -275,16 +293,20 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
   List<Customer> get _filteredCustomers {
     if (_query.trim().isEmpty) return _allCustomers;
     final cleanQuery = _query.trim().toLowerCase();
-    final cleanPhoneQuery = cleanQuery.replaceAll(RegExp(r'[^0-9]'), '');
+    final convertedQuery = YemenPhoneHelper.convertArabicIndicDigits(cleanQuery);
+    final cleanPhoneQuery = convertedQuery.replaceAll(RegExp(r'[^0-9]'), '');
 
     return _allCustomers.where((c) {
       final nameMatches = c.name.toLowerCase().contains(cleanQuery);
-      final phoneMatches = cleanPhoneQuery.isNotEmpty &&
-          c.phone != null &&
-          c.phone!.replaceAll(RegExp(r'[^0-9]'), '').contains(cleanPhoneQuery);
-      final waMatches = cleanPhoneQuery.isNotEmpty &&
-          c.whatsapp != null &&
-          c.whatsapp!.replaceAll(RegExp(r'[^0-9]'), '').contains(cleanPhoneQuery);
+      final phoneDigits = c.phone != null
+          ? YemenPhoneHelper.convertArabicIndicDigits(c.phone!).replaceAll(RegExp(r'[^0-9]'), '')
+          : '';
+      final waDigits = c.whatsapp != null
+          ? YemenPhoneHelper.convertArabicIndicDigits(c.whatsapp!).replaceAll(RegExp(r'[^0-9]'), '')
+          : '';
+
+      final phoneMatches = cleanPhoneQuery.isNotEmpty && phoneDigits.contains(cleanPhoneQuery);
+      final waMatches = cleanPhoneQuery.isNotEmpty && waDigits.contains(cleanPhoneQuery);
 
       return nameMatches || phoneMatches || waMatches;
     }).toList();
@@ -520,9 +542,10 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                                 (c.whatsapp != null && c.whatsapp!.isNotEmpty)
                             ? Row(
                                 children: [
-                                  if (c.phone != null && c.phone!.isNotEmpty) ...[
+                                   if (c.phone != null && c.phone!.isNotEmpty) ...[
                                     Text(
-                                      YemenPhoneHelper.formatForDisplay(c.phone) ?? c.phone!,
+                                      YemenPhoneHelper.formatForDisplay(c.phone, context: context) ?? c.phone!,
+                                      textDirection: TextDirection.ltr,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: context.textSecondary,
@@ -535,7 +558,8 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                                     const WhatsAppIcon(size: 13),
                                     const SizedBox(width: 4),
                                     Text(
-                                      YemenPhoneHelper.formatForDisplay(c.whatsapp) ?? c.whatsapp!,
+                                      YemenPhoneHelper.formatForDisplay(c.whatsapp, context: context) ?? c.whatsapp!,
+                                      textDirection: TextDirection.ltr,
                                       style: const TextStyle(
                                         fontSize: 11,
                                         color: AppColors.primaryGreen,

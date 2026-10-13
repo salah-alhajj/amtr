@@ -198,6 +198,20 @@ void main() {
         const TextEditingValue(text: '7712abc'),
       );
       expect(result.text, '7712');
+
+      // Arabic-Indic digits entry -> accepted and preserved
+      result = formatters.first.formatEditUpdate(
+        TextEditingValue.empty,
+        const TextEditingValue(text: '٧٧١٢٣٤٥٦٧'),
+      );
+      expect(result.text, '٧٧١٢٣٤٥٦٧');
+
+      // Leading plus with Arabic-Indic digits -> accepted
+      result = formatters.first.formatEditUpdate(
+        TextEditingValue.empty,
+        const TextEditingValue(text: '+٩٦٧٧٧١٢٣٤٥٦٧'),
+      );
+      expect(result.text, '+٩٦٧٧٧١٢٣٤٥٦٧');
     });
 
     test('personName formatter accepts Arabic and Latin letters, rejects digits', () {
@@ -239,13 +253,27 @@ void main() {
       expect(YemenPhoneHelper.getOperator('+12025550199'), YemenTelecomOperator.international);
     });
 
-    test('formatForDisplay formats Yemen numbers into clear visual chunks', () {
-      expect(YemenPhoneHelper.formatForDisplay('771234567'), '771 234 567');
-      expect(YemenPhoneHelper.formatForDisplay('0771234567'), '771 234 567');
-      expect(YemenPhoneHelper.formatForDisplay('+967771234567'), '+967 771 234 567');
-      expect(YemenPhoneHelper.formatForDisplay('967771234567'), '+967 771 234 567');
-      expect(YemenPhoneHelper.formatForDisplay('01234567'), '01 234 567');
-      expect(YemenPhoneHelper.formatForDisplay('+966501234567'), '+966 50 123 4567');
+    test('formatForDisplay formats Yemen numbers according to language', () {
+      // English language display (Latin digits 0-9)
+      expect(YemenPhoneHelper.formatForDisplay('771234567', languageCode: 'en'), '771 234 567');
+      expect(YemenPhoneHelper.formatForDisplay('0771234567', languageCode: 'en'), '771 234 567');
+      expect(YemenPhoneHelper.formatForDisplay('+967771234567', languageCode: 'en'), '\u200E+967 771 234 567');
+      expect(YemenPhoneHelper.formatForDisplay('967771234567', languageCode: 'en'), '\u200E+967 771 234 567');
+      expect(YemenPhoneHelper.formatForDisplay('01234567', languageCode: 'en'), '01 234 567');
+      expect(YemenPhoneHelper.formatForDisplay('+966501234567', languageCode: 'en'), '\u200E+966 50 123 4567');
+
+      // Arabic language display (Arabic-Indic digits ٠-٩)
+      expect(YemenPhoneHelper.formatForDisplay('771234567', languageCode: 'ar'), '٧٧١ ٢٣٤ ٥٦٧');
+      expect(YemenPhoneHelper.formatForDisplay('0771234567', languageCode: 'ar'), '٧٧١ ٢٣٤ ٥٦٧');
+      expect(YemenPhoneHelper.formatForDisplay('+967771234567', languageCode: 'ar'), '\u200E+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧');
+      expect(YemenPhoneHelper.formatForDisplay('967771234567', languageCode: 'ar'), '\u200E+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧');
+      expect(YemenPhoneHelper.formatForDisplay('01234567', languageCode: 'ar'), '٠١ ٢٣٤ ٥٦٧');
+      expect(YemenPhoneHelper.formatForDisplay('+966501234567', languageCode: 'ar'), '\u200E+٩٦٦ ٥٠ ١٢٣ ٤٥٦٧');
+
+      // Formatting Arabic input into English display
+      expect(YemenPhoneHelper.formatForDisplay('٧٧١٢٣٤٥٦٧', languageCode: 'en'), '771 234 567');
+      // Formatting Arabic input into Arabic display
+      expect(YemenPhoneHelper.formatForDisplay('٧٧١٢٣٤٥٦٧', languageCode: 'ar'), '٧٧١ ٢٣٤ ٥٦٧');
     });
 
     test('cleanForWhatsApp prepares valid WhatsApp E.164 without plus or zeros', () {
@@ -255,16 +283,28 @@ void main() {
       expect(YemenPhoneHelper.cleanForWhatsApp('00967 771234567'), '967771234567');
       expect(YemenPhoneHelper.cleanForWhatsApp('0501234567'), '966501234567');
       expect(YemenPhoneHelper.cleanForWhatsApp('+966 50 123 4567'), '966501234567');
+      expect(YemenPhoneHelper.cleanForWhatsApp('٧٧١٢٣٤٥٦٧'), '967771234567');
+      expect(YemenPhoneHelper.cleanForWhatsApp('٠٧٧١٢٣٤٥٦٧'), '967771234567');
+      expect(YemenPhoneHelper.cleanForWhatsApp('+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧'), '967771234567');
+      expect(YemenPhoneHelper.cleanForWhatsApp('\u200E+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧'), '967771234567');
+      expect(YemenPhoneHelper.cleanForWhatsApp('٠٥٠١٢٣٤٥٦٧'), '966501234567');
     });
 
     test('cleanForDialing strips spaces for safe tel: URI', () {
       expect(YemenPhoneHelper.cleanForDialing('+967 771 234 567'), '+967771234567');
       expect(YemenPhoneHelper.cleanForDialing('771 234 567'), '771234567');
+      expect(YemenPhoneHelper.cleanForDialing('+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧'), '+967771234567');
+      expect(YemenPhoneHelper.cleanForDialing('\u200E+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧'), '+967771234567');
+      expect(YemenPhoneHelper.cleanForDialing('  +967-771 234 567  '), '+967771234567');
     });
 
-    test('convertArabicIndicDigits transforms eastern numerals', () {
+    test('convertArabicIndicDigits and convertToIndicDigits transform numerals bi-directionally', () {
       expect(YemenPhoneHelper.convertArabicIndicDigits('٧٧١٢٣٤٥٦٧'), '771234567');
       expect(YemenPhoneHelper.convertArabicIndicDigits('+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧'), '+967 771 234 567');
+      expect(YemenPhoneHelper.convertToIndicDigits('771234567'), '٧٧١٢٣٤٥٦٧');
+      expect(YemenPhoneHelper.convertToIndicDigits('+967 771 234 567'), '+٩٦٧ ٧٧١ ٢٣٤ ٥٦٧');
+      expect(YemenPhoneHelper.localizeDigits('771234567', languageCode: 'ar'), '٧٧١٢٣٤٥٦٧');
+      expect(YemenPhoneHelper.localizeDigits('٧٧١٢٣٤٥٦٧', languageCode: 'en'), '771234567');
     });
   });
 }

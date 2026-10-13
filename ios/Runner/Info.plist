@@ -86,6 +86,10 @@
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
 	<string>يسمح للتطبيق بإضافة تذكيرات مواعيد استحقاق الديون إلى تقويم هاتفك.</string>
 
+	<!-- أذونات جهات الاتصال لاختيار أرقام الهواتف والواتساب -->
+	<key>NSContactsUsageDescription</key>
+	<string>يحتاج تطبيق عَمْتر إلى الوصول لجهات الاتصال لاختيار وتعبئة أرقام هواتف العملاء بسهولة وسرعة.</string>
+
 	<!-- مخططات التطبيقات الخارجية للواتساب والاتصال -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

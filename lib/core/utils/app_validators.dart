@@ -108,7 +108,7 @@ class _PositiveDecimalTextInputFormatter extends TextInputFormatter {
   }
 }
 
-/// مخصص تقييد إدخال أرقام الهواتف (تحويل الأرقام المشرقية، السماح بعلامة + في البداية فقط وأرقام ومسافات)
+/// مخصص تقييد إدخال أرقام الهواتف (يدعم الأرقام العربية المشرقية والإنجليزية، علامة + في البداية فقط، ومسافات وشرطات)
 class _PhoneNumberTextInputFormatter extends TextInputFormatter {
   final int maxLength;
 
@@ -122,21 +122,29 @@ class _PhoneNumberTextInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue;
     }
-    // تحويل الأرقام المشرقية ٠-٩ إلى أرقام 0-9 تلقائياً
-    final converted = YemenPhoneHelper.convertArabicIndicDigits(newValue.text);
 
-    // يسمح بعلامة + فقط في الحرف الأول والباقي أرقام ومسافات
-    if (!RegExp(r'^\+?[0-9\s\-]*$').hasMatch(converted)) {
+    final text = newValue.text;
+    final hasPlusAtStart = text.startsWith('+');
+    final withoutPlus = hasPlusAtStart ? text.substring(1) : text;
+
+    // لا يسمح بعلامة + في أي موضع آخر غير البداية
+    if (withoutPlus.contains('+')) {
       return oldValue;
     }
-    final digitsOnly = converted.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // يسمح بالأرقام العربية المشرقية (٠-٩)، والفارسية/الأوردية (۰-۹)، والأرقام اللاتينية (0-9)، والمسافات والشرطات
+    if (!RegExp(r'^[\u0660-\u0669\u06F0-\u06F90-9\s\-]*$').hasMatch(withoutPlus)) {
+      return oldValue;
+    }
+
+    // التحقق من أن عدد الأرقام الفعلي لا يتجاوز الحد الأقصى
+    final normalized = YemenPhoneHelper.convertArabicIndicDigits(text);
+    final digitsOnly = normalized.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.length > maxLength) {
       return oldValue;
     }
-    return newValue.copyWith(
-      text: converted,
-      selection: newValue.selection,
-    );
+
+    return newValue;
   }
 }
 

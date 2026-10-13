@@ -782,5 +782,12 @@
   "shipment_advance_unverified_desc": "Certaines commandes ne sont pas encore arrivées ou sont toujours en transit. La confirmation de la livraison complète de l'envoi marquera automatiquement toutes les commandes comme Livrées, à moins qu'elles ne soient d'abord supprimées.",
   "customer_deselect_all": "Tout désélectionner",
   "customer_surplus_credit": "Crédit client excédentaire",
-  "customer_due_date_prefix": "Date d'échéance : {date}"
+  "customer_due_date_prefix": "Date d'échéance : {date}",
+  "contacts_permission_title": "Autorisation des contacts",
+  "contacts_permission_desc": "L'application doit accéder à vos contacts pour sélectionner et remplir directement les numéros de téléphone ou WhatsApp des clients.",
+  "contacts_permission_request_btn": "Demander les autorisations",
+  "contacts_pick_tooltip": "Choisir parmi les contacts",
+  "contacts_permission_denied": "L'autorisation des contacts a été refusée, activez-la dans les paramètres.",
+  "contacts_no_phone_found": "Le contact sélectionné n'a aucun numéro enregistré.",
+  "contacts_select_phone_title": "Sélectionnez le numéro de téléphone"
 }

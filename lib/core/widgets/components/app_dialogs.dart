@@ -106,6 +106,8 @@ class AppConfirmationDialog extends StatelessWidget {
   final String? cancelLabel;
   final VoidCallback onConfirm;
   final bool isDestructive;
+  final IconData? icon;
+  final Color? iconColor;
 
   const AppConfirmationDialog({
     super.key,
@@ -115,7 +117,36 @@ class AppConfirmationDialog extends StatelessWidget {
     this.cancelLabel,
     required this.onConfirm,
     this.isDestructive = false,
+    this.icon,
+    this.iconColor,
   });
+
+  static Future<bool?> show(
+    BuildContext context, {
+    required String title,
+    required String message,
+    String? confirmLabel,
+    String? cancelLabel,
+    VoidCallback? onConfirm,
+    bool isDestructive = false,
+    IconData? icon,
+    Color? iconColor,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AppConfirmationDialog(
+        title: title,
+        message: message,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        onConfirm: onConfirm ?? () {},
+        isDestructive: isDestructive,
+        icon: icon,
+        iconColor: iconColor,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,11 +154,13 @@ class AppConfirmationDialog extends StatelessWidget {
     final defaultBg = isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite;
     final defaultTextColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
     final defaultSubtextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-    final defaultPrimary = isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue;
-    final defaultDanger = isDark ? AppColors.darkStatusDanger : AppColors.statusDanger;
+    final defaultPrimary = iconColor ?? (isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue);
+    final defaultDanger = iconColor ?? (isDark ? AppColors.darkStatusDanger : AppColors.statusDanger);
 
     final resolvedConfirm = confirmLabel ?? 'common_confirm'.i18n();
     final resolvedCancel = cancelLabel ?? 'common_cancel'.i18n();
+
+    final resolvedIcon = icon ?? (isDestructive ? Icons.warning_amber_rounded : Icons.info_outline_rounded);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -147,7 +180,7 @@ class AppConfirmationDialog extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  isDestructive ? Icons.warning_amber_rounded : Icons.info_outline_rounded,
+                  resolvedIcon,
                   color: isDestructive ? defaultDanger : defaultPrimary,
                   size: 28,
                 ),

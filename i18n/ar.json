@@ -782,5 +782,12 @@
   "language_turkish": "التركية (Türkçe)",
   "language_french": "الفرنسية (Français)",
   "language_spanish": "الإسبانية (Español)",
-  "select_language": "اختر اللغة"
+  "select_language": "اختر اللغة",
+  "contacts_permission_title": "صلاحية جهات الاتصال",
+  "contacts_permission_desc": "يحتاج التطبيق للوصول إلى سجل جهات الاتصال في هاتفك لتتمكن من اختيار وتعبئة رقم هاتف أو واتساب العميل مباشرة وبكل سهولة دون الحاجة لكتابته يدوياً.",
+  "contacts_permission_request_btn": "طلب الصلاحيات",
+  "contacts_pick_tooltip": "اختيار من جهات الاتصال",
+  "contacts_permission_denied": "تم رفض صلاحية الوصول لجهات الاتصال، يمكنك تفعيلها من إعدادات الجهاز",
+  "contacts_no_phone_found": "جهة الاتصال المحددة لا تحتوي على أي رقم هاتف مسجل",
+  "contacts_select_phone_title": "اختر رقم الهاتف المطلوب"
 }

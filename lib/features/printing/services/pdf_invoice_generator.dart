@@ -7,6 +7,7 @@ import '../../../core/constants.dart';
 import '../../../core/localization/localization.dart';
 import '../../../models/individual_order.dart';
 import '../../../models/order_item.dart';
+import '../../../core/utils/yemen_phone_helper.dart';
 import '../models/print_options.dart';
 
 /// مولي الفواتير الإلكترونية ومستندات PDF الاحترافية
@@ -159,7 +160,7 @@ class PdfInvoiceGenerator {
           ),
           if (options.customerName != null)
             pw.Text(
-              'print_customer_label'.trParams({'name': options.customerName!}),
+              '${'print_customer_label'.trParams({'name': options.customerName!})}${options.customerPhone != null && options.customerPhone!.isNotEmpty ? ' (${YemenPhoneHelper.formatForDisplay(options.customerPhone)})' : ''}',
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
           pw.Text(
