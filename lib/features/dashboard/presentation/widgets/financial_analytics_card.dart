@@ -97,7 +97,15 @@ class _FinancialAnalyticsCardState extends State<FinancialAnalyticsCard> {
           if (_selectedTab == 0) ...[
             BezierSalesChart(
               values: widget.weeklySales.isEmpty
-                  ? [widget.totalRevenue * 0.4, widget.totalRevenue * 0.6, widget.totalRevenue * 0.5, widget.totalRevenue * 0.8, widget.totalRevenue]
+                  ? [
+                      widget.totalRevenue * 0.35,
+                      widget.totalRevenue * 0.55,
+                      widget.totalRevenue * 0.45,
+                      widget.totalRevenue * 0.70,
+                      widget.totalRevenue * 0.60,
+                      widget.totalRevenue * 0.85,
+                      widget.totalRevenue,
+                    ]
                   : widget.weeklySales,
               labels: widget.dayLabels ?? [
                 'day_saturday'.i18n(),

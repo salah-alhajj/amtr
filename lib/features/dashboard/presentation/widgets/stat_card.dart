@@ -50,27 +50,35 @@ class StatCard extends StatelessWidget {
                 ),
                 child: Icon(icon, size: 18, color: iconColor),
               ),
-              if (subtitle != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: context.surfaceMuted,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: context.textSecondary,
+              if (subtitle != null) ...[
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: context.surfaceMuted,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: context.textSecondary,
+                      ),
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,

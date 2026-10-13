@@ -23,16 +23,22 @@ class CurrencySelectorBar extends StatelessWidget {
     return ListenableBuilder(
       listenable: currencyService,
       builder: (context, _) {
-        final currentActive = (activeCurrency ?? currencyService.activeDisplayCurrency).toUpperCase();
+        final currentActive =
+            (activeCurrency ?? currencyService.activeDisplayCurrency)
+                .toUpperCase();
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
         return Container(
           padding: const EdgeInsets.all(3.5),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurfaceMuted : const Color(0xFFF0F1F5),
+            color: isDark
+                ? AppColors.darkSurfaceMuted
+                : const Color(0xFFF0F1F5),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isDark ? AppColors.darkBorderSubtle : const Color(0xFFE2E4EB),
+              color: isDark
+                  ? AppColors.darkBorderSubtle
+                  : const Color(0xFFE2E4EB),
               width: 0.8,
             ),
           ),
@@ -42,7 +48,12 @@ class CurrencySelectorBar extends StatelessWidget {
                 context: context,
                 title: 'currency_yer'.i18n(),
                 symbolWidget: Text(
-                  context.isArabic ? 'ر.ي' : 'YER',
+                  context.isArabic
+                      ? AppConstants.yerSymbol
+                            .toLowerCase()
+                            .i18n()
+                            .toUpperCase()
+                      : AppConstants.currencyYer,
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -60,8 +71,12 @@ class CurrencySelectorBar extends StatelessWidget {
                   width: 14,
                   height: 14,
                   color: currentActive == AppConstants.currencySar
-                      ? (isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue)
-                      : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                      ? (isDark
+                            ? AppColors.darkPrimaryBlue
+                            : AppColors.primaryBlue)
+                      : (isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary),
                 ),
                 currencyCode: AppConstants.currencySar,
                 isActive: currentActive == AppConstants.currencySar,
@@ -73,10 +88,7 @@ class CurrencySelectorBar extends StatelessWidget {
                 title: 'currency_usd'.i18n(),
                 symbolWidget: const Text(
                   '\$',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
                 ),
                 currencyCode: AppConstants.currencyUsd,
                 isActive: currentActive == AppConstants.currencyUsd,
@@ -97,8 +109,12 @@ class CurrencySelectorBar extends StatelessWidget {
     required bool isActive,
     required bool isDark,
   }) {
-    final activeTextColor = isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue;
-    final inactiveTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final activeTextColor = isDark
+        ? AppColors.darkPrimaryBlue
+        : AppColors.primaryBlue;
+    final inactiveTextColor = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
     final activeBg = isDark ? AppColors.darkSurfaceCard : Colors.white;
 
     return Expanded(
@@ -120,7 +136,9 @@ class CurrencySelectorBar extends StatelessWidget {
               boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.25 : 0.06,
+                        ),
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),
