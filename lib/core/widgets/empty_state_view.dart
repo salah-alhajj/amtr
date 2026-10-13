@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/localization.dart';
 import '../theme/app_colors.dart';
 import 'components/app_buttons.dart';
 
@@ -293,7 +294,7 @@ class _EmptyStateViewState extends State<EmptyStateView>
       children: [
         if (widget.onActionPressed != null)
           AppPrimaryButton(
-            label: widget.actionLabel ?? 'متابعة',
+            label: widget.actionLabel ?? (context.isArabic ? 'متابعة' : 'Continue'),
             icon: widget.actionIcon,
             onPressed: widget.onActionPressed,
             height: isSection ? 42 : 46,
@@ -376,7 +377,7 @@ class _EmptyStateViewState extends State<EmptyStateView>
           if (widget.onActionPressed != null)
             AppSecondaryButton(
               onPressed: widget.onActionPressed,
-              label: widget.actionLabel ?? 'إجراء',
+              label: widget.actionLabel ?? (context.isArabic ? 'إجراء' : 'Action'),
               height: 36,
             )
           else if (widget.action != null)

@@ -124,5 +124,21 @@ void main() {
       expect(Directory('assets/i18n').existsSync(), false, reason: 'assets/i18n must not exist');
       expect(Directory('lib/i18n').existsSync(), false, reason: 'lib/i18n must not exist');
     });
+
+    test('English i18n file contains zero Arabic characters', () {
+      final enFile = File('i18n/en.json');
+      final Map<String, dynamic> enJson = json.decode(enFile.readAsStringSync());
+      final arabicRegex = RegExp(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]');
+
+      final keysWithArabic = <String, String>{};
+      for (final entry in enJson.entries) {
+        if (entry.value is String && arabicRegex.hasMatch(entry.value as String)) {
+          keysWithArabic[entry.key] = entry.value as String;
+        }
+      }
+
+      expect(keysWithArabic, isEmpty,
+          reason: 'en.json must not contain any Arabic text. Found: $keysWithArabic');
+    });
   });
 }

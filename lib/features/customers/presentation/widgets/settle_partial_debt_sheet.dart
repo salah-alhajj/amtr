@@ -120,7 +120,7 @@ class _SettlePartialDebtSheetState extends State<SettlePartialDebtSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'طلب #${widget.order.orderNumber}',
+                      'order_number'.trParams({'id': widget.order.orderNumber}),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,

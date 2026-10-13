@@ -158,7 +158,9 @@ class GlobalSearchDelegate extends SearchDelegate {
                         alpha: 0.1,
                       ),
                       child: Text(
-                        c.name.isNotEmpty ? c.name[0] : 'ع',
+                        c.name.isNotEmpty
+                            ? c.name[0].toUpperCase()
+                            : (context.isArabic ? 'ع' : 'C'),
                         style: const TextStyle(
                           color: AppColors.primaryBlue,
                           fontWeight: FontWeight.bold,

@@ -372,7 +372,7 @@ extension CustomerListFilterX on CustomerListFilter {
         return translated;
       }
     } catch (_) {}
-    final isArabic = Localizations.maybeLocaleOf(context)?.languageCode != 'en';
+    final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
     return isArabic ? labelAr : labelEn;
   }
 

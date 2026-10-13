@@ -413,7 +413,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  _customer.name.isNotEmpty ? _customer.name[0] : 'ع',
+                  _customer.name.isNotEmpty
+                      ? _customer.name[0].toUpperCase()
+                      : (context.isArabic ? 'ع' : 'C'),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -1210,7 +1212,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'طلب #${order.orderNumber}',
+                        'order_number'.trParams({'id': order.orderNumber}),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,

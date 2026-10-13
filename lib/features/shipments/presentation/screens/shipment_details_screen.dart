@@ -134,7 +134,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
     showAppModalSheet(
       context: context,
       title: 'shipment_order_change_status'.i18n(),
-      subtitle: 'طلب #${order.orderNumber} - ${order.customerName ?? "customer_quick_default".i18n()}',
+      subtitle: '${'order_number'.trParams({'id': order.orderNumber})} - ${order.customerName ?? "customer_quick_default".i18n()}',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

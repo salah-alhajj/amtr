@@ -147,7 +147,9 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                   child: Center(
                     child: hasSelection
                         ? Text(
-                            customer.name.isNotEmpty ? customer.name[0] : 'ع',
+                            customer.name.isNotEmpty
+                                ? customer.name[0].toUpperCase()
+                                : (context.isArabic ? 'ع' : 'C'),
                             style: const TextStyle(
                               color: AppColors.primaryBlue,
                               fontWeight: FontWeight.bold,
@@ -490,7 +492,9 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                         if (_query.trim().isNotEmpty) ...[
                           const SizedBox(height: 14),
                           AppSecondaryButton(
-                            label: 'إضافة عميل باسم "$_query"',
+                            label: context.isArabic
+                                ? 'إضافة عميل باسم "$_query"'
+                                : 'Add customer "$_query"',
                             icon: Icons.add_rounded,
                             onPressed: _handleAddNewCustomer,
                           ),
@@ -519,7 +523,9 @@ class _CustomerSearchPickerSheetState extends State<_CustomerSearchPickerSheet> 
                           ),
                           child: Center(
                             child: Text(
-                              c.name.isNotEmpty ? c.name[0] : 'ع',
+                              c.name.isNotEmpty
+                                  ? c.name[0].toUpperCase()
+                                  : (context.isArabic ? 'ع' : 'C'),
                               style: TextStyle(
                                 color: isSelected ? Colors.white : AppColors.primaryBlue,
                                 fontWeight: FontWeight.bold,

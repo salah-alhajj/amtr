@@ -41,31 +41,38 @@ class _FinancialAnalyticsCardState extends State<FinancialAnalyticsCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.insights_rounded,
+                        size: 18,
+                        color: AppColors.primaryBlue,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.insights_rounded,
-                      size: 18,
-                      color: AppColors.primaryBlue,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'financial_analytics_title'.i18n(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: context.textPrimary,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'financial_analytics_title'.i18n(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: context.textPrimary,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               // مبدل النمط المصغر (Segmented Control)
               Container(
                 padding: const EdgeInsets.all(3),

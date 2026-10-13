@@ -178,7 +178,7 @@ class _AppErrorStateViewState extends State<AppErrorStateView>
               ),
               SizedBox(height: isSection ? 14 : 20),
               Text(
-                widget.title ?? 'حدث خطأ أثناء تحميل البيانات',
+                widget.title ?? 'common_error_loading'.i18n(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: isSection ? 15 : 17,

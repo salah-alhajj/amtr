@@ -28,3 +28,8 @@ extension LocalizedStringExtensions on String {
     return translated;
   }
 }
+
+extension LocalizationContextExtensions on BuildContext {
+  bool get isArabic =>
+      Localizations.maybeLocaleOf(this)?.languageCode == 'ar';
+}

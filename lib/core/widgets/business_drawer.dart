@@ -158,6 +158,7 @@ class BusinessDrawer extends StatelessWidget {
                             // 3. محول العملات والعملة النشطة
                             Expanded(
                               child: _buildCalculatorTickerItem(
+                                context: context,
                                 activeCurrency: activeCurrency,
                                 isDark: isDark,
                               ),
@@ -464,11 +465,14 @@ class BusinessDrawer extends StatelessWidget {
   }
 
   Widget _buildCalculatorTickerItem({
+    required BuildContext context,
     required String activeCurrency,
     required bool isDark,
   }) {
     final primaryColor = isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue;
     final secondaryColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final isArabic = context.isArabic;
+    final activePrefix = isArabic ? 'النشطة: ' : 'Active: ';
 
     Widget activeBadge;
     if (activeCurrency == AppConstants.currencySar) {
@@ -476,18 +480,18 @@ class BusinessDrawer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('النشطة: ', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor)),
+          Text(activePrefix, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor)),
           SaudiRiyalIcon(width: 10, height: 10, color: secondaryColor),
         ],
       );
     } else if (activeCurrency == AppConstants.currencyUsd) {
       activeBadge = Text(
-        'النشطة: \$',
+        '$activePrefix\$',
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor),
       );
     } else {
       activeBadge = Text(
-        'النشطة: ${AppConstants.yerSymbol}',
+        '$activePrefix${isArabic ? AppConstants.yerSymbol : 'YER'}',
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor),
       );
     }
@@ -504,7 +508,7 @@ class BusinessDrawer extends StatelessWidget {
             const SizedBox(width: 3),
             Flexible(
               child: Text(
-                'حاسبة الصرف',
+                isArabic ? 'حاسبة الصرف' : 'Converter',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

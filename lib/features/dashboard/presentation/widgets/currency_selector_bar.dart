@@ -41,9 +41,9 @@ class CurrencySelectorBar extends StatelessWidget {
               _buildSegment(
                 context: context,
                 title: 'currency_yer'.i18n(),
-                symbolWidget: const Text(
-                  'ر.ي',
-                  style: TextStyle(
+                symbolWidget: Text(
+                  context.isArabic ? 'ر.ي' : 'YER',
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
