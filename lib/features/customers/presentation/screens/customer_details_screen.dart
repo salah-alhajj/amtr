@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
@@ -442,8 +441,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           Text(
                             YemenPhoneHelper.formatForDisplay(
                                   _customer.phone!,
+                                  context: context,
                                 ) ??
                                 _customer.phone!,
+                            textDirection: TextDirection.ltr,
                             style: TextStyle(
                               fontSize: 12,
                               color: context.textSecondary,
@@ -472,7 +473,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           const WhatsAppIcon(size: 13),
                           const SizedBox(width: 4),
                           Text(
-                            _customer.whatsapp!,
+                            YemenPhoneHelper.formatForDisplay(
+                                  _customer.whatsapp!,
+                                  context: context,
+                                ) ??
+                                _customer.whatsapp!,
+                            textDirection: TextDirection.ltr,
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primaryGreen,
@@ -514,10 +520,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   size: 36,
                   iconSize: 18,
                   tooltip: 'customer_call_btn'.i18n(),
-                  onPressed: () => launchUrl(
-                    Uri.parse(
-                      'tel:${YemenPhoneHelper.cleanForDialing(_customer.phone)}',
-                    ),
+                  onPressed: () => YemenPhoneHelper.launchPhoneCall(
+                    context,
+                    _customer.phone,
                   ),
                 ),
               ],

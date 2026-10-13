@@ -326,30 +326,23 @@ class BusinessDrawer extends StatelessWidget {
                 builder: (context, localeState) {
                   final currentCode = localeState.locale.languageCode;
 
-                  return Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: CountryFlagSvg.fromLanguageCode(
-                          currentCode,
-                          width: 22,
-                          height: 16.5,
-                          borderRadius: 3,
-                        ),
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark ? AppColors.darkBorderDivider : AppColors.borderSubtle,
+                        width: 0.8,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: AppLanguage.supported.any((l) => l.code == currentCode)
-                                ? currentCode
-                                : 'ar',
-                            isExpanded: true,
-                            isDense: true,
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: AppLanguage.supported.any((l) => l.code == currentCode)
+                            ? currentCode
+                            : 'ar',
+                        isExpanded: true,
+                        isDense: true,
                             icon: Icon(
                               Icons.keyboard_arrow_down_rounded,
                               color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
@@ -419,10 +412,8 @@ class BusinessDrawer extends StatelessWidget {
                             },
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      );
+                    },
               ),
             ),
           ],

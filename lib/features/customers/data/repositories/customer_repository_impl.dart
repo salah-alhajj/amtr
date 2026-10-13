@@ -1,5 +1,6 @@
 import '../../../../core/database/app_database.dart';
 import '../../../../models/customer.dart';
+import '../../../../core/utils/yemen_phone_helper.dart';
 import '../../domain/repositories/customer_repository.dart';
 
 class CustomerRepositoryImpl implements CustomerRepository {
@@ -55,10 +56,20 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<List<Customer>> searchCustomers(String query) async {
     final db = await dbHelper.database;
+    final clean = query.trim();
+    final latinDigits = YemenPhoneHelper.convertArabicIndicDigits(clean);
+    final arabicDigits = YemenPhoneHelper.convertToIndicDigits(clean);
+
     final maps = await db.query(
       'customers',
-      where: 'name LIKE ? OR phone LIKE ?',
-      whereArgs: ['%$query%', '%$query%'],
+      where: 'name LIKE ? OR phone LIKE ? OR phone LIKE ? OR whatsapp LIKE ? OR whatsapp LIKE ?',
+      whereArgs: [
+        '%$clean%',
+        '%$latinDigits%',
+        '%$arabicDigits%',
+        '%$latinDigits%',
+        '%$arabicDigits%',
+      ],
       orderBy: 'name ASC',
     );
     return maps.map((e) => Customer.fromMap(e)).toList();

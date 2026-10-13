@@ -50,7 +50,7 @@ class CustomerOrdersSheet extends StatelessWidget {
     return AppModalSheet(
       title: customer.name,
       subtitle: customer.phone != null
-          ? (YemenPhoneHelper.formatForDisplay(customer.phone!) ?? customer.phone!)
+          ? (YemenPhoneHelper.formatForDisplay(customer.phone!, context: context) ?? customer.phone!)
           : null,
       trailing: AppIconButton(
         icon: Icons.close_rounded,

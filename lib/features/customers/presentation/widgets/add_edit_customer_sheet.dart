@@ -1,6 +1,10 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/localization/localization.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/customer.dart';
 import '../../domain/customer_financial_helper.dart';
@@ -48,9 +52,21 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
   @override
   void initState() {
     super.initState();
+    final currentLang = LocalizationHelper.currentLanguage;
+    final initialPhone = widget.customerToEdit?.phone;
+    final initialWhatsapp = widget.customerToEdit?.whatsapp;
+
     _nameCtrl = TextEditingController(text: widget.customerToEdit?.name ?? '');
-    _phoneCtrl = TextEditingController(text: widget.customerToEdit?.phone ?? '');
-    _whatsappCtrl = TextEditingController(text: widget.customerToEdit?.whatsapp ?? '');
+    _phoneCtrl = TextEditingController(
+      text: initialPhone != null
+          ? YemenPhoneHelper.localizeDigits(initialPhone, languageCode: currentLang)
+          : '',
+    );
+    _whatsappCtrl = TextEditingController(
+      text: initialWhatsapp != null
+          ? YemenPhoneHelper.localizeDigits(initialWhatsapp, languageCode: currentLang)
+          : '',
+    );
     _notesCtrl = TextEditingController(
       text: CustomerFinancialHelper.cleanUserNotes(widget.customerToEdit?.notes),
     );
@@ -116,6 +132,97 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
     Navigator.pop(context);
   }
 
+  Future<String?> _selectPhoneFromList(BuildContext context, List<Phone> phones) {
+    return showAppModalSheet<String>(
+      context: context,
+      title: 'contacts_select_phone_title'.i18n(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: phones.map((p) {
+          final raw = p.number;
+          final formatted = YemenPhoneHelper.formatForDisplay(raw, context: context) ?? raw;
+          final label = p.label.customLabel ?? p.label.label.name;
+          return ListTile(
+            leading: const Icon(Icons.phone_rounded, color: AppColors.primaryBlue),
+            title: Text(formatted, textDirection: TextDirection.ltr),
+            subtitle: Text(label),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            onTap: () => Navigator.pop(context, raw),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Future<void> _pickContactFor(TextEditingController controller) async {
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+      AppToast.showInfo(context, 'contacts_pick_tooltip'.i18n());
+      return;
+    }
+
+    try {
+      final hasPermission = await FlutterContacts.permissions.has(PermissionType.read);
+      if (!hasPermission) {
+        if (!mounted) return;
+        final shouldRequest = await AppConfirmationDialog.show(
+          context,
+          title: 'contacts_permission_title'.i18n(),
+          message: 'contacts_permission_desc'.i18n(),
+          confirmLabel: 'contacts_permission_request_btn'.i18n(),
+          cancelLabel: 'common_cancel'.i18n(),
+          icon: Icons.perm_contact_calendar_rounded,
+          iconColor: AppColors.primaryBlue,
+        );
+
+        if (shouldRequest != true) return;
+
+        final status = await FlutterContacts.permissions.request(PermissionType.read);
+        if (status != PermissionStatus.granted && status != PermissionStatus.limited) {
+          if (mounted) {
+            AppToast.showError(context, 'contacts_permission_denied'.i18n());
+          }
+          return;
+        }
+      }
+
+      final contact = await FlutterContacts.native.showPicker(
+        properties: {ContactProperty.phone, ContactProperty.name},
+      );
+
+      if (contact == null || !mounted) return;
+
+      if (contact.phones.isEmpty) {
+        AppToast.showInfo(context, 'contacts_no_phone_found'.i18n());
+        return;
+      }
+
+      String? chosenNumber;
+      if (contact.phones.length == 1) {
+        chosenNumber = contact.phones.first.number;
+      } else {
+        chosenNumber = await _selectPhoneFromList(context, contact.phones);
+        if (chosenNumber == null || !mounted) return;
+      }
+
+      final cleaned = YemenPhoneHelper.cleanPhoneNumber(chosenNumber);
+      final localized = YemenPhoneHelper.localizeDigits(
+        cleaned.isNotEmpty ? cleaned : chosenNumber,
+        context: context,
+      );
+
+      setState(() {
+        controller.text = localized;
+        if (_nameCtrl.text.trim().isEmpty &&
+            contact.displayName != null &&
+            contact.displayName!.trim().isNotEmpty) {
+          _nameCtrl.text = contact.displayName!.trim();
+        }
+      });
+    } catch (e) {
+      debugPrint('Error picking contact: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final phoneOp = YemenPhoneHelper.getOperator(_phoneCtrl.text);
@@ -151,6 +258,16 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             inputFormatters: AppFormatters.phoneNumber(),
             validator: (val) => AppValidators.phone(val, isRequired: false),
             textInputAction: TextInputAction.next,
+            suffix: Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: IconButton(
+                icon: const Icon(Icons.contacts_rounded, size: 20, color: AppColors.primaryBlue),
+                tooltip: 'contacts_pick_tooltip'.i18n(),
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                onPressed: () => _pickContactFor(_phoneCtrl),
+              ),
+            ),
           ),
           const SizedBox(height: 14),
           AppTextField(
@@ -163,16 +280,30 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             inputFormatters: AppFormatters.phoneNumber(),
             validator: (val) => AppValidators.phone(val, isRequired: false),
             textInputAction: TextInputAction.next,
-            suffix: AppSecondaryButton(
-              height: 28,
-              borderRadius: 6,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              onPressed: () {
-                if (_phoneCtrl.text.trim().isNotEmpty) {
-                  setState(() => _whatsappCtrl.text = _phoneCtrl.text.trim());
-                }
-              },
-              label: 'customer_copy_phone_to_whatsapp'.i18n(),
+            suffix: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.contacts_rounded, size: 20, color: AppColors.primaryBlue),
+                  tooltip: 'contacts_pick_tooltip'.i18n(),
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  onPressed: () => _pickContactFor(_whatsappCtrl),
+                ),
+                const SizedBox(width: 4),
+                AppSecondaryButton(
+                  height: 28,
+                  borderRadius: 6,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  onPressed: () {
+                    if (_phoneCtrl.text.trim().isNotEmpty) {
+                      setState(() => _whatsappCtrl.text = _phoneCtrl.text.trim());
+                    }
+                  },
+                  label: 'customer_copy_phone_to_whatsapp'.i18n(),
+                ),
+                const SizedBox(width: 6),
+              ],
             ),
           ),
           const SizedBox(height: 14),

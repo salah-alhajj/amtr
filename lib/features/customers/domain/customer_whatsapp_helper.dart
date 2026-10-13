@@ -155,7 +155,7 @@ class CustomerWhatsAppHelper {
     required Customer customer,
     String? message,
   }) async {
-    final cleanPhone = getEffectiveWhatsAppNumber(customer);
+    final cleanPhone = getEffectiveWhatsAppNumber(customer).replaceAll(RegExp(r'[^0-9]'), '');
 
     if (cleanPhone.isEmpty) {
       AppToast.showWarning(
@@ -170,38 +170,49 @@ class CustomerWhatsAppHelper {
     final nativeUri = Uri.parse('whatsapp://send?phone=$cleanPhone${encodedText.isNotEmpty ? '&text=$encodedText' : ''}');
     final webUri = Uri.parse('https://wa.me/$cleanPhone${encodedText.isNotEmpty ? '?text=$encodedText' : ''}');
 
+    bool launched = false;
+
+    // 1. محاولة فتح تطبيق واتساب المثبت على النظام مباشرة
     try {
       if (await canLaunchUrl(nativeUri)) {
-        await launchUrl(nativeUri, mode: LaunchMode.externalApplication);
-        return;
+        launched = await launchUrl(nativeUri, mode: LaunchMode.externalApplication);
       }
+    } catch (_) {
+      launched = false;
+    }
 
+    if (launched) return;
+
+    // 2. استخدام الرابط الدولي المعتمد من واتساب wa.me المتوافق 100% مع كافة الأنظمة والمتصفحات
+    try {
       if (await canLaunchUrl(webUri)) {
-        await launchUrl(webUri, mode: LaunchMode.externalApplication);
-        return;
+        launched = await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      } else {
+        launched = await launchUrl(webUri, mode: LaunchMode.platformDefault);
       }
+    } catch (_) {
+      launched = false;
+    }
 
-      // إذا لم يتوفر تطبيق واتساب أو المتصفح الخارجي
-      if (message != null && message.isNotEmpty) {
-        await Clipboard.setData(ClipboardData(text: message));
-        if (context.mounted) {
-          AppToast.showInfo(
-            context,
-            'تم نسخ نص الرسالة إلى الحافظة لعدم توفر تطبيق واتساب مباشرة',
-            title: 'تم النسخ',
-          );
-        }
+    if (launched) return;
+
+    // 3. في حال عدم توفر تطبيق واتساب أو تعذر فتحه على الجهاز
+    if (message != null && message.isNotEmpty) {
+      await Clipboard.setData(ClipboardData(text: message));
+      if (context.mounted) {
+        AppToast.showInfo(
+          context,
+          'تم نسخ نص الرسالة إلى الحافظة لعدم توفر تطبيق واتساب مباشرة على هذا الجهاز',
+          title: 'تم النسخ',
+        );
       }
-    } catch (e) {
-      if (message != null && message.isNotEmpty) {
-        await Clipboard.setData(ClipboardData(text: message));
-        if (context.mounted) {
-          AppToast.showInfo(
-            context,
-            'تم نسخ التقرير إلى الحافظة',
-            title: 'تم النسخ',
-          );
-        }
+    } else {
+      if (context.mounted) {
+        AppToast.showWarning(
+          context,
+          'تعذر فتح تطبيق واتساب على جهازك، يرجى التأكد من تثبيته',
+          title: 'واتساب',
+        );
       }
     }
   }

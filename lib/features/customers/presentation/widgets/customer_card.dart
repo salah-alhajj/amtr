@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -73,8 +72,13 @@ class CustomerCard extends StatelessWidget {
                   children: [
                     Text(
                       customer.phone != null
-                          ? (YemenPhoneHelper.formatForDisplay(customer.phone) ?? customer.phone!)
-                          : 'customer_no_phone'.i18n(),
+                          ? (YemenPhoneHelper.formatForDisplay(customer.phone, context: context) ?? customer.phone!)
+                          : (customer.whatsapp != null && customer.whatsapp!.isNotEmpty
+                              ? (YemenPhoneHelper.formatForDisplay(customer.whatsapp, context: context) ?? customer.whatsapp!)
+                              : 'customer_no_phone'.i18n()),
+                      textDirection: (customer.phone != null || (customer.whatsapp != null && customer.whatsapp!.isNotEmpty))
+                          ? TextDirection.ltr
+                          : null,
                       style: TextStyle(fontSize: 12, color: context.textSecondary),
                     ),
                     if (customer.whatsapp != null && customer.whatsapp!.isNotEmpty) ...[
@@ -154,7 +158,7 @@ class CustomerCard extends StatelessWidget {
               size: 34,
               iconSize: 16,
               tooltip: 'customer_call_btn'.i18n(),
-              onPressed: () => launchUrl(Uri.parse('tel:${YemenPhoneHelper.cleanForDialing(customer.phone)}')),
+              onPressed: () => YemenPhoneHelper.launchPhoneCall(context, customer.phone),
             ),
             const SizedBox(width: 6),
           ],

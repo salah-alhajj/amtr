@@ -5,6 +5,7 @@ import '../../../../models/individual_order.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
 import '../../domain/customer_financial_helper.dart';
 import '../../domain/repositories/customer_repository.dart';
+import '../../../../core/utils/yemen_phone_helper.dart';
 
 // --- Events ---
 abstract class CustomersEvent {
@@ -197,11 +198,31 @@ class CustomersBloc extends Bloc<CustomersEvent, CustomersState> {
     required CustomerListFilter filter,
   }) {
     final cleanQuery = query.trim().toLowerCase();
+    final convertedQuery = YemenPhoneHelper.convertArabicIndicDigits(cleanQuery);
+    final cleanDigitsQuery = convertedQuery.replaceAll(RegExp(r'[^0-9]'), '');
+
     return list.where((customer) {
       if (cleanQuery.isNotEmpty) {
         final nameMatches = customer.name.toLowerCase().contains(cleanQuery);
-        final phoneMatches = customer.phone != null && customer.phone!.contains(cleanQuery);
-        final whatsappMatches = customer.whatsapp != null && customer.whatsapp!.contains(cleanQuery);
+
+        final phoneDigits = customer.phone != null
+            ? YemenPhoneHelper.convertArabicIndicDigits(customer.phone!)
+                .replaceAll(RegExp(r'[^0-9]'), '')
+            : '';
+        final waDigits = customer.whatsapp != null
+            ? YemenPhoneHelper.convertArabicIndicDigits(customer.whatsapp!)
+                .replaceAll(RegExp(r'[^0-9]'), '')
+            : '';
+
+        final phoneMatches = (customer.phone != null &&
+                customer.phone!.toLowerCase().contains(cleanQuery)) ||
+            (cleanDigitsQuery.isNotEmpty &&
+                phoneDigits.contains(cleanDigitsQuery));
+        final whatsappMatches = (customer.whatsapp != null &&
+                customer.whatsapp!.toLowerCase().contains(cleanQuery)) ||
+            (cleanDigitsQuery.isNotEmpty &&
+                waDigits.contains(cleanDigitsQuery));
+
         if (!nameMatches && !phoneMatches && !whatsappMatches) {
           return false;
         }

@@ -7,6 +7,7 @@ import '../../core/widgets/design_system.dart';
 import '../../models/consolidated_shipment.dart';
 import '../../models/customer.dart';
 import '../../models/individual_order.dart';
+import '../../core/utils/yemen_phone_helper.dart';
 import '../customers/domain/repositories/customer_repository.dart';
 import '../customers/presentation/screens/customer_details_screen.dart';
 import '../orders/domain/repositories/order_repository.dart';
@@ -169,7 +170,14 @@ class GlobalSearchDelegate extends SearchDelegate {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      c.phone ?? 'customer_no_phone'.i18n(),
+                      c.phone != null
+                          ? (YemenPhoneHelper.formatForDisplay(c.phone, context: context) ?? c.phone!)
+                          : (c.whatsapp != null && c.whatsapp!.isNotEmpty
+                              ? (YemenPhoneHelper.formatForDisplay(c.whatsapp, context: context) ?? c.whatsapp!)
+                              : 'customer_no_phone'.i18n()),
+                      textDirection: (c.phone != null || (c.whatsapp != null && c.whatsapp!.isNotEmpty))
+                          ? TextDirection.ltr
+                          : null,
                       style: const TextStyle(fontSize: 12),
                     ),
                     trailing: const ForwardChevron(),
