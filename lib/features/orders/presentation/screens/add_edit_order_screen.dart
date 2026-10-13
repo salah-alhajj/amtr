@@ -74,7 +74,9 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
       _customerNameController.text = o.customerName ?? '';
       _paidAmountController.text = o.paidAmount.toString();
       _additionalCostController.text = o.additionalCost > 0
-          ? (o.additionalCost % 1 == 0 ? o.additionalCost.toInt().toString() : o.additionalCost.toString())
+          ? (o.additionalCost % 1 == 0
+                ? o.additionalCost.toInt().toString()
+                : o.additionalCost.toString())
           : '0';
       _notesController.text = o.notes ?? '';
       _createdAt = o.createdAt;
@@ -200,7 +202,8 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
 
     final orderId = widget.orderToEdit?.id ?? const Uuid().v4();
     final paid = double.tryParse(_paidAmountController.text) ?? 0.0;
-    final additionalCost = double.tryParse(_additionalCostController.text) ?? 0.0;
+    final additionalCost =
+        double.tryParse(_additionalCostController.text) ?? 0.0;
 
     final List<OrderItem> orderItems = [];
     for (final draft in _itemsDraft) {
@@ -488,7 +491,9 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
                             decimal: true,
                           ),
                           label: 'order_paid_amount_label'.trParams({
-                            'symbol': AppConstants.getCurrencySymbol(_currency),
+                            'symbol': AppConstants.getCurrencySymbol(
+                              _currency,
+                            ).i18n(),
                           }),
                           hint: '0.00',
                           prefixIcon: Icons.payments_outlined,

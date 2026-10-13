@@ -20,12 +20,16 @@ class OrderItemDraft {
     double? costPrice,
     double? sellPrice,
     List<String>? photos,
-  })  : id = id ?? DateTime.now().microsecondsSinceEpoch.toString(),
-        nameController = TextEditingController(text: name ?? ''),
-        qtyController = TextEditingController(text: (quantity ?? 1).toString()),
-        costController = TextEditingController(text: costPrice != null ? costPrice.toString() : ''),
-        sellController = TextEditingController(text: sellPrice != null ? sellPrice.toString() : ''),
-        photos = photos != null ? List<String>.from(photos) : [];
+  }) : id = id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+       nameController = TextEditingController(text: name ?? ''),
+       qtyController = TextEditingController(text: (quantity ?? 1).toString()),
+       costController = TextEditingController(
+         text: costPrice != null ? costPrice.toString() : '',
+       ),
+       sellController = TextEditingController(
+         text: sellPrice != null ? sellPrice.toString() : '',
+       ),
+       photos = photos != null ? List<String>.from(photos) : [];
 
   void dispose() {
     nameController.dispose();
@@ -68,7 +72,13 @@ class ItemDraftCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('item_number_fmt'.trParams({'number': (index + 1).toString()}), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+              Text(
+                'item_number_fmt'.trParams({'number': (index + 1).toString()}),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               if (canDelete)
                 AppIconButton(
                   icon: Icons.delete_outline_rounded,
@@ -100,7 +110,8 @@ class ItemDraftCard extends StatelessWidget {
                   label: 'item_quantity_label'.i18n(),
                   prefixIcon: Icons.format_list_numbered_rounded,
                   inputFormatters: AppFormatters.positiveInteger(maxDigits: 5),
-                  validator: (val) => AppValidators.quantity(val, min: 1, max: 10000),
+                  validator: (val) =>
+                      AppValidators.quantity(val, min: 1, max: 10000),
                   textInputAction: TextInputAction.next,
                 ),
               ),
@@ -109,12 +120,16 @@ class ItemDraftCard extends StatelessWidget {
                 flex: 2,
                 child: AppTextField(
                   controller: draft.costController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   label: 'item_cost_price_label'.trParams({
-                    'symbol': AppConstants.getCurrencySymbol(currency),
+                    'symbol': AppConstants.getCurrencySymbol(currency).i18n(),
                   }),
                   prefixIcon: Icons.price_change_outlined,
-                  inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+                  inputFormatters: AppFormatters.positiveDecimal(
+                    decimalRange: 2,
+                  ),
                   validator: (val) => AppValidators.positiveAmount(
                     val,
                     allowZero: false,
@@ -130,7 +145,7 @@ class ItemDraftCard extends StatelessWidget {
             controller: draft.sellController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             label: 'item_sell_price_label'.trParams({
-              'symbol': AppConstants.getCurrencySymbol(currency),
+              'symbol': AppConstants.getCurrencySymbol(currency).i18n(),
             }),
             hint: 'item_sell_price_hint'.i18n(),
             prefixIcon: Icons.sell_outlined,
@@ -162,4 +177,3 @@ class ItemDraftCard extends StatelessWidget {
     );
   }
 }
-

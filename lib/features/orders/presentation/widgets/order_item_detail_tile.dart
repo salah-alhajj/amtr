@@ -22,15 +22,18 @@ class OrderItemDetailTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                item.name,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  item.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 'item_qty_fmt'.trParams({'qty': item.quantity.toString()}),
                 style: const TextStyle(
@@ -55,33 +58,39 @@ class OrderItemDetailTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'item_cost_price_fmt'.trParams({
-                  'price': currencyService.formatAmount(
-                    item.costPrice,
-                    currencyCode: item.currency,
+              Flexible(
+                child: Text(
+                  'item_cost_price_fmt'.trParams({
+                    'price': currencyService.formatAmount(
+                      item.costPrice,
+                      currencyCode: item.currency,
+                    ),
+                  }),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
                   ),
-                }),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
                 ),
               ),
-              Text(
-                item.sellPrice != null
-                    ? 'item_sell_price_fmt'.trParams({
-                        'price': currencyService.formatAmount(
-                          item.sellPrice!,
-                          currencyCode: item.currency,
-                        ),
-                      })
-                    : 'item_sell_price_unset'.i18n(),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: item.sellPrice != null
-                      ? AppColors.primaryGreen
-                      : AppColors.statusWarning,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  item.sellPrice != null
+                      ? 'item_sell_price_fmt'.trParams({
+                          'price': currencyService.formatAmount(
+                            item.sellPrice!,
+                            currencyCode: item.currency,
+                          ),
+                        })
+                      : 'item_sell_price_unset'.i18n(),
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: item.sellPrice != null
+                        ? AppColors.primaryGreen
+                        : AppColors.statusWarning,
+                  ),
                 ),
               ),
             ],
