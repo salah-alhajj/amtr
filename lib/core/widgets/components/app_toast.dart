@@ -17,7 +17,7 @@ enum AppToastPosition {
   bottom,
 }
 
-/// نظام التوست والإشعارات المنبثقة الموحد (AMTR Unified Toast & In-App Notification System)
+/// نظام التوست والإشعارات المنبثقة الموحد (Mosaed Unified Toast & In-App Notification System)
 /// مصمم وفق إرشادات آبل للتصميم (Apple HIG) مع تأثيرات زجاجية ناعمة، حدود دقيقة،
 /// وانسيابية كاملة، مع دعم تام لاتجاه النصوص العربية RTL والوضع الداكن والفاتح.
 class AppToast {

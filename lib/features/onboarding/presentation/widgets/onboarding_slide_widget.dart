@@ -207,11 +207,11 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
                     color: AppColors.primaryBlue,
                     alignment: Alignment.center,
                     child: const Text(
-                      'AMTR',
+                      'Mosaed',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24,
+                        fontSize: 22,
                       ),
                     ),
                   );

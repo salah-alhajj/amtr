@@ -10,7 +10,7 @@ enum ErrorStateVariant {
   compact, // شريط مصغر مضغوط للأخطاء السريعة
 }
 
-/// ويدجت حالة الخطأ الموحد بتصميم آبل والهوية البصرية لـ AMTR
+/// ويدجت حالة الخطأ الموحد بتصميم آبل والهوية البصرية لـ مساعد
 /// يدعم أنيميشن ناعم وسلس (Soft Gentle Pulse Entrance)، مع خيارات تخصيص غير محدودة
 class AppErrorStateView extends StatefulWidget {
   final String? title;

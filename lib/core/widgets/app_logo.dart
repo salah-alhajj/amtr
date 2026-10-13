@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// ويدجت موحدة لعرض شعار تطبيق أمتار (AMTR)
+/// ويدجت موحدة لعرض شعار تطبيق مساعد (Mosaed)
 /// تدعم الحجم المخصص، الشفافية، والشكل الجمالي وفق إرشادات آبل وجوجل
 class AppLogo extends StatelessWidget {
   final double size;
@@ -36,11 +36,11 @@ class AppLogo extends StatelessWidget {
           color: AppColors.primaryBlue,
           alignment: Alignment.center,
           child: Text(
-            'AMTR',
+            'Mosaed',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: size * 0.28,
+              fontSize: size * 0.24,
             ),
           ),
         );

@@ -11,7 +11,7 @@ import 'app_buttons.dart';
 import 'app_text_fields.dart';
 
 /// قائمة منسدلة تفاعلية ومخصصة لاختيار والبحث عن عميل مسجل بالاسم أو الهاتف
-/// مطابقة لمفاهيم ومعايير نظام تصميم آبل الموحد لتطبيق AMTR،
+/// مطابقة لمفاهيم ومعايير نظام تصميم آبل الموحد لتطبيق مساعد،
 /// مع إمكانية إنشاء عميل جديد مباشرة عبر نفس البوتوم شيت واختياره فورياً.
 class AppCustomerSearchDropdown extends StatelessWidget {
   final String? selectedCustomerId;

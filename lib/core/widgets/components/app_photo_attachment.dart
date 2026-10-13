@@ -15,7 +15,7 @@ enum PhotoAttachmentSource {
   gallery,
 }
 
-/// مكوّن إدارة وإرفاق الصور الموحد بتصميم آبل (AMTR Unified Photo Attachment System)
+/// مكوّن إدارة وإرفاق الصور الموحد بتصميم آبل (Mosaed Unified Photo Attachment System)
 /// يدعم الاختيار من الكاميرا أو المعرض، معاينة فورية، حذف الصور، وتنسيقات مصغرة
 class AppPhotoAttachmentSection extends StatelessWidget {
   final List<String> photos;

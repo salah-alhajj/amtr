@@ -9,7 +9,7 @@ enum ShimmerDirection {
   btt, // من الأسفل إلى الأعلى
 }
 
-/// ويدجت الشيمر الأساسي فائق النعومة متوافق تماماً مع فلسفة تصميم آبل و AMTR
+/// ويدجت الشيمر الأساسي فائق النعومة متوافق تماماً مع فلسفة تصميم آبل و مساعد
 /// يوفر تدرجاً ضوئياً سلساً (Smooth Shimmer Wave) مع مراعاة الوضع الليلي والاتجاه RTL
 class AppShimmer extends StatefulWidget {
   final Widget child;

@@ -84,8 +84,8 @@ void main() {
         ),
       );
 
-      await tester.enterText(find.byType(TextField), 'AMTR Preservation Test');
-      expect(controller.text, 'AMTR Preservation Test');
+      await tester.enterText(find.byType(TextField), 'Mosaed Preservation Test');
+      expect(controller.text, 'Mosaed Preservation Test');
 
       // Switch to tab 1
       await tester.tap(find.byType(FloatingActionButton));
@@ -93,7 +93,7 @@ void main() {
       expect(find.text('Second Screen'), findsOneWidget);
 
       // Value in controller should remain intact
-      expect(controller.text, 'AMTR Preservation Test');
+      expect(controller.text, 'Mosaed Preservation Test');
     });
   });
 

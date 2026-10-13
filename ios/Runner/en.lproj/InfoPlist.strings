@@ -1,2 +1,6 @@
 "CFBundleDisplayName" = "Mosaed";
 "CFBundleName" = "Mosaed";
+"NSCameraUsageDescription" = "Mosaed needs camera access to capture order documents and attachments.";
+"NSPhotoLibraryUsageDescription" = "Mosaed needs photo library access to select attachments and receipts.";
+"NSCalendarsUsageDescription" = "Mosaed needs calendar access to schedule customer debt due dates.";
+"NSContactsUsageDescription" = "Mosaed needs contacts access to easily select and auto-fill customer phone numbers.";

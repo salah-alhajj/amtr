@@ -15,8 +15,8 @@ void main() {
       'common_skip': 'تخطي',
       'common_next': 'التالي',
       'common_start': 'ابدأ الآن',
-      'onboarding_slide0_badge': 'هوية أمتر',
-      'onboarding_slide0_title': 'مرحباً بك في أمتر',
+      'onboarding_slide0_badge': 'هوية مساعد',
+      'onboarding_slide0_title': 'مرحباً بك في مساعد',
     }, 'ar');
   });
 
@@ -57,8 +57,8 @@ void main() {
     // فحص ظهور العداد 1 / 8
     expect(find.text('1 / 8'), findsOneWidget);
     // فحص شارة السلايد الأول
-    expect(find.text('هوية أمتر'), findsOneWidget);
-    expect(find.text('مرحباً بك في أمتر'), findsOneWidget);
+    expect(find.text('هوية مساعد'), findsOneWidget);
+    expect(find.text('مرحباً بك في مساعد'), findsOneWidget);
     // فحص زر تخطي
     expect(find.text('تخطي'), findsOneWidget);
     // فحص زر التالي
