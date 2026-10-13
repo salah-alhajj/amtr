@@ -22,15 +22,16 @@ class PdfInvoiceGenerator {
     final pdf = pw.Document();
 
     // تحميل الخطوط العربية المضمنة في التطبيق
-    final regularFontData = await rootBundle.load('assets/fonts/IBMPlexSansArabic-Regular.ttf');
-    final boldFontData = await rootBundle.load('assets/fonts/IBMPlexSansArabic-Bold.ttf');
+    final regularFontData = await rootBundle.load(
+      'assets/fonts/IBMPlexSansArabic-Regular.ttf',
+    );
+    final boldFontData = await rootBundle.load(
+      'assets/fonts/IBMPlexSansArabic-Bold.ttf',
+    );
     final ttfRegular = pw.Font.ttf(regularFontData);
     final ttfBold = pw.Font.ttf(boldFontData);
 
-    final baseTheme = pw.ThemeData.withFont(
-      base: ttfRegular,
-      bold: ttfBold,
-    );
+    final baseTheme = pw.ThemeData.withFont(base: ttfRegular, bold: ttfBold);
 
     final pageFormat = options.paperSize.pageFormat;
     final int cols = options.effectiveColumnsPerRow;
@@ -73,7 +74,8 @@ class PdfInvoiceGenerator {
             textDirection: pw.TextDirection.rtl,
             margin: const pw.EdgeInsets.all(24),
             header: (pw.Context context) => _buildDocumentHeader(options),
-            footer: (pw.Context context) => _buildDocumentFooter(context, options),
+            footer: (pw.Context context) =>
+                _buildDocumentFooter(context, options),
             build: (pw.Context context) => [
               pw.Directionality(
                 textDirection: pw.TextDirection.rtl,
@@ -92,19 +94,24 @@ class PdfInvoiceGenerator {
     final double marginSize = 16.0;
     final double availableWidth = pageFormat.width - (marginSize * 2);
     final double columnSpacing = 10.0;
-    final double cardWidth = (availableWidth - (columnSpacing * (cols - 1))) / cols;
+    final double cardWidth =
+        (availableWidth - (columnSpacing * (cols - 1))) / cols;
 
     // نقسم الطلبات إلى شرائح (صفحات)
     // في A4، بارتفاع 842pt، فاتورة بارتفاع ~360pt تستوعب صفين (أي حتى 6 فواتير بالصفحة)
     // إذا كانت الطلبات تحتوي عناصر كثيرة (> 4 بنود)، نضع صفاً واحداً بالصفحة (3 فواتير بالصفحة)
     int invoicesPerPage = cols;
-    final bool anyOrderHasManyItems = orders.any((o) => o.items.length > 4 || options.includeItemPhotos);
+    final bool anyOrderHasManyItems = orders.any(
+      (o) => o.items.length > 4 || options.includeItemPhotos,
+    );
     if (!anyOrderHasManyItems && orders.every((o) => o.items.length <= 3)) {
       invoicesPerPage = cols * 2; // صفان
     }
 
     for (int i = 0; i < orders.length; i += invoicesPerPage) {
-      final end = (i + invoicesPerPage < orders.length) ? i + invoicesPerPage : orders.length;
+      final end = (i + invoicesPerPage < orders.length)
+          ? i + invoicesPerPage
+          : orders.length;
       final pageOrders = orders.sublist(i, end);
 
       pdf.addPage(
@@ -119,7 +126,11 @@ class PdfInvoiceGenerator {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  _buildPageHeader(options, pageIndex: (i ~/ invoicesPerPage) + 1, totalPages: (orders.length / invoicesPerPage).ceil()),
+                  _buildPageHeader(
+                    options,
+                    pageIndex: (i ~/ invoicesPerPage) + 1,
+                    totalPages: (orders.length / invoicesPerPage).ceil(),
+                  ),
                   pw.SizedBox(height: 8),
                   pw.Expanded(
                     child: _buildInvoiceGrid(
@@ -149,14 +160,20 @@ class PdfInvoiceGenerator {
       margin: const pw.EdgeInsets.only(bottom: 12),
       padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 1)),
+        border: pw.Border(
+          bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+        ),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
             options.documentTitle ?? 'print_invoice_slip_title'.i18n(),
-            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800),
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blueGrey800,
+            ),
           ),
           if (options.customerName != null)
             pw.Text(
@@ -173,11 +190,17 @@ class PdfInvoiceGenerator {
   }
 
   /// رأس كل صفحة في التوزيع الشبكي
-  static pw.Widget _buildPageHeader(PrintOptions options, {required int pageIndex, required int totalPages}) {
+  static pw.Widget _buildPageHeader(
+    PrintOptions options, {
+    required int pageIndex,
+    required int totalPages,
+  }) {
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 6),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.8)),
+        border: pw.Border(
+          bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.8),
+        ),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -187,12 +210,19 @@ class PdfInvoiceGenerator {
               pw.Container(
                 width: 8,
                 height: 8,
-                decoration: const pw.BoxDecoration(color: PdfColors.indigo700, shape: pw.BoxShape.circle),
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.indigo700,
+                  shape: pw.BoxShape.circle,
+                ),
               ),
               pw.SizedBox(width: 6),
               pw.Text(
                 options.documentTitle ?? 'print_default_doc_title'.i18n(),
-                style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900),
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.indigo900,
+                ),
               ),
             ],
           ),
@@ -206,12 +236,17 @@ class PdfInvoiceGenerator {
   }
 
   /// تذييل الصفحة
-  static pw.Widget _buildDocumentFooter(pw.Context context, PrintOptions options) {
+  static pw.Widget _buildDocumentFooter(
+    pw.Context context,
+    PrintOptions options,
+  ) {
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 10),
       padding: const pw.EdgeInsets.only(top: 6),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(top: pw.BorderSide(color: PdfColors.grey200, width: 0.8)),
+        border: pw.Border(
+          top: pw.BorderSide(color: PdfColors.grey200, width: 0.8),
+        ),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -221,7 +256,10 @@ class PdfInvoiceGenerator {
             style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey600),
           ),
           pw.Text(
-            'print_page_of'.trParams({'current': context.pageNumber.toString(), 'total': context.pagesCount.toString()}),
+            'print_page_of'.trParams({
+              'current': context.pageNumber.toString(),
+              'total': context.pagesCount.toString(),
+            }),
             style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey600),
           ),
         ],
@@ -330,7 +368,10 @@ class PdfInvoiceGenerator {
     return pw.Column(
       mainAxisAlignment: pw.MainAxisAlignment.center,
       children: [
-        pw.Text(':', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey400)),
+        pw.Text(
+          ':',
+          style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey400),
+        ),
         pw.SizedBox(height: 2),
         pw.Expanded(
           child: pw.Container(
@@ -355,13 +396,20 @@ class PdfInvoiceGenerator {
       margin: const pw.EdgeInsets.symmetric(vertical: 6),
       child: pw.Row(
         children: [
-          pw.Text('- - - ', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey400)),
+          pw.Text(
+            '- - - ',
+            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey400),
+          ),
           pw.Expanded(
             child: pw.Container(
               height: 1,
               decoration: const pw.BoxDecoration(
                 border: pw.Border(
-                  bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.8, style: pw.BorderStyle.dashed),
+                  bottom: pw.BorderSide(
+                    color: PdfColors.grey300,
+                    width: 0.8,
+                    style: pw.BorderStyle.dashed,
+                  ),
                 ),
               ),
             ),
@@ -397,7 +445,9 @@ class PdfInvoiceGenerator {
           pw.Container(
             padding: const pw.EdgeInsets.only(bottom: 6),
             decoration: const pw.BoxDecoration(
-              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.8)),
+              border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.8),
+              ),
             ),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
@@ -414,12 +464,19 @@ class PdfInvoiceGenerator {
                       ),
                     ),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
                       decoration: pw.BoxDecoration(
                         color: isPaid ? PdfColors.green50 : PdfColors.amber50,
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(3),
+                        ),
                         border: pw.Border.all(
-                          color: isPaid ? PdfColors.green700 : PdfColors.amber800,
+                          color: isPaid
+                              ? PdfColors.green700
+                              : PdfColors.amber800,
                           width: 0.6,
                         ),
                       ),
@@ -428,16 +485,21 @@ class PdfInvoiceGenerator {
                         style: pw.TextStyle(
                           fontSize: 7.5 * fontSizeScale,
                           fontWeight: pw.FontWeight.bold,
-                          color: isPaid ? PdfColors.green900 : PdfColors.amber900,
+                          color: isPaid
+                              ? PdfColors.green900
+                              : PdfColors.amber900,
                         ),
                       ),
                     ),
                   ],
                 ),
                 pw.SizedBox(height: 3),
-                if (order.customerName != null && order.customerName!.isNotEmpty)
+                if (order.customerName != null &&
+                    order.customerName!.isNotEmpty)
                   pw.Text(
-                    'print_customer_label'.trParams({'name': order.customerName!}),
+                    'print_customer_label'.trParams({
+                      'name': order.customerName!,
+                    }),
                     style: pw.TextStyle(
                       fontSize: 8.5 * fontSizeScale,
                       fontWeight: pw.FontWeight.bold,
@@ -450,11 +512,19 @@ class PdfInvoiceGenerator {
                   children: [
                     pw.Text(
                       DateFormat('yyyy/MM/dd').format(order.createdAt),
-                      style: pw.TextStyle(fontSize: 7.5 * fontSizeScale, color: PdfColors.grey600),
+                      style: pw.TextStyle(
+                        fontSize: 7.5 * fontSizeScale,
+                        color: PdfColors.grey600,
+                      ),
                     ),
                     pw.Text(
-                      'print_items_count'.trParams({'count': order.items.length.toString()}),
-                      style: pw.TextStyle(fontSize: 7.5 * fontSizeScale, color: PdfColors.grey600),
+                      'print_items_count'.trParams({
+                        'count': order.items.length.toString(),
+                      }),
+                      style: pw.TextStyle(
+                        fontSize: 7.5 * fontSizeScale,
+                        color: PdfColors.grey600,
+                      ),
                     ),
                   ],
                 ),
@@ -498,21 +568,24 @@ class PdfInvoiceGenerator {
               children: [
                 _buildSummaryRow(
                   label: '${'print_total_price'.i18n()}:',
-                  value: '${order.totalSellPrice.toStringAsFixed(1)} $currencySymbol',
+                  value:
+                      '${order.totalSellPrice.toStringAsFixed(1)} $currencySymbol',
                   fontSize: 8.5 * fontSizeScale,
                   isBold: true,
                 ),
                 if (order.paidAmount > 0)
                   _buildSummaryRow(
                     label: 'print_paid_summary'.i18n(),
-                    value: '${order.paidAmount.toStringAsFixed(1)} $currencySymbol',
+                    value:
+                        '${order.paidAmount.toStringAsFixed(1)} $currencySymbol',
                     fontSize: 7.5 * fontSizeScale,
                     color: PdfColors.green800,
                   ),
                 if (order.remainingDebt > 0)
                   _buildSummaryRow(
                     label: 'print_debt_summary'.i18n(),
-                    value: '${order.remainingDebt.toStringAsFixed(1)} $currencySymbol',
+                    value:
+                        '${order.remainingDebt.toStringAsFixed(1)} $currencySymbol',
                     fontSize: 8 * fontSizeScale,
                     color: PdfColors.red800,
                     isBold: true,
@@ -525,7 +598,10 @@ class PdfInvoiceGenerator {
             pw.SizedBox(height: 3),
             pw.Text(
               'print_notes_label'.trParams({'notes': order.notes!}),
-              style: pw.TextStyle(fontSize: 7 * fontSizeScale, color: PdfColors.grey600),
+              style: pw.TextStyle(
+                fontSize: 7 * fontSizeScale,
+                color: PdfColors.grey600,
+              ),
               maxLines: 1,
             ),
           ],
@@ -561,7 +637,9 @@ class PdfInvoiceGenerator {
                 height: 26,
                 margin: const pw.EdgeInsets.only(left: 4),
                 decoration: pw.BoxDecoration(
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(3),
+                  ),
                   border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
                 ),
                 child: pw.ClipRRect(
@@ -577,7 +655,9 @@ class PdfInvoiceGenerator {
         return pw.Container(
           padding: const pw.EdgeInsets.symmetric(vertical: 3),
           decoration: const pw.BoxDecoration(
-            border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.5)),
+            border: pw.Border(
+              bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+            ),
           ),
           child: pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
@@ -598,7 +678,10 @@ class PdfInvoiceGenerator {
                     ),
                     pw.Text(
                       '${item.quantity} × ${price.toStringAsFixed(1)} $currencySymbol',
-                      style: pw.TextStyle(fontSize: 7 * fontSizeScale, color: PdfColors.grey600),
+                      style: pw.TextStyle(
+                        fontSize: 7 * fontSizeScale,
+                        color: PdfColors.grey600,
+                      ),
                     ),
                   ],
                 ),
@@ -619,7 +702,10 @@ class PdfInvoiceGenerator {
   }
 
   /// تخطيط الفاتورة العريضة (في حال اختيار 1 عمود)
-  static pw.Widget _buildWideInvoiceLayout(IndividualOrder order, PrintOptions options) {
+  static pw.Widget _buildWideInvoiceLayout(
+    IndividualOrder order,
+    PrintOptions options,
+  ) {
     final currencySymbol = _getCurrencySymbol(order.currency);
     final isPaid = order.isFullyPaid;
 
@@ -640,33 +726,64 @@ class PdfInvoiceGenerator {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'print_invoice_for_order'.trParams({'number': order.orderNumber}),
-                    style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900),
+                    'print_invoice_for_order'.trParams({
+                      'number': order.orderNumber,
+                    }),
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.indigo900,
+                    ),
                   ),
                   pw.SizedBox(height: 4),
                   pw.Text(
-                    'print_creation_date'.trParams({'date': DateFormat('yyyy/MM/dd HH:mm').format(order.createdAt)}),
-                    style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                    'print_creation_date'.trParams({
+                      'date': DateFormat(
+                        'yyyy/MM/dd HH:mm',
+                      ).format(order.createdAt),
+                    }),
+                    style: const pw.TextStyle(
+                      fontSize: 10,
+                      color: PdfColors.grey700,
+                    ),
                   ),
                   if (order.customerName != null) ...[
                     pw.SizedBox(height: 2),
                     pw.Text(
-                      'print_customer_label'.trParams({'name': order.customerName!}),
-                      style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900),
+                      'print_customer_label'.trParams({
+                        'name': order.customerName!,
+                      }),
+                      style: pw.TextStyle(
+                        fontSize: 11,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey900,
+                      ),
                     ),
                   ],
                 ],
               ),
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: pw.BoxDecoration(
                   color: isPaid ? PdfColors.green50 : PdfColors.amber50,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
-                  border: pw.Border.all(color: isPaid ? PdfColors.green700 : PdfColors.amber700, width: 1),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(6),
+                  ),
+                  border: pw.Border.all(
+                    color: isPaid ? PdfColors.green700 : PdfColors.amber700,
+                    width: 1,
+                  ),
                 ),
                 child: pw.Text(
                   _getPaymentStatusText(order.paymentStatus),
-                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: isPaid ? PdfColors.green900 : PdfColors.amber900),
+                  style: pw.TextStyle(
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                    color: isPaid ? PdfColors.green900 : PdfColors.amber900,
+                  ),
                 ),
               ),
             ],
@@ -677,8 +794,14 @@ class PdfInvoiceGenerator {
           // جدول الأصناف
           pw.TableHelper.fromTextArray(
             border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.6),
-            headerStyle: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-            headerDecoration: const pw.BoxDecoration(color: PdfColors.indigo800),
+            headerStyle: pw.TextStyle(
+              fontSize: 10,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.white,
+            ),
+            headerDecoration: const pw.BoxDecoration(
+              color: PdfColors.indigo800,
+            ),
             cellAlignment: pw.Alignment.centerRight,
             cellStyle: const pw.TextStyle(fontSize: 9),
             headers: <String>[
@@ -688,21 +811,18 @@ class PdfInvoiceGenerator {
               'print_unit_price'.i18n(),
               'print_total_price'.i18n(),
             ],
-            data: List<List<dynamic>>.generate(
-              order.items.length,
-              (index) {
-                final item = order.items[index];
-                final price = item.sellPrice ?? item.costPrice;
-                final total = item.totalSell ?? item.totalCost;
-                return [
-                  '${index + 1}',
-                  item.name,
-                  '${item.quantity}',
-                  '${price.toStringAsFixed(1)} $currencySymbol',
-                  '${total.toStringAsFixed(1)} $currencySymbol',
-                ];
-              },
-            ),
+            data: List<List<dynamic>>.generate(order.items.length, (index) {
+              final item = order.items[index];
+              final price = item.sellPrice ?? item.costPrice;
+              final total = item.totalSell ?? item.totalCost;
+              return [
+                '${index + 1}',
+                item.name,
+                '${item.quantity}',
+                '${price.toStringAsFixed(1)} $currencySymbol',
+                '${total.toStringAsFixed(1)} $currencySymbol',
+              ];
+            }),
           ),
 
           pw.SizedBox(height: 16),
@@ -722,21 +842,24 @@ class PdfInvoiceGenerator {
                 children: [
                   _buildSummaryRow(
                     label: 'print_invoice_total'.i18n(),
-                    value: '${order.totalSellPrice.toStringAsFixed(1)} $currencySymbol',
+                    value:
+                        '${order.totalSellPrice.toStringAsFixed(1)} $currencySymbol',
                     fontSize: 11,
                     isBold: true,
                   ),
                   pw.SizedBox(height: 4),
                   _buildSummaryRow(
                     label: 'print_paid_amount'.i18n(),
-                    value: '${order.paidAmount.toStringAsFixed(1)} $currencySymbol',
+                    value:
+                        '${order.paidAmount.toStringAsFixed(1)} $currencySymbol',
                     fontSize: 10,
                     color: PdfColors.green800,
                   ),
                   pw.SizedBox(height: 4),
                   _buildSummaryRow(
                     label: 'print_remaining_debt'.i18n(),
-                    value: '${order.remainingDebt.toStringAsFixed(1)} $currencySymbol',
+                    value:
+                        '${order.remainingDebt.toStringAsFixed(1)} $currencySymbol',
                     fontSize: 11,
                     color: PdfColors.red800,
                     isBold: true,
@@ -790,7 +913,7 @@ class PdfInvoiceGenerator {
         return AppConstants.usdSymbol;
       case AppConstants.currencyYer:
       default:
-        return AppConstants.yerSymbol;
+        return AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase();
     }
   }
 
