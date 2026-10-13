@@ -132,15 +132,27 @@ class _BezierSalesChartState extends State<BezierSalesChart>
             ),
             const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(widget.labels.length, (i) {
                 final isSelected = _selectedIndex == i;
-                return Text(
-                  widget.labels[i],
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? widget.primaryColor : AppColors.textTertiary,
+                return Expanded(
+                  child: Align(
+                    alignment: i == 0
+                        ? AlignmentDirectional.centerStart
+                        : (i == widget.labels.length - 1
+                            ? AlignmentDirectional.centerEnd
+                            : AlignmentDirectional.center),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        widget.labels[i],
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected ? widget.primaryColor : AppColors.textTertiary,
+                        ),
+                      ),
+                    ),
                   ),
                 );
               }),
@@ -462,6 +474,8 @@ class _DonutLegendItem extends StatelessWidget {
             children: [
               Text(
                 '$title (${(ratio * 100).toStringAsFixed(0)}%)',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,

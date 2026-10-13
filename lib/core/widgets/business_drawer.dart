@@ -40,7 +40,9 @@ class BusinessDrawer extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
-      backgroundColor: isDark ? AppColors.darkScaffoldBackground : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.darkScaffoldBackground
+          : AppColors.backgroundLight,
       child: SafeArea(
         child: Column(
           children: [
@@ -48,10 +50,14 @@ class BusinessDrawer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
+                color: isDark
+                    ? AppColors.darkSurfaceCard
+                    : AppColors.surfaceWhite,
                 border: Border(
                   bottom: BorderSide(
-                    color: isDark ? AppColors.darkBorderDivider : AppColors.borderDivider,
+                    color: isDark
+                        ? AppColors.darkBorderDivider
+                        : AppColors.borderDivider,
                     width: 0.8,
                   ),
                 ),
@@ -61,10 +67,7 @@ class BusinessDrawer extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const AppLogo(
-                        size: 44,
-                        borderRadius: 12,
-                      ),
+                      const AppLogo(size: 44, borderRadius: 12),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -75,7 +78,9 @@ class BusinessDrawer extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.deepNavy,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.deepNavy,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -93,7 +98,9 @@ class BusinessDrawer extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -113,12 +120,19 @@ class BusinessDrawer extends StatelessWidget {
                       onTap: () => _showQuickCurrencyConverter(context),
                       borderRadius: BorderRadius.circular(12),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceMuted : const Color(0xFFF6F7F9),
+                          color: isDark
+                              ? AppColors.darkSurfaceMuted
+                              : const Color(0xFFF6F7F9),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorderSubtle : const Color(0xFFE5E7EB),
+                            color: isDark
+                                ? AppColors.darkBorderSubtle
+                                : const Color(0xFFE5E7EB),
                             width: 0.8,
                           ),
                         ),
@@ -130,14 +144,23 @@ class BusinessDrawer extends StatelessWidget {
                                 symbolWidget: SaudiRiyalIcon(
                                   width: 12,
                                   height: 12,
-                                  color: isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue,
+                                  color: isDark
+                                      ? AppColors.darkPrimaryBlue
+                                      : AppColors.primaryBlue,
                                 ),
                                 prefixNumber: '1',
-                                valueText: '${NumberFormat('#,##0.##').format(currencyService.sarToYer)} ${AppConstants.yerSymbol}',
+                                valueText:
+                                    '${NumberFormat('#,##0.##').format(currencyService.sarToYer)} ${AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase()}',
                                 isDark: isDark,
                               ),
                             ),
-                            Container(width: 0.8, height: 24, color: isDark ? AppColors.darkBorderDivider : AppColors.borderDivider),
+                            Container(
+                              width: 0.8,
+                              height: 24,
+                              color: isDark
+                                  ? AppColors.darkBorderDivider
+                                  : AppColors.borderDivider,
+                            ),
                             // 2. سعر صرف الدولار الأمريكي
                             Expanded(
                               child: _buildRateTickerItem(
@@ -146,15 +169,24 @@ class BusinessDrawer extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue,
+                                    color: isDark
+                                        ? AppColors.darkPrimaryBlue
+                                        : AppColors.primaryBlue,
                                   ),
                                 ),
                                 prefixNumber: '1',
-                                valueText: '${NumberFormat('#,##0.##').format(currencyService.usdToYer)} ${AppConstants.yerSymbol}',
+                                valueText:
+                                    '${NumberFormat('#,##0.##').format(currencyService.usdToYer)} ${AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase()}',
                                 isDark: isDark,
                               ),
                             ),
-                            Container(width: 0.8, height: 24, color: isDark ? AppColors.darkBorderDivider : AppColors.borderDivider),
+                            Container(
+                              width: 0.8,
+                              height: 24,
+                              color: isDark
+                                  ? AppColors.darkBorderDivider
+                                  : AppColors.borderDivider,
+                            ),
                             // 3. محول العملات والعملة النشطة
                             Expanded(
                               child: _buildCalculatorTickerItem(
@@ -175,7 +207,10 @@ class BusinessDrawer extends StatelessWidget {
             // قائمة الخيارات المالية واللوجستية
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 children: [
                   _buildSectionHeader('drawer_operations_logistics'.i18n()),
                   _DrawerMenuItem(
@@ -200,7 +235,9 @@ class BusinessDrawer extends StatelessWidget {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const OrdersListScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const OrdersListScreen(),
+                          ),
                         );
                       }
                     },
@@ -217,7 +254,9 @@ class BusinessDrawer extends StatelessWidget {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ShipmentsListScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const ShipmentsListScreen(),
+                          ),
                         );
                       }
                     },
@@ -234,7 +273,9 @@ class BusinessDrawer extends StatelessWidget {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const CustomersListScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const CustomersListScreen(),
+                          ),
                         );
                       }
                     },
@@ -255,7 +296,9 @@ class BusinessDrawer extends StatelessWidget {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsScreen(),
+                          ),
                         );
                       }
                     },
@@ -269,7 +312,9 @@ class BusinessDrawer extends StatelessWidget {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const BackupRestoreScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const BackupRestoreScreen(),
+                        ),
                       );
                     },
                   ),
@@ -285,7 +330,9 @@ class BusinessDrawer extends StatelessWidget {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsScreen(),
+                          ),
                         );
                       }
                     },
@@ -302,7 +349,9 @@ class BusinessDrawer extends StatelessWidget {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const AboutAppScreen(),
+                          ),
                         );
                       }
                     },
@@ -315,10 +364,14 @@ class BusinessDrawer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
+                color: isDark
+                    ? AppColors.darkSurfaceCard
+                    : AppColors.surfaceWhite,
                 border: Border(
                   top: BorderSide(
-                    color: isDark ? AppColors.darkBorderDivider : AppColors.borderDivider,
+                    color: isDark
+                        ? AppColors.darkBorderDivider
+                        : AppColors.borderDivider,
                     width: 0.8,
                   ),
                 ),
@@ -328,93 +381,108 @@ class BusinessDrawer extends StatelessWidget {
                   final currentCode = localeState.locale.languageCode;
 
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceMuted,
+                      color: isDark
+                          ? AppColors.darkSurfaceMuted
+                          : AppColors.surfaceMuted,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: isDark ? AppColors.darkBorderDivider : AppColors.borderSubtle,
+                        color: isDark
+                            ? AppColors.darkBorderDivider
+                            : AppColors.borderSubtle,
                         width: 0.8,
                       ),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: AppLanguage.supported.any((l) => l.code == currentCode)
+                        value:
+                            AppLanguage.supported.any(
+                              (l) => l.code == currentCode,
+                            )
                             ? currentCode
                             : 'ar',
                         isExpanded: true,
                         isDense: true,
-                            icon: Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                              size: 20,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            dropdownColor:
-                                isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite,
-                            items: AppLanguage.supported.map((lang) {
-                              final isSelected = lang.code == currentCode;
-                              return DropdownMenuItem<String>(
-                                value: lang.code,
-                                child: Row(
-                                  children: [
-                                    CountryFlagSvg.fromLanguageCode(
-                                      lang.code,
-                                      width: 20,
-                                      height: 15,
-                                      borderRadius: 2.5,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      lang.nativeName,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                        color: isSelected
-                                            ? (isDark
-                                                ? AppColors.darkPrimaryBlue
-                                                : AppColors.primaryBlue)
-                                            : (isDark
-                                                ? AppColors.darkTextPrimary
-                                                : AppColors.textPrimary),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        '(${lang.translationKey.i18n()})',
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: isDark
-                                              ? AppColors.darkTextTertiary
-                                              : AppColors.textTertiary,
-                                        ),
-                                      ),
-                                    ),
-                                    if (isSelected)
-                                      Icon(
-                                        Icons.check_rounded,
-                                        size: 16,
-                                        color: isDark
-                                            ? AppColors.darkPrimaryBlue
-                                            : AppColors.primaryBlue,
-                                      ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (newCode) {
-                              if (newCode != null && newCode != currentCode) {
-                                context.read<LocaleBloc>().add(
-                                      ChangeLocale(Locale(newCode)),
-                                    );
-                              }
-                            },
-                          ),
+                        icon: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                          size: 20,
                         ),
-                      );
-                    },
+                        borderRadius: BorderRadius.circular(12),
+                        dropdownColor: isDark
+                            ? AppColors.darkSurfaceCard
+                            : AppColors.surfaceWhite,
+                        items: AppLanguage.supported.map((lang) {
+                          final isSelected = lang.code == currentCode;
+                          return DropdownMenuItem<String>(
+                            value: lang.code,
+                            child: Row(
+                              children: [
+                                CountryFlagSvg.fromLanguageCode(
+                                  lang.code,
+                                  width: 20,
+                                  height: 15,
+                                  borderRadius: 2.5,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  lang.nativeName,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? (isDark
+                                              ? AppColors.darkPrimaryBlue
+                                              : AppColors.primaryBlue)
+                                        : (isDark
+                                              ? AppColors.darkTextPrimary
+                                              : AppColors.textPrimary),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    '(${lang.translationKey.i18n()})',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark
+                                          ? AppColors.darkTextTertiary
+                                          : AppColors.textTertiary,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check_rounded,
+                                    size: 16,
+                                    color: isDark
+                                        ? AppColors.darkPrimaryBlue
+                                        : AppColors.primaryBlue,
+                                  ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newCode) {
+                          if (newCode != null && newCode != currentCode) {
+                            context.read<LocaleBloc>().add(
+                              ChangeLocale(Locale(newCode)),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -429,7 +497,9 @@ class BusinessDrawer extends StatelessWidget {
     required String valueText,
     required bool isDark,
   }) {
-    final primaryColor = isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue;
+    final primaryColor = isDark
+        ? AppColors.darkPrimaryBlue
+        : AppColors.primaryBlue;
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -457,7 +527,9 @@ class BusinessDrawer extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
       ],
@@ -469,8 +541,12 @@ class BusinessDrawer extends StatelessWidget {
     required String activeCurrency,
     required bool isDark,
   }) {
-    final primaryColor = isDark ? AppColors.darkPrimaryBlue : AppColors.primaryBlue;
-    final secondaryColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final primaryColor = isDark
+        ? AppColors.darkPrimaryBlue
+        : AppColors.primaryBlue;
+    final secondaryColor = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
     final isArabic = context.isArabic;
     final activePrefix = isArabic ? 'النشطة: ' : 'Active: ';
 
@@ -480,19 +556,34 @@ class BusinessDrawer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(activePrefix, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor)),
+          Text(
+            activePrefix,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: secondaryColor,
+            ),
+          ),
           SaudiRiyalIcon(width: 10, height: 10, color: secondaryColor),
         ],
       );
     } else if (activeCurrency == AppConstants.currencyUsd) {
       activeBadge = Text(
         '$activePrefix\$',
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: secondaryColor,
+        ),
       );
     } else {
       activeBadge = Text(
-        '$activePrefix${isArabic ? AppConstants.yerSymbol : 'YER'}',
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: secondaryColor),
+        '$activePrefix${isArabic ? AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase() : 'YER'}',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: secondaryColor,
+        ),
       );
     }
 
@@ -628,11 +719,15 @@ class _QuickCurrencyConverterSheet extends StatefulWidget {
   const _QuickCurrencyConverterSheet();
 
   @override
-  State<_QuickCurrencyConverterSheet> createState() => _QuickCurrencyConverterSheetState();
+  State<_QuickCurrencyConverterSheet> createState() =>
+      _QuickCurrencyConverterSheetState();
 }
 
-class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterSheet> {
-  final TextEditingController _amountController = TextEditingController(text: '100');
+class _QuickCurrencyConverterSheetState
+    extends State<_QuickCurrencyConverterSheet> {
+  final TextEditingController _amountController = TextEditingController(
+    text: '100',
+  );
   String _sourceCurrency = AppConstants.currencySar;
 
   @override
@@ -646,9 +741,21 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
     final currencyService = CurrencyService.instance;
     final amount = double.tryParse(_amountController.text) ?? 0.0;
 
-    final double sarVal = currencyService.convert(amount: amount, fromCurrency: _sourceCurrency, toCurrency: AppConstants.currencySar);
-    final double usdVal = currencyService.convert(amount: amount, fromCurrency: _sourceCurrency, toCurrency: AppConstants.currencyUsd);
-    final double yerVal = currencyService.convert(amount: amount, fromCurrency: _sourceCurrency, toCurrency: AppConstants.currencyYer);
+    final double sarVal = currencyService.convert(
+      amount: amount,
+      fromCurrency: _sourceCurrency,
+      toCurrency: AppConstants.currencySar,
+    );
+    final double usdVal = currencyService.convert(
+      amount: amount,
+      fromCurrency: _sourceCurrency,
+      toCurrency: AppConstants.currencyUsd,
+    );
+    final double yerVal = currencyService.convert(
+      amount: amount,
+      fromCurrency: _sourceCurrency,
+      toCurrency: AppConstants.currencyYer,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -661,7 +768,9 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
             Expanded(
               child: AppTextField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => setState(() {}),
                 label: 'converter_amount_hint'.i18n(),
                 hint: '100',
@@ -694,7 +803,10 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('\$ ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text(
+                          '\$ ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         Flexible(
                           child: Text(
                             'currency_usd'.i18n(),
@@ -709,7 +821,10 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('${AppConstants.yerSymbol} ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          '${AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase()} ',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         Flexible(
                           child: Text(
                             'currency_yer'.i18n(),
@@ -739,7 +854,9 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: _sourceCurrency != AppConstants.currencySar ? AppColors.primaryGreen : AppColors.textPrimary,
+              color: _sourceCurrency != AppConstants.currencySar
+                  ? AppColors.primaryGreen
+                  : AppColors.textPrimary,
             ),
           ),
           icon: Icons.account_balance_wallet_outlined,
@@ -756,7 +873,9 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: _sourceCurrency != AppConstants.currencyUsd ? AppColors.primaryBlue : AppColors.textPrimary,
+              color: _sourceCurrency != AppConstants.currencyUsd
+                  ? AppColors.primaryBlue
+                  : AppColors.textPrimary,
             ),
           ),
           icon: Icons.attach_money_rounded,
@@ -773,7 +892,9 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: _sourceCurrency != AppConstants.currencyYer ? AppColors.vibrantTeal : AppColors.textPrimary,
+              color: _sourceCurrency != AppConstants.currencyYer
+                  ? AppColors.vibrantTeal
+                  : AppColors.textPrimary,
             ),
           ),
           icon: Icons.receipt_long_outlined,
@@ -809,10 +930,14 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isHighlight ? color.withValues(alpha: 0.08) : AppColors.surfaceMuted,
+        color: isHighlight
+            ? color.withValues(alpha: 0.08)
+            : AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isHighlight ? color.withValues(alpha: 0.25) : AppColors.borderSubtle,
+          color: isHighlight
+              ? color.withValues(alpha: 0.25)
+              : AppColors.borderSubtle,
           width: 0.8,
         ),
       ),
@@ -833,7 +958,9 @@ class _QuickCurrencyConverterSheetState extends State<_QuickCurrencyConverterShe
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isHighlight ? FontWeight.w600 : FontWeight.normal,
-                color: isHighlight ? AppColors.textPrimary : AppColors.textSecondary,
+                color: isHighlight
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
               ),
             ),
           ),
