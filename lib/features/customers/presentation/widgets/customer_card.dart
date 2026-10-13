@@ -74,16 +74,32 @@ class CustomerCard extends StatelessWidget {
                   children: [
                     Text(
                       customer.phone != null
-                          ? (YemenPhoneHelper.formatForDisplay(customer.phone, context: context) ?? customer.phone!)
-                          : (customer.whatsapp != null && customer.whatsapp!.isNotEmpty
-                              ? (YemenPhoneHelper.formatForDisplay(customer.whatsapp, context: context) ?? customer.whatsapp!)
-                              : 'customer_no_phone'.i18n()),
-                      textDirection: (customer.phone != null || (customer.whatsapp != null && customer.whatsapp!.isNotEmpty))
+                          ? (YemenPhoneHelper.formatForDisplay(
+                                  customer.phone,
+                                  context: context,
+                                ) ??
+                                customer.phone!)
+                          : (customer.whatsapp != null &&
+                                    customer.whatsapp!.isNotEmpty
+                                ? (YemenPhoneHelper.formatForDisplay(
+                                        customer.whatsapp,
+                                        context: context,
+                                      ) ??
+                                      customer.whatsapp!)
+                                : 'customer_no_phone'.i18n()),
+                      textDirection:
+                          (customer.phone != null ||
+                              (customer.whatsapp != null &&
+                                  customer.whatsapp!.isNotEmpty))
                           ? TextDirection.ltr
                           : null,
-                      style: TextStyle(fontSize: 12, color: context.textSecondary),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.textSecondary,
+                      ),
                     ),
-                    if (customer.whatsapp != null && customer.whatsapp!.isNotEmpty) ...[
+                    if (customer.whatsapp != null &&
+                        customer.whatsapp!.isNotEmpty) ...[
                       const SizedBox(width: 6),
                       const WhatsAppIcon(size: 13),
                     ],
@@ -97,20 +113,28 @@ class CustomerCard extends StatelessWidget {
                     children: [
                       if (summary!.debtsOwed > 0.001) ...[
                         AppBadge(
-                          label: '${'customer_badge_debt'.i18n()}: ${CurrencyService.instance.formatAmount(summary!.debtsOwed, currencyCode: summary!.activeCurrency)}',
+                          label:
+                              '${'customer_badge_debt'.i18n()}: ${CurrencyService.instance.formatAmount(summary!.debtsOwed, currencyCode: summary!.activeCurrency)}',
                           color: AppColors.statusDanger,
                           icon: Icons.trending_down_rounded,
                           fontSize: 10,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                         ),
                       ],
                       if (summary!.creditBalance > 0.001) ...[
                         AppBadge(
-                          label: '${'customer_badge_creditor'.i18n()}: ${CurrencyService.instance.formatAmount(summary!.creditBalance, currencyCode: summary!.activeCurrency)}',
+                          label:
+                              '${'customer_badge_creditor'.i18n()}: ${CurrencyService.instance.formatAmount(summary!.creditBalance, currencyCode: summary!.activeCurrency)}',
                           color: AppColors.statusInfo,
                           icon: Icons.account_balance_wallet_rounded,
                           fontSize: 10,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                         ),
                       ],
                       if (summary!.pendingOrdersCount > 0) ...[
@@ -121,7 +145,10 @@ class CustomerCard extends StatelessWidget {
                           color: AppColors.statusWarning,
                           icon: Icons.hourglass_top_rounded,
                           fontSize: 10,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                         ),
                       ],
                       if (summary!.allOrdersCount == 0) ...[
@@ -130,7 +157,10 @@ class CustomerCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                           icon: Icons.person_outline,
                           fontSize: 10,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                         ),
                       ],
                     ],
@@ -160,7 +190,8 @@ class CustomerCard extends StatelessWidget {
               size: 34,
               iconSize: 16,
               tooltip: 'customer_call_btn'.i18n(),
-              onPressed: () => YemenPhoneHelper.launchPhoneCall(context, customer.phone),
+              onPressed: () =>
+                  YemenPhoneHelper.launchPhoneCall(context, customer.phone),
             ),
             const SizedBox(width: 6),
           ],

@@ -558,7 +558,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         _buildFinancialTile(
           title: 'customer_benefit_amount'.i18n(),
           amount: summary.benefitedAmount,
-          currency: summary.activeCurrency,
+          currency: summary.activeCurrency.i18n(),
           icon: Icons.trending_up_rounded,
           color: AppColors.primaryGreen,
           isDark: isDark,
@@ -572,7 +572,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         _buildFinancialTile(
           title: 'customer_debts_owed'.i18n(),
           amount: summary.debtsOwed,
-          currency: summary.activeCurrency,
+          currency: summary.activeCurrency.i18n(),
           icon: Icons.receipt_long_rounded,
           color: AppColors.statusDanger,
           isDark: isDark,
@@ -721,59 +721,71 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         onTap: (_) => setState(() {}),
         tabs: [
           Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.shopping_bag_outlined, size: 16),
-                const SizedBox(width: 4),
-                Text('customer_tab_orders'.i18n()),
-                const SizedBox(width: 4),
-                Text(
-                  '(${_orders.length})',
-                  style: const TextStyle(fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.receipt_outlined, size: 16),
-                const SizedBox(width: 4),
-                Text('customer_tab_debts'.i18n()),
-                if (debtsCount > 0) ...[
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.shopping_bag_outlined, size: 16),
                   const SizedBox(width: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.statusDanger,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '$debtsCount',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  Text('customer_tab_orders'.i18n()),
+                  const SizedBox(width: 4),
+                  Text(
+                    '(${_orders.length})',
+                    style: const TextStyle(fontSize: 11),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
           Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.auto_graph_rounded, size: 16),
-                const SizedBox(width: 4),
-                Text('customer_tab_finance'.i18n()),
-              ],
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.receipt_outlined, size: 16),
+                  const SizedBox(width: 4),
+                  Text('customer_tab_debts'.i18n()),
+                  if (debtsCount > 0) ...[
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.statusDanger,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '$debtsCount',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Tab(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.auto_graph_rounded, size: 16),
+                  const SizedBox(width: 4),
+                  Text('customer_tab_finance'.i18n()),
+                ],
+              ),
             ),
           ),
         ],
@@ -964,9 +976,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   if (_isSelectionMode) ...[
                                     Icon(
@@ -991,45 +1004,51 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                   ),
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  AppBadge(
-                                    label: AppConstants.getOrderStatusLabel(
-                                      o.orderStatus,
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Wrap(
+                                  alignment: WrapAlignment.end,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 6,
+                                  runSpacing: 4,
+                                  children: [
+                                    AppBadge(
+                                      label: AppConstants.getOrderStatusLabel(
+                                        o.orderStatus,
+                                      ),
+                                      color:
+                                          o.orderStatus ==
+                                              AppConstants.orderStatusDelivered
+                                          ? AppColors.primaryGreen
+                                          : AppColors.primaryBlue,
                                     ),
-                                    color:
-                                        o.orderStatus ==
-                                            AppConstants.orderStatusDelivered
-                                        ? AppColors.primaryGreen
-                                        : AppColors.primaryBlue,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  AppBadge(
-                                    label: AppConstants.getPaymentStatusLabel(
-                                      o.paymentStatus,
+                                    AppBadge(
+                                      label: AppConstants.getPaymentStatusLabel(
+                                        o.paymentStatus,
+                                      ),
+                                      color:
+                                          o.paymentStatus ==
+                                              AppConstants.paymentPrepaid
+                                          ? AppColors.primaryGreen
+                                          : (o.remainingDebt > 0
+                                                ? AppColors.statusDanger
+                                                : AppColors.statusWarning),
                                     ),
-                                    color:
-                                        o.paymentStatus ==
-                                            AppConstants.paymentPrepaid
-                                        ? AppColors.primaryGreen
-                                        : (o.remainingDebt > 0
-                                              ? AppColors.statusDanger
-                                              : AppColors.statusWarning),
-                                  ),
-                                  if (!_isSelectionMode) ...[
-                                    const SizedBox(width: 6),
-                                    AppIconButton(
-                                      customIcon: const WhatsAppIcon(size: 16),
-                                      color: AppColors.primaryGreen,
-                                      size: 30,
-                                      tooltip:
-                                          'customer_send_order_status_whatsapp'
-                                              .i18n(),
-                                      onPressed: () =>
-                                          _sendSingleOrderWhatsApp(o),
-                                    ),
+                                    if (!_isSelectionMode)
+                                      AppIconButton(
+                                        customIcon: const WhatsAppIcon(
+                                          size: 16,
+                                        ),
+                                        color: AppColors.primaryGreen,
+                                        size: 28,
+                                        tooltip:
+                                            'customer_send_order_status_whatsapp'
+                                                .i18n(),
+                                        onPressed: () =>
+                                            _sendSingleOrderWhatsApp(o),
+                                      ),
                                   ],
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -1037,16 +1056,20 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                '${'items_count'.trParams({'count': o.items.length.toString()})} • ${o.createdAt.year}/${o.createdAt.month}/${o.createdAt.day}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: context.textSecondary,
+                              Flexible(
+                                child: Text(
+                                  '${'items_count'.trParams({'count': o.items.length.toString()})} • ${o.createdAt.year}/${o.createdAt.month}/${o.createdAt.day}',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: context.textSecondary,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               CurrencyPriceDisplay(
                                 amount: o.totalSellPrice,
-                                currency: o.currency,
+                                currency: o.currency.i18n(),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -1072,13 +1095,17 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    'customer_remaining_debt_on_order'.i18n(),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.statusDanger,
+                                  Flexible(
+                                    child: Text(
+                                      'customer_remaining_debt_on_order'.i18n(),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.statusDanger,
+                                      ),
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
                                   CurrencyPriceDisplay(
                                     amount: o.remainingDebt,
                                     currency: o.currency,
@@ -1339,7 +1366,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     const SizedBox(width: 4),
                     Text(
                       'customer_due_date_prefix'.trParams({
-                        'date': '${order.debtDueDate!.year}/${order.debtDueDate!.month}/${order.debtDueDate!.day}',
+                        'date':
+                            '${order.debtDueDate!.year}/${order.debtDueDate!.month}/${order.debtDueDate!.day}',
                       }),
                       style: const TextStyle(
                         fontSize: 11,
