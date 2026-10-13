@@ -7,6 +7,8 @@ class AppPrimaryButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final Widget? customIcon;
+  final IconData? trailingIcon;
+  final Widget? customTrailingIcon;
   final bool isLoading;
   final Color? backgroundColor;
   final Color? textColor;
@@ -14,6 +16,7 @@ class AppPrimaryButton extends StatefulWidget {
   final double? width;
   final double height;
   final double borderRadius;
+  final EdgeInsetsGeometry? padding;
 
   const AppPrimaryButton({
     super.key,
@@ -21,6 +24,8 @@ class AppPrimaryButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.customIcon,
+    this.trailingIcon,
+    this.customTrailingIcon,
     this.isLoading = false,
     this.backgroundColor,
     this.textColor,
@@ -28,6 +33,7 @@ class AppPrimaryButton extends StatefulWidget {
     this.width,
     this.height = 50,
     this.borderRadius = 14,
+    this.padding,
   });
 
   @override
@@ -93,6 +99,7 @@ class _AppPrimaryButtonState extends State<AppPrimaryButton>
         child: Container(
           width: widget.width,
           height: widget.height,
+          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: widget.gradient == null
                 ? (isEnabled ? defaultBg : defaultBg.withValues(alpha: 0.4))
@@ -145,6 +152,17 @@ class _AppPrimaryButtonState extends State<AppPrimaryButton>
                               letterSpacing: 0.2,
                             ),
                           ),
+                          if (widget.customTrailingIcon != null) ...[
+                            const SizedBox(width: 8),
+                            widget.customTrailingIcon!,
+                          ] else if (widget.trailingIcon != null) ...[
+                            const SizedBox(width: 8),
+                            Icon(
+                              widget.trailingIcon,
+                              color: defaultText,
+                              size: 18,
+                            ),
+                          ],
                         ],
                       ),
               ),
@@ -162,6 +180,8 @@ class AppSecondaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final Widget? customIcon;
+  final IconData? trailingIcon;
+  final Widget? customTrailingIcon;
   final Color? color;
   final double? width;
   final double height;
@@ -174,6 +194,8 @@ class AppSecondaryButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.customIcon,
+    this.trailingIcon,
+    this.customTrailingIcon,
     this.color,
     this.width,
     this.height = 46,
@@ -218,6 +240,13 @@ class AppSecondaryButton extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (customTrailingIcon != null) ...[
+                  const SizedBox(width: 6),
+                  customTrailingIcon!,
+                ] else if (trailingIcon != null) ...[
+                  const SizedBox(width: 6),
+                  Icon(trailingIcon, color: baseColor, size: 17),
+                ],
               ],
             ),
           ),
@@ -233,10 +262,13 @@ class AppOutlinedButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final Widget? customIcon;
+  final IconData? trailingIcon;
+  final Widget? customTrailingIcon;
   final Color? color;
   final double? width;
   final double height;
   final double borderRadius;
+  final EdgeInsetsGeometry? padding;
 
   const AppOutlinedButton({
     super.key,
@@ -244,10 +276,13 @@ class AppOutlinedButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.customIcon,
+    this.trailingIcon,
+    this.customTrailingIcon,
     this.color,
     this.width,
     this.height = 46,
     this.borderRadius = 12,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16),
   });
 
   @override
@@ -257,6 +292,7 @@ class AppOutlinedButton extends StatelessWidget {
     return Container(
       width: width,
       height: height,
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -290,6 +326,13 @@ class AppOutlinedButton extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (customTrailingIcon != null) ...[
+                  const SizedBox(width: 6),
+                  customTrailingIcon!,
+                ] else if (trailingIcon != null) ...[
+                  const SizedBox(width: 6),
+                  Icon(trailingIcon, color: baseColor, size: 16),
+                ],
               ],
             ),
           ),

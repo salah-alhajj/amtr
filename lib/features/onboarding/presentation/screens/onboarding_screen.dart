@@ -224,9 +224,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: isFirstSlide ? null : _goToPrevious,
                     label: 'common_previous'.i18n(),
                     customIcon: const BackChevron(size: 14),
-                    height: 40,
+                    height: 42,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
+                      horizontal: 16,
                       vertical: 8,
                     ),
                   ),
@@ -249,9 +249,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 AppPrimaryButton(
                   onPressed: _goToNext,
                   label: 'common_next'.i18n(),
-                  customIcon: const ForwardChevron(size: 14, color: Colors.white),
+                  customTrailingIcon: const ForwardChevron(
+                    size: 14,
+                    color: Colors.white,
+                  ),
                   gradient: AppColors.appleGradient,
                   height: 42,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 8,
+                  ),
                   borderRadius: 14,
                 ),
               ],
