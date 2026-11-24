@@ -72,7 +72,12 @@
 	<array>
 		<string>ar</string>
 		<string>en</string>
+		<string>es</string>
+		<string>fr</string>
+		<string>tr</string>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 
 	<!-- أذونات الكاميرا ومعرض الصور لطلب الفواتير والمرفقات -->
 	<key>NSCameraUsageDescription</key>
