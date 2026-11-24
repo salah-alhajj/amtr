@@ -1,10 +1,18 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/database/app_database.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../../../models/individual_order.dart';
+import '../../../../models/payment_transaction.dart';
 import '../../../customers/domain/repositories/customer_repository.dart';
+import '../../../expenses/data/repositories/expense_repository_impl.dart';
+import '../../../expenses/domain/repositories/expense_repository.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
+import '../../../products/data/repositories/product_repository_impl.dart';
+import '../../../products/domain/repositories/product_repository.dart';
 import '../../../shipments/domain/repositories/shipment_repository.dart';
 import '../../domain/entities/dashboard_stats.dart';
 
@@ -73,17 +81,33 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final OrderRepository orderRepo;
   final ShipmentRepository shipmentRepo;
   final CustomerRepository customerRepo;
+  final ExpenseRepository expenseRepo;
+  final ProductRepository productRepo;
   final CurrencyService currencyService;
+  late final StreamSubscription<DataDomain> _syncSub;
 
   DashboardBloc({
     required this.orderRepo,
     required this.shipmentRepo,
     required this.customerRepo,
+    ExpenseRepository? expenseRepo,
+    ProductRepository? productRepo,
     CurrencyService? currency,
-  })  : currencyService = currency ?? CurrencyService.instance,
+  })  : expenseRepo = expenseRepo ?? ExpenseRepositoryImpl(),
+        productRepo = productRepo ?? ProductRepositoryImpl(),
+        currencyService = currency ?? CurrencyService.instance,
         super(const DashboardInitial()) {
     on<LoadDashboardData>(_onLoadDashboardData);
     on<ChangeDisplayCurrency>(_onChangeDisplayCurrency);
+    _syncSub = DataSyncBus.instance.stream.listen((_) {
+      add(const LoadDashboardData());
+    });
+  }
+
+  @override
+  Future<void> close() async {
+    await _syncSub.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadDashboardData(
@@ -96,6 +120,63 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final orders = await orderRepo.getAllOrders();
       final shipments = await shipmentRepo.getAllShipments();
       final customers = await customerRepo.getAllCustomers();
+      final expenses = await expenseRepo.getAllExpenses();
+      final products = await productRepo.getAllProducts();
+
+      final nowDate = DateTime.now();
+      double businessExpensesYer = 0.0;
+      double personalDrawingsYer = 0.0;
+      double todayBusinessExpensesYer = 0.0;
+
+      for (final exp in expenses) {
+        final amountYer = currencyService.toBaseYer(exp.amount, exp.currency);
+        if (exp.isPersonalDrawing) {
+          personalDrawingsYer += amountYer;
+        } else {
+          businessExpensesYer += amountYer;
+          if (exp.expenseDate.year == nowDate.year &&
+              exp.expenseDate.month == nowDate.month &&
+              exp.expenseDate.day == nowDate.day) {
+            todayBusinessExpensesYer += amountYer;
+          }
+        }
+      }
+
+      double todayCashInYer = 0.0;
+      try {
+        final db = await AppDatabase.instance.database;
+        final todayPrefix =
+            '${nowDate.year.toString().padLeft(4, '0')}-${nowDate.month.toString().padLeft(2, '0')}-${nowDate.day.toString().padLeft(2, '0')}';
+        final paymentMaps = await db.query(
+          'payment_transactions',
+          where: 'paidAt LIKE ?',
+          whereArgs: ['$todayPrefix%'],
+        );
+        for (final map in paymentMaps) {
+          final tx = PaymentTransaction.fromMap(map);
+          todayCashInYer += currencyService.toBaseYer(tx.amount, tx.currency);
+        }
+      } catch (_) {
+        // تجاهل آمن في بيئات الاختبار التي لا تهيئ قاعدة البيانات
+      }
+
+      final int lowStockCount = products.where((p) => p.isLowStock).length;
+      int todayOrdersCount = 0;
+      double todaySalesYer = 0.0;
+      bool isSameDay(DateTime a, DateTime b) =>
+          a.year == b.year && a.month == b.month && a.day == b.day;
+      for (final o in orders) {
+        final isTodayOrder = isSameDay(o.createdAt, nowDate) ||
+            (o.expectedDeliveryDate != null &&
+                isSameDay(o.expectedDeliveryDate!, nowDate));
+        if (isTodayOrder && o.orderStatus != AppConstants.orderStatusDelivered) {
+          todayOrdersCount++;
+        }
+        if (isSameDay(o.createdAt, nowDate)) {
+          todaySalesYer +=
+              currencyService.toBaseYer(o.totalSellPrice, o.currency);
+        }
+      }
 
       double totalDebtsYer = 0.0;
       double collectedCapitalYer = 0.0;
@@ -172,15 +253,26 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       }
 
       final totalCapitalYer = collectedCapitalYer + remainingCapitalYer;
+      final netProfitAfterExpensesYer = totalProfitYer - businessExpensesYer;
+      final netCashInHandYer =
+          collectedCapitalYer - businessExpensesYer - personalDrawingsYer;
 
       final stats = DashboardStats(
         totalDebtsInYer: totalDebtsYer,
         collectedCapitalInYer: collectedCapitalYer,
+        netCashInHandInYer: netCashInHandYer,
         remainingCapitalInYer: remainingCapitalYer,
         totalCapitalInYer: totalCapitalYer,
-        netProfitInYer: totalProfitYer,
+        netProfitInYer: netProfitAfterExpensesYer,
+        totalExpensesInYer: businessExpensesYer,
+        personalDrawingsInYer: personalDrawingsYer,
+        todayCashInYer: todayCashInYer,
+        todaySalesInYer: todaySalesYer,
+        todayBusinessExpensesInYer: todayBusinessExpensesYer,
         totalOrdersCount: orders.length,
         pendingOrdersCount: pendingOrdersCount,
+        todayOrdersCount: todayOrdersCount,
+        lowStockCount: lowStockCount,
         activeShipmentsCount: shipments.where((s) => s.status != AppConstants.shipmentDelivered).length,
         totalCustomersCount: customers.length,
         debtorsCount: debtorsCount,

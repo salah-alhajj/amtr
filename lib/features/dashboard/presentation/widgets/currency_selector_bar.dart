@@ -60,7 +60,8 @@ class CurrencySelectorBar extends StatelessWidget {
                   ),
                 ),
                 currencyCode: AppConstants.currencyYer,
-                isActive: currentActive == AppConstants.currencyYer,
+                isActive:
+                    currentActive == AppConstants.currencyYer.toUpperCase(),
                 isDark: isDark,
               ),
               const SizedBox(width: 4),

@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../../../core/constants.dart';
 import '../../../core/localization/localization.dart';
+import '../../../core/services/preferences_service.dart';
 import '../../../models/individual_order.dart';
 import '../../../models/order_item.dart';
 import '../../../core/utils/yemen_phone_helper.dart';
@@ -156,6 +157,14 @@ class PdfInvoiceGenerator {
 
   /// رأس المستند
   static pw.Widget _buildDocumentHeader(PrintOptions options) {
+    final prefs = PreferencesService.instance;
+    final businessName = prefs.getBusinessName();
+    final businessPhone = prefs.getBusinessPhone();
+    final headerTitle = options.documentTitle ??
+        (businessName.isNotEmpty
+            ? businessName
+            : 'print_invoice_slip_title'.i18n());
+
     return pw.Container(
       margin: const pw.EdgeInsets.only(bottom: 12),
       padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 10),
@@ -167,13 +176,23 @@ class PdfInvoiceGenerator {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(
-            options.documentTitle ?? 'print_invoice_slip_title'.i18n(),
-            style: pw.TextStyle(
-              fontSize: 14,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColors.blueGrey800,
-            ),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                headerTitle,
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.blueGrey800,
+                ),
+              ),
+              if (businessPhone.isNotEmpty)
+                pw.Text(
+                  businessPhone,
+                  style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+                ),
+            ],
           ),
           if (options.customerName != null)
             pw.Text(
@@ -240,6 +259,9 @@ class PdfInvoiceGenerator {
     pw.Context context,
     PrintOptions options,
   ) {
+    final footerNote = PreferencesService.instance.getInvoiceFooterNote();
+    final effectiveFooter = options.footerNotes ??
+        (footerNote.isNotEmpty ? footerNote : 'print_footer_thanks'.i18n());
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 10),
       padding: const pw.EdgeInsets.only(top: 6),
@@ -252,7 +274,7 @@ class PdfInvoiceGenerator {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            options.footerNotes ?? 'print_footer_thanks'.i18n(),
+            effectiveFooter,
             style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey600),
           ),
           pw.Text(

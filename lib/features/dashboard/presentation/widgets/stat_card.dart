@@ -34,7 +34,7 @@ class StatCard extends StatelessWidget {
       onTap: onTap,
       gradient: gradient,
       backgroundColor: cardColor ?? context.surfaceCard,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,7 +74,7 @@ class StatCard extends StatelessWidget {
               ],
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
             title,
             maxLines: 1,
@@ -85,30 +85,32 @@ class StatCard extends StatelessWidget {
               color: context.textSecondary,
             ),
           ),
-          const SizedBox(height: 4),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: (amount != null && currency != null)
-                ? CurrencyPriceDisplay(
-                    amount: amount!,
-                    currency: currency!,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: context.textPrimary,
-                      letterSpacing: -0.3,
+          const SizedBox(height: 2),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: (amount != null && currency != null)
+                  ? CurrencyPriceDisplay(
+                      amount: amount!,
+                      currency: currency!,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: context.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    )
+                  : Text(
+                      amountFormatted ?? '',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: context.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
                     ),
-                  )
-                : Text(
-                    amountFormatted ?? '',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: context.textPrimary,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
+            ),
           ),
         ],
       ),

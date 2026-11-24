@@ -4,10 +4,15 @@ import '../../../../core/localization/localization.dart';
 import '../../../../core/services/demo_data_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
+import '../../../cashbox/presentation/cubit/cashbox_cubit.dart';
+import '../../../couriers/presentation/bloc/couriers_bloc.dart';
 import '../../../customers/presentation/bloc/customers_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
+import '../../../expenses/presentation/bloc/expenses_bloc.dart';
 import '../../../orders/presentation/bloc/orders_bloc.dart';
+import '../../../products/presentation/bloc/products_bloc.dart';
 import '../../../shipments/presentation/bloc/shipments_bloc.dart';
+import '../../../suppliers/presentation/bloc/suppliers_bloc.dart';
 
 /// بطاقة إدارة وتوليد وإزالة البيانات التجريبية والتدريبية للنظام
 /// تدعم توليد مئات البيانات الواقعية المترابطة وحذفها بزر مجاور لزر التوليد
@@ -42,10 +47,34 @@ class _DemoDataCardState extends State<DemoDataCard> {
 
   void _refreshAllBlocs() {
     if (!mounted) return;
-    context.read<OrdersBloc>().add(const LoadOrders());
-    context.read<ShipmentsBloc>().add(const LoadShipments());
-    context.read<CustomersBloc>().add(const LoadCustomers());
-    context.read<DashboardBloc>().add(const LoadDashboardData());
+    try {
+      context.read<OrdersBloc>().add(const LoadOrders());
+    } catch (_) {}
+    try {
+      context.read<ShipmentsBloc>().add(const LoadShipments());
+    } catch (_) {}
+    try {
+      context.read<CustomersBloc>().add(const LoadCustomers());
+    } catch (_) {}
+    try {
+      context.read<DashboardBloc>().add(const LoadDashboardData());
+    } catch (_) {}
+    try {
+      context.read<ProductsBloc>().add(const LoadProducts());
+    } catch (_) {}
+    try {
+      context.read<ExpensesBloc>().add(const LoadExpenses());
+    } catch (_) {}
+    try {
+      context.read<SuppliersBloc>().add(const LoadSuppliers());
+    } catch (_) {}
+    try {
+      context.read<CouriersBloc>().add(const LoadCouriers());
+    } catch (_) {}
+    try {
+      final cashBox = context.read<CashBoxCubit>();
+      cashBox.loadDate(cashBox.selectedDate);
+    } catch (_) {}
   }
 
   Future<void> _handleGenerate() async {
@@ -246,6 +275,30 @@ class _DemoDataCardState extends State<DemoDataCard> {
                         color: accentPurple,
                         icon: Icons.category_rounded,
                       ),
+                      if (_stats.productsCount > 0)
+                        AppBadge(
+                          label: 'demo_data_products_count'.trParams({
+                            'count': _stats.productsCount.toString(),
+                          }),
+                          color: AppColors.vibrantTeal,
+                          icon: Icons.storefront_rounded,
+                        ),
+                      if (_stats.suppliersCount > 0)
+                        AppBadge(
+                          label: 'demo_data_suppliers_count'.trParams({
+                            'count': _stats.suppliersCount.toString(),
+                          }),
+                          color: AppColors.deepNavy,
+                          icon: Icons.local_shipping_outlined,
+                        ),
+                      if (_stats.expensesCount > 0)
+                        AppBadge(
+                          label: 'demo_data_expenses_count'.trParams({
+                            'count': _stats.expensesCount.toString(),
+                          }),
+                          color: AppColors.statusDanger,
+                          icon: Icons.payments_outlined,
+                        ),
                     ],
                   ),
                 ],

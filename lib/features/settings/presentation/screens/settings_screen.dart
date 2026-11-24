@@ -1,12 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/business/business_mode_cubit.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/services/data_sync_bus.dart';
+import '../../../../core/services/preferences_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../backup/presentation/screens/backup_restore_screen.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 import '../../../about/presentation/screens/about_app_screen.dart';
+import '../widgets/business_profile_card.dart';
 import '../widgets/database_backup_tile.dart';
 import '../widgets/demo_data_card.dart';
 import '../widgets/exchange_rates_card.dart';
@@ -24,19 +29,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final CurrencyService _currencyService = CurrencyService.instance;
   late final TextEditingController _sarController;
   late final TextEditingController _usdController;
+  StreamSubscription<DataDomain>? _syncSub;
 
   @override
   void initState() {
     super.initState();
     _sarController = TextEditingController(text: _currencyService.sarToYer.toString());
     _usdController = TextEditingController(text: _currencyService.usdToYer.toString());
+    _syncSub = DataSyncBus.instance.stream.listen((domain) {
+      if (domain == DataDomain.businessMode && mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
+    _syncSub?.cancel();
     _sarController.dispose();
     _usdController.dispose();
     super.dispose();
+  }
+
+  bool _isMultiCurrencyEnabled(BuildContext context) {
+    try {
+      return context.watch<BusinessModeCubit>().state.multiCurrencyEnabled;
+    } catch (_) {
+      return PreferencesService.instance.isMultiCurrencyEnabled();
+    }
   }
 
   Future<void> _saveRates() async {
@@ -58,6 +78,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     context.watch<LocaleBloc>();
+    final multiCurrencyEnabled = _isMultiCurrencyEnabled(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('settings_title'.i18n()),
@@ -65,6 +87,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // هوية المشروع ونمط العمل (أسر منتجة / بزنس صغير)
+          const BusinessProfileCard(),
+
+          const SizedBox(height: 16),
+
           // نمط مظهر التطبيق (تلقائي / فاتح / داكن)
           const ThemeSelectorCard(),
 
@@ -76,13 +103,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
 
           // بطاقة العملة القاعدة وأسعار الصرف
-          ExchangeRatesCard(
-            sarController: _sarController,
-            usdController: _usdController,
-            onSave: _saveRates,
-          ),
-
-          const SizedBox(height: 16),
+          if (multiCurrencyEnabled) ...[
+            ExchangeRatesCard(
+              sarController: _sarController,
+              usdController: _usdController,
+              onSave: _saveRates,
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // جولة في ميزات التطبيق
           AppCard(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../constants.dart';
 import '../database/app_database.dart';
+import 'data_sync_bus.dart';
 
 /// إحصائيات وسجلات البيانات التجريبية المتوفرة في قاعدة البيانات
 class DemoDataStats {
@@ -9,65 +10,132 @@ class DemoDataStats {
   final int shipmentsCount;
   final int ordersCount;
   final int itemsCount;
+  final int suppliersCount;
+  final int rawMaterialsCount;
+  final int templatesCount;
+  final int productsCount;
+  final int expensesCount;
+  final int paymentsCount;
+  final int closingsCount;
+  final int extraRecordsCount;
 
   const DemoDataStats({
     this.customersCount = 0,
     this.shipmentsCount = 0,
     this.ordersCount = 0,
     this.itemsCount = 0,
+    this.suppliersCount = 0,
+    this.rawMaterialsCount = 0,
+    this.templatesCount = 0,
+    this.productsCount = 0,
+    this.expensesCount = 0,
+    this.paymentsCount = 0,
+    this.closingsCount = 0,
+    this.extraRecordsCount = 0,
   });
 
   int get totalRecords =>
-      customersCount + shipmentsCount + ordersCount + itemsCount;
+      customersCount +
+      shipmentsCount +
+      ordersCount +
+      itemsCount +
+      suppliersCount +
+      rawMaterialsCount +
+      templatesCount +
+      productsCount +
+      expensesCount +
+      paymentsCount +
+      closingsCount +
+      extraRecordsCount;
   bool get hasDemoData => totalRecords > 0;
 }
 
 /// خدمة توليد وحذف الداتا التجريبية والتدريبية للنظام
 /// تنشئ مئات السجلات الواقعية المستوحاة بالكامل من البيئة والتجارة والمحافظات والأسواق اليمنية
-/// (عملاء يمنيون، فرزات وشركات نقل محلية، سلع وتراث يمني، منظومات طاقة، عسل وبن وبخور، حوالات الكريمي والنجم)
+/// (عملاء يمنيون، موردون، مواد خام وقوالب تصنيع، منتجات بيع وشراء وتصنيع، مصاريف دورية ونثريات،
+/// فرزات وشركات نقل محلية، طلبات وحركات دفع وإغلاقات يومية)
 /// وتتيح إزالتها كلياً بنقرة واحدة دون المساس بأي بيانات حقيقية أخرى.
 class DemoDataService {
   static final DemoDataService instance = DemoDataService._init();
   DemoDataService._init();
 
+  Future<int> _countDemo(Database db, String table) async {
+    try {
+      return Sqflite.firstIntValue(
+            await db.rawQuery(
+              "SELECT COUNT(*) FROM $table WHERE id LIKE 'demo_%'",
+            ),
+          ) ??
+          0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   /// جلب إحصائيات البيانات التجريبية الحالية في قاعدة البيانات
   Future<DemoDataStats> getDemoDataStats() async {
     final db = await AppDatabase.instance.database;
-    final cCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM customers WHERE id LIKE 'demo_%'",
-          ),
-        ) ??
-        0;
-    final sCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM shipments WHERE id LIKE 'demo_%'",
-          ),
-        ) ??
-        0;
-    final oCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM orders WHERE id LIKE 'demo_%'",
-          ),
-        ) ??
-        0;
-    final iCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM order_items WHERE id LIKE 'demo_%'",
-          ),
-        ) ??
-        0;
+    final cCount = await _countDemo(db, 'customers');
+    final sCount = await _countDemo(db, 'shipments');
+    final oCount = await _countDemo(db, 'orders');
+    final iCount = await _countDemo(db, 'order_items');
+    final supCount = await _countDemo(db, 'suppliers');
+    final matCount = await _countDemo(db, 'raw_materials');
+    final tplCount = await _countDemo(db, 'manufacturing_templates');
+    final prodCount = await _countDemo(db, 'products');
+    final expCount = await _countDemo(db, 'expenses');
+    final payCount = await _countDemo(db, 'payment_transactions');
+    final closeCount = await _countDemo(db, 'daily_closings');
+    final tpliCount = await _countDemo(db, 'manufacturing_template_items');
+    final ingCount = await _countDemo(db, 'product_ingredients');
+    final batchCount = await _countDemo(db, 'production_batches');
+    final supTxCount = await _countDemo(db, 'supplier_transactions');
+    final courierCount = await _countDemo(db, 'couriers');
+    final courierSettleCount = await _countDemo(db, 'courier_settlements');
+    final variantsCount = await _countDemo(db, 'product_variants');
+    final bundleItemsCount = await _countDemo(db, 'product_bundle_items');
+    final wasteLogsCount = await _countDemo(db, 'waste_logs');
 
     return DemoDataStats(
       customersCount: cCount,
       shipmentsCount: sCount,
       ordersCount: oCount,
       itemsCount: iCount,
+      suppliersCount: supCount,
+      rawMaterialsCount: matCount,
+      templatesCount: tplCount,
+      productsCount: prodCount,
+      expensesCount: expCount,
+      paymentsCount: payCount,
+      closingsCount: closeCount,
+      extraRecordsCount: tpliCount +
+          ingCount +
+          batchCount +
+          supTxCount +
+          courierCount +
+          courierSettleCount +
+          variantsCount +
+          bundleItemsCount +
+          wasteLogsCount,
     );
+  }
+
+  /// إجمالي عدد السجلات التجريبية الحالية
+  Future<int> getDemoDataCount() async =>
+      (await getDemoDataStats()).totalRecords;
+
+  /// اسم بديل آمن لحذف كافة البيانات التجريبية
+  Future<int> clearDemoData() => removeDemoData();
+
+  void _notifyAllDomains() {
+    DataSyncBus.instance.notify(DataDomain.orders);
+    DataSyncBus.instance.notify(DataDomain.payments);
+    DataSyncBus.instance.notify(DataDomain.expenses);
+    DataSyncBus.instance.notify(DataDomain.products);
+    DataSyncBus.instance.notify(DataDomain.customers);
+    DataSyncBus.instance.notify(DataDomain.suppliers);
+    DataSyncBus.instance.notify(DataDomain.materials);
+    DataSyncBus.instance.notify(DataDomain.couriers);
   }
 
   /// حذف كافة البيانات التجريبية من قاعدة البيانات بشكل آمن تماماً
@@ -76,14 +144,118 @@ class DemoDataService {
     int totalDeleted = 0;
 
     await db.transaction((txn) async {
-      // فك ارتباط أي طلبات غير تجريبية كانت مرتبطة بشحنات أو عملاء تجريبيين لتفادي أي مراجع معلقة
+      // فك ارتباط أي سجلات غير تجريبية كانت مرتبطة بسجلات تجريبية لتفادي أي مراجع معلقة
       await txn.rawUpdate(
         "UPDATE orders SET shipmentId = NULL WHERE shipmentId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
       );
       await txn.rawUpdate(
         "UPDATE orders SET customerId = NULL WHERE customerId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
       );
+      await txn.rawUpdate(
+        "UPDATE order_items SET productId = NULL WHERE productId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE products SET supplierId = NULL WHERE supplierId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE products SET templateId = NULL WHERE templateId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE raw_materials SET supplierId = NULL WHERE supplierId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE expenses SET supplierId = NULL WHERE supplierId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE product_ingredients SET materialId = NULL WHERE materialId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE manufacturing_template_items SET materialId = NULL WHERE materialId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
+      await txn.rawUpdate(
+        "UPDATE orders SET courierId = NULL, courierStatus = 'none', courierFee = 0.0, isSettledWithCourier = 0 WHERE courierId LIKE 'demo_%' AND id NOT LIKE 'demo_%'",
+      );
 
+      final supplierTxDeleted = await txn.delete(
+        'supplier_transactions',
+        where: 'id LIKE ? OR supplierId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final courierSettlementsDeleted = await txn.delete(
+        'courier_settlements',
+        where: 'id LIKE ? OR courierId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final couriersDeleted = await txn.delete(
+        'couriers',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
+      final paymentsDeleted = await txn.delete(
+        'payment_transactions',
+        where: 'id LIKE ? OR orderId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final closingsDeleted = await txn.delete(
+        'daily_closings',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
+      final batchesDeleted = await txn.delete(
+        'production_batches',
+        where: 'id LIKE ? OR productId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final variantsDeleted = await txn.delete(
+        'product_variants',
+        where: 'id LIKE ? OR productId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final bundleItemsDeleted = await txn.delete(
+        'product_bundle_items',
+        where: 'id LIKE ? OR bundleProductId LIKE ? OR componentProductId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%', 'demo_%'],
+      );
+      final wasteLogsDeleted = await txn.delete(
+        'waste_logs',
+        where: 'id LIKE ? OR itemId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final ingredientsDeleted = await txn.delete(
+        'product_ingredients',
+        where: 'id LIKE ? OR productId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final templateItemsDeleted = await txn.delete(
+        'manufacturing_template_items',
+        where: 'id LIKE ? OR templateId LIKE ?',
+        whereArgs: ['demo_%', 'demo_%'],
+      );
+      final templatesDeleted = await txn.delete(
+        'manufacturing_templates',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
+      final materialsDeleted = await txn.delete(
+        'raw_materials',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
+      final productsDeleted = await txn.delete(
+        'products',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
+      final expensesDeleted = await txn.delete(
+        'expenses',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
+      final suppliersDeleted = await txn.delete(
+        'suppliers',
+        where: 'id LIKE ?',
+        whereArgs: ['demo_%'],
+      );
       final itemsDeleted = await txn.delete(
         'order_items',
         where: 'id LIKE ? OR orderId LIKE ?',
@@ -105,10 +277,29 @@ class DemoDataService {
         whereArgs: ['demo_%'],
       );
 
-      totalDeleted =
-          itemsDeleted + ordersDeleted + shipmentsDeleted + customersDeleted;
+      totalDeleted = supplierTxDeleted +
+          courierSettlementsDeleted +
+          couriersDeleted +
+          paymentsDeleted +
+          closingsDeleted +
+          batchesDeleted +
+          variantsDeleted +
+          bundleItemsDeleted +
+          wasteLogsDeleted +
+          ingredientsDeleted +
+          templateItemsDeleted +
+          templatesDeleted +
+          materialsDeleted +
+          productsDeleted +
+          expensesDeleted +
+          suppliersDeleted +
+          itemsDeleted +
+          ordersDeleted +
+          shipmentsDeleted +
+          customersDeleted;
     });
 
+    _notifyAllDomains();
     return totalDeleted;
   }
 
@@ -746,8 +937,849 @@ class DemoDataService {
     // =========================================================================
     // 4. تنفيذ التوليد الجماعي داخل معاملة (Transaction) سريعة
     // =========================================================================
+    // خريطة ربط فهارس الكتالوج بالمنتجات التجريبية في جدول products
+    // لتوليد تقارير حقيقية تقارن بين (البيع والشراء) و(التصنيع والإنتاج)
+    final Map<int, String> catalogIndexToProductId = {
+      0: 'demo_prod_1',
+      1: 'demo_prod_2',
+      2: 'demo_prod_3',
+      3: 'demo_prod_4',
+      4: 'demo_prod_5',
+      5: 'demo_prod_6',
+      10: 'demo_prod_7',
+      11: 'demo_prod_8',
+      18: 'demo_prod_9',
+      19: 'demo_prod_10',
+    };
+
+    String formatDateOnly(DateTime d) =>
+        '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
     await db.transaction((txn) async {
-      // أ. إدخال العملاء
+      // -----------------------------------------------------------------------
+      // أ. إدخال الموردين (6 موردين واقعيين بمختلف التصنيفات)
+      // -----------------------------------------------------------------------
+      final supplierDefinitions = <Map<String, dynamic>>[
+        {
+          'id': 'demo_sup_1',
+          'name': 'مؤسسة الروضة للمواد الخام والبهارات',
+          'phone': '+967 771100201',
+          'whatsapp': '+967 771100201',
+          'category': 'sup_cat_materials',
+          'address': 'باب اليمن - سوق البهارات والمواد الخام، صنعاء',
+          'notes': 'توريد بن يافعي أخضر، هيل، دقيق وتمر بالجملة',
+        },
+        {
+          'id': 'demo_sup_2',
+          'name': 'مطبعة ومصنع الخليج للعلب والتغليف',
+          'phone': '+967 772200302',
+          'whatsapp': '+967 772200302',
+          'category': 'sup_cat_packaging',
+          'address': 'شارع الستين الجنوبي - صنعاء',
+          'notes': 'علب هدايا فاخرة، عبوات زجاجية وأكياس مطبوعة بالهوية',
+        },
+        {
+          'id': 'demo_sup_3',
+          'name': 'وكالة باحارثة لتجارة العسل والبن بالجملة',
+          'phone': '+967 711300403',
+          'whatsapp': '+967 711300403',
+          'category': 'sup_cat_wholesale',
+          'address': 'الشرج - المكلا، حضرموت',
+          'notes': 'توريد عسل سدر دوعني وجرداني شبواني مفحوص بأسعار الجملة',
+        },
+        {
+          'id': 'demo_sup_4',
+          'name': 'شركة الأصالة للزيوت العطرية ودهن العود',
+          'phone': '+967 733400504',
+          'whatsapp': '+967 733400504',
+          'category': 'sup_cat_materials',
+          'address': 'كريتر - شارع أروى، عدن',
+          'notes': 'خشب عود كمبودي خام، عنبر ومسك وورد طائفي للتصنيع',
+        },
+        {
+          'id': 'demo_sup_5',
+          'name': 'مركز النخبة لتجارة الأقمشة والشيلان',
+          'phone': '+967 774500605',
+          'whatsapp': '+967 774500605',
+          'category': 'sup_cat_wholesale',
+          'address': 'سوق الزمر - صنعاء القديمة',
+          'notes': 'شيلان كشميرية، معاوز بيضانية وأقمشة تراثية جاهزة للبيع',
+        },
+        {
+          'id': 'demo_sup_6',
+          'name': 'مندوب السريع للتوصيل المحلي',
+          'phone': '+967 775600706',
+          'whatsapp': '+967 775600706',
+          'category': 'sup_cat_services',
+          'address': 'حي حدة - صنعاء',
+          'notes': 'توصيل طلبات الأسر المنتجة داخل المدينة وتحصيل الدفع عند الاستلام',
+        },
+      ];
+
+      for (int i = 0; i < supplierDefinitions.length; i++) {
+        final sup = supplierDefinitions[i];
+        await txn.insert('suppliers', {
+          'id': sup['id'],
+          'name': sup['name'],
+          'phone': sup['phone'],
+          'whatsapp': sup['whatsapp'],
+          'category': sup['category'],
+          'address': sup['address'],
+          'notes': sup['notes'],
+          'createdAt': now.subtract(Duration(days: 45 - i * 3)).toIso8601String(),
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // ب. إدخال المواد الخام المرتبطة بالموردين مع كميات المخزون وحد التنبيه
+      // -----------------------------------------------------------------------
+      final rawMaterialDefinitions = <Map<String, dynamic>>[
+        {
+          'id': 'demo_mat_1',
+          'name': 'خشب عود كمبودي خام فاخر',
+          'unit': 'كجم',
+          'unitCost': 45000.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_4',
+          'stockQuantity': 2.5,
+          'lowStockThreshold': 3.0, // مخزون منخفض لاختبار التنبيهات
+          'notes': 'لتحضير طبخات البخور العدني العرائسي',
+        },
+        {
+          'id': 'demo_mat_2',
+          'name': 'دهن عود وعنبر ومسك مخلط',
+          'unit': 'تولة',
+          'unitCost': 6500.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_4',
+          'stockQuantity': 18.0,
+          'lowStockThreshold': 5.0,
+          'notes': 'تركيز عالٍ للعطور والبخور',
+        },
+        {
+          'id': 'demo_mat_3',
+          'name': 'حبوب بن يافعي أخضر درجة أولى',
+          'unit': 'كجم',
+          'unitCost': 18000.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_1',
+          'stockQuantity': 14.0,
+          'lowStockThreshold': 4.0,
+          'notes': 'للتحميص والتعبئة الطازجة',
+        },
+        {
+          'id': 'demo_mat_4',
+          'name': 'دقيق فاخر وسمن بلدي وتمر خلاص',
+          'unit': 'كجم',
+          'unitCost': 3200.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_1',
+          'stockQuantity': 22.0,
+          'lowStockThreshold': 6.0,
+          'notes': 'مكونات أساسية لمعمول الضيافة',
+        },
+        {
+          'id': 'demo_mat_5',
+          'name': 'هيل وزنجبيل وتوابل قهوة فاخرة',
+          'unit': 'كجم',
+          'unitCost': 12000.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_1',
+          'stockQuantity': 1.5,
+          'lowStockThreshold': 2.0, // مخزون منخفض
+          'notes': 'خلطة البهارات للبن والقشر الخولاني',
+        },
+        {
+          'id': 'demo_mat_6',
+          'name': 'علب تغليف هدايا فاخرة مع شريط',
+          'unit': 'علبة',
+          'unitCost': 1200.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_2',
+          'stockQuantity': 60.0,
+          'lowStockThreshold': 15.0,
+          'notes': 'علب كرتون مقوى بشعار المتجر',
+        },
+        {
+          'id': 'demo_mat_7',
+          'name': 'أكياس قماشية مطبوعة بالعلامة',
+          'unit': 'كيس',
+          'unitCost': 600.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_2',
+          'stockQuantity': 90.0,
+          'lowStockThreshold': 20.0,
+          'notes': 'أكياس تغليف للبن والمكسرات',
+        },
+        {
+          'id': 'demo_mat_8',
+          'name': 'عبوات زجاجية محكمة الإغلاق للبخور والعطور',
+          'unit': 'عبوة',
+          'unitCost': 900.0,
+          'currency': AppConstants.currencyYer,
+          'supplierId': 'demo_sup_2',
+          'stockQuantity': 45.0,
+          'lowStockThreshold': 10.0,
+          'notes': 'تحفظ الرائحة وتمنع التسرب',
+        },
+      ];
+
+      for (int i = 0; i < rawMaterialDefinitions.length; i++) {
+        final mat = rawMaterialDefinitions[i];
+        await txn.insert('raw_materials', {
+          'id': mat['id'],
+          'name': mat['name'],
+          'unit': mat['unit'],
+          'unitCost': mat['unitCost'],
+          'currency': mat['currency'],
+          'supplierId': mat['supplierId'],
+          'notes': mat['notes'],
+          'stockQuantity': mat['stockQuantity'],
+          'lowStockThreshold': mat['lowStockThreshold'],
+          'createdAt': now.subtract(Duration(days: 40 - i * 2)).toIso8601String(),
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // ج. إدخال قوالب التصنيع وبنودها
+      // -----------------------------------------------------------------------
+      final templates = <Map<String, dynamic>>[
+        {
+          'id': 'demo_tpl_1',
+          'name': 'قالب طبخة البخور العدني والعطور الملكية',
+          'description': 'وصفة إنتاج دفعة من 10 عبوات بخور وعطر فاخر شاملة التغليف وأجر التحضير',
+          'yieldCount': 10,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpl_2',
+          'name': 'قالب تحميص وتعبئة البن اليافعي والخولاني',
+          'description': 'تحميص وطحن وتعبئة 8 عبوات بن يمني مختص مع التوابل والتغليف',
+          'yieldCount': 8,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpl_3',
+          'name': 'قالب تجهيز حلويات ومعمول الضيافة',
+          'description': 'إنتاج 12 علبة ضيافة فاخرة شاملة المواد الخام والعلب والغاز',
+          'yieldCount': 12,
+          'currency': AppConstants.currencyYer,
+        },
+      ];
+
+      for (int i = 0; i < templates.length; i++) {
+        final t = templates[i];
+        await txn.insert('manufacturing_templates', {
+          'id': t['id'],
+          'name': t['name'],
+          'description': t['description'],
+          'yieldCount': t['yieldCount'],
+          'currency': t['currency'],
+          'createdAt': now.subtract(Duration(days: 35 - i * 3)).toIso8601String(),
+        });
+      }
+
+      final templateItems = <Map<String, dynamic>>[
+        // قالب 1: بخور وعطور
+        {
+          'id': 'demo_tpli_1',
+          'templateId': 'demo_tpl_1',
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_1',
+          'name': 'خشب عود كمبودي خام فاخر',
+          'quantity': 4.0,
+          'unit': 'كجم',
+          'unitCost': 45000.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_2',
+          'templateId': 'demo_tpl_1',
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_2',
+          'name': 'دهن عود وعنبر ومسك مخلط',
+          'quantity': 20.0,
+          'unit': 'تولة',
+          'unitCost': 6500.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_3',
+          'templateId': 'demo_tpl_1',
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_8',
+          'name': 'عبوات زجاجية محكمة الإغلاق',
+          'quantity': 10.0,
+          'unit': 'عبوة',
+          'unitCost': 900.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_4',
+          'templateId': 'demo_tpl_1',
+          'itemType': AppConstants.costItemLabor,
+          'materialId': null,
+          'name': 'أجر الطبخ والتعتيق والتعبئة',
+          'quantity': 1.0,
+          'unit': 'دفعة',
+          'unitCost': 30000.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_5',
+          'templateId': 'demo_tpl_1',
+          'itemType': AppConstants.costItemUtilities,
+          'materialId': null,
+          'name': 'غاز وكهرباء الطبخة',
+          'quantity': 1.0,
+          'unit': 'دفعة',
+          'unitCost': 11000.0,
+          'currency': AppConstants.currencyYer,
+        },
+        // قالب 2: بن يمني
+        {
+          'id': 'demo_tpli_6',
+          'templateId': 'demo_tpl_2',
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_3',
+          'name': 'حبوب بن يافعي أخضر درجة أولى',
+          'quantity': 10.0,
+          'unit': 'كجم',
+          'unitCost': 18000.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_7',
+          'templateId': 'demo_tpl_2',
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_5',
+          'name': 'هيل وزنجبيل وتوابل قهوة فاخرة',
+          'quantity': 2.0,
+          'unit': 'كجم',
+          'unitCost': 12000.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_8',
+          'templateId': 'demo_tpl_2',
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_7',
+          'name': 'أكياس قماشية مطبوعة بالعلامة',
+          'quantity': 8.0,
+          'unit': 'كيس',
+          'unitCost': 600.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_9',
+          'templateId': 'demo_tpl_2',
+          'itemType': AppConstants.costItemLabor,
+          'materialId': null,
+          'name': 'تحميص وطحن وتغليف',
+          'quantity': 1.0,
+          'unit': 'دفعة',
+          'unitCost': 15200.0,
+          'currency': AppConstants.currencyYer,
+        },
+        // قالب 3: معمول ضيافة
+        {
+          'id': 'demo_tpli_10',
+          'templateId': 'demo_tpl_3',
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_4',
+          'name': 'دقيق فاخر وسمن بلدي وتمر خلاص',
+          'quantity': 8.0,
+          'unit': 'كجم',
+          'unitCost': 3200.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_11',
+          'templateId': 'demo_tpl_3',
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_6',
+          'name': 'علب تغليف هدايا فاخرة مع شريط',
+          'quantity': 12.0,
+          'unit': 'علبة',
+          'unitCost': 1200.0,
+          'currency': AppConstants.currencyYer,
+        },
+        {
+          'id': 'demo_tpli_12',
+          'templateId': 'demo_tpl_3',
+          'itemType': AppConstants.costItemUtilities,
+          'materialId': null,
+          'name': 'فرن وغاز وتبريد',
+          'quantity': 1.0,
+          'unit': 'دفعة',
+          'unitCost': 8000.0,
+          'currency': AppConstants.currencyYer,
+        },
+      ];
+
+      for (final ti in templateItems) {
+        await txn.insert('manufacturing_template_items', ti);
+      }
+
+      // -----------------------------------------------------------------------
+      // د. إدخال منتجات الكتالوج (5 بيع وشراء + 5 تصنيع وإنتاج) + مكونات التصنيع
+      // -----------------------------------------------------------------------
+      final productDefinitions = <Map<String, dynamic>>[
+        // منتجات بيع وشراء (Resale)
+        {
+          'id': 'demo_prod_1',
+          'name': itemCatalog[0]['name'],
+          'category': 'cat_food_sweets',
+          'unit': 'دبة 1 كجم',
+          'costPrice': 128000.0,
+          'sellPrice': 187000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 14,
+          'trackStock': 1,
+          'lowStockThreshold': 4,
+          'supplierId': 'demo_sup_3',
+          'productType': AppConstants.productTypeResale,
+          'batchYield': 1,
+          'templateId': null,
+          'notes': itemCatalog[0]['desc'],
+        },
+        {
+          'id': 'demo_prod_2',
+          'name': itemCatalog[1]['name'],
+          'category': 'cat_food_sweets',
+          'unit': 'نصف كجم',
+          'costPrice': 80000.0,
+          'sellPrice': 118000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 10,
+          'trackStock': 1,
+          'lowStockThreshold': 3,
+          'supplierId': 'demo_sup_3',
+          'productType': AppConstants.productTypeResale,
+          'batchYield': 1,
+          'templateId': null,
+          'notes': itemCatalog[1]['desc'],
+        },
+        {
+          'id': 'demo_prod_4',
+          'name': itemCatalog[3]['name'],
+          'category': 'cat_gifts_crafts',
+          'unit': 'طقم',
+          'costPrice': 348000.0,
+          'sellPrice': 492000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 4,
+          'trackStock': 1,
+          'lowStockThreshold': 2,
+          'supplierId': 'demo_sup_5',
+          'productType': AppConstants.productTypeResale,
+          'batchYield': 1,
+          'templateId': null,
+          'notes': itemCatalog[3]['desc'],
+        },
+        {
+          'id': 'demo_prod_7',
+          'name': itemCatalog[10]['name'],
+          'category': 'cat_fashion_sewing',
+          'unit': 'شال',
+          'costPrice': 203000.0,
+          'sellPrice': 289000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 2,
+          'trackStock': 1,
+          'lowStockThreshold': 3, // مخزون منخفض
+          'supplierId': 'demo_sup_5',
+          'productType': AppConstants.productTypeResale,
+          'batchYield': 1,
+          'templateId': null,
+          'notes': itemCatalog[10]['desc'],
+        },
+        {
+          'id': 'demo_prod_8',
+          'name': itemCatalog[11]['name'],
+          'category': 'cat_fashion_sewing',
+          'unit': 'معوز',
+          'costPrice': 64000.0,
+          'sellPrice': 96000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 16,
+          'trackStock': 1,
+          'lowStockThreshold': 4,
+          'supplierId': 'demo_sup_5',
+          'productType': AppConstants.productTypeResale,
+          'batchYield': 1,
+          'templateId': null,
+          'notes': itemCatalog[11]['desc'],
+        },
+        // منتجات تصنيع وإنتاج (Manufactured)
+        {
+          'id': 'demo_prod_3',
+          'name': itemCatalog[2]['name'],
+          'category': 'cat_perfume_bakhoor',
+          'unit': 'عبوة',
+          'costPrice': 48000.0,
+          'sellPrice': 75000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 12,
+          'trackStock': 1,
+          'lowStockThreshold': 4,
+          'supplierId': 'demo_sup_4',
+          'productType': AppConstants.productTypeManufactured,
+          'batchYield': 10,
+          'templateId': 'demo_tpl_1',
+          'reorderCycleDays': 7,
+          'notes': itemCatalog[2]['desc'],
+        },
+        {
+          'id': 'demo_prod_5',
+          'name': itemCatalog[4]['name'],
+          'category': 'cat_food_sweets',
+          'unit': 'كجم',
+          'costPrice': 45000.0,
+          'sellPrice': 69000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 15,
+          'trackStock': 1,
+          'lowStockThreshold': 4,
+          'supplierId': 'demo_sup_1',
+          'productType': AppConstants.productTypeManufactured,
+          'batchYield': 8,
+          'templateId': 'demo_tpl_2',
+          'notes': itemCatalog[4]['desc'],
+        },
+        {
+          'id': 'demo_prod_6',
+          'name': itemCatalog[5]['name'],
+          'category': 'cat_food_sweets',
+          'unit': 'كيس 2 كجم',
+          'costPrice': 29000.0,
+          'sellPrice': 45000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 9,
+          'trackStock': 1,
+          'lowStockThreshold': 3,
+          'supplierId': 'demo_sup_1',
+          'productType': AppConstants.productTypeManufactured,
+          'batchYield': 8,
+          'templateId': 'demo_tpl_2',
+          'notes': itemCatalog[5]['desc'],
+        },
+        {
+          'id': 'demo_prod_9',
+          'name': itemCatalog[18]['name'],
+          'category': 'cat_perfume_bakhoor',
+          'unit': 'تولة',
+          'costPrice': 85000.0,
+          'sellPrice': 128000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 2,
+          'trackStock': 1,
+          'lowStockThreshold': 3, // مخزون منخفض
+          'supplierId': 'demo_sup_4',
+          'productType': AppConstants.productTypeManufactured,
+          'batchYield': 10,
+          'templateId': 'demo_tpl_1',
+          'notes': itemCatalog[18]['desc'],
+        },
+        {
+          'id': 'demo_prod_10',
+          'name': itemCatalog[19]['name'],
+          'category': 'cat_fashion_sewing',
+          'unit': 'طقم',
+          'costPrice': 101000.0,
+          'sellPrice': 150000.0,
+          'currency': AppConstants.currencyYer,
+          'stockQuantity': 6,
+          'trackStock': 1,
+          'lowStockThreshold': 2,
+          'supplierId': 'demo_sup_2',
+          'productType': AppConstants.productTypeManufactured,
+          'batchYield': 12,
+          'templateId': 'demo_tpl_3',
+          'notes': itemCatalog[19]['desc'],
+        },
+      ];
+
+      for (int i = 0; i < productDefinitions.length; i++) {
+        final p = productDefinitions[i];
+        await txn.insert('products', {
+          ...p,
+          'isActive': 1,
+          'createdAt': now.subtract(Duration(days: 30 - i * 2)).toIso8601String(),
+        });
+      }
+
+      // مكونات التصنيع (product_ingredients) للمنتجات التصنيعية
+      final demoIngredients = <Map<String, dynamic>>[
+        // demo_prod_3: بخور عدني
+        {
+          'id': 'demo_ing_1',
+          'productId': 'demo_prod_3',
+          'name': 'خشب عود كمبودي خام فاخر',
+          'cost': 180000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 10,
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_1',
+          'quantity': 4.0,
+          'unit': 'كجم',
+          'unitCost': 45000.0,
+        },
+        {
+          'id': 'demo_ing_2',
+          'productId': 'demo_prod_3',
+          'name': 'دهن عود وعنبر ومسك مخلط',
+          'cost': 130000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 10,
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_2',
+          'quantity': 20.0,
+          'unit': 'تولة',
+          'unitCost': 6500.0,
+        },
+        {
+          'id': 'demo_ing_3',
+          'productId': 'demo_prod_3',
+          'name': 'عبوات زجاجية محكمة الإغلاق',
+          'cost': 9000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 10,
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_8',
+          'quantity': 10.0,
+          'unit': 'عبوة',
+          'unitCost': 900.0,
+        },
+        // demo_prod_5: بن يافعي
+        {
+          'id': 'demo_ing_4',
+          'productId': 'demo_prod_5',
+          'name': 'حبوب بن يافعي أخضر درجة أولى',
+          'cost': 180000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 8,
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_3',
+          'quantity': 10.0,
+          'unit': 'كجم',
+          'unitCost': 18000.0,
+        },
+        {
+          'id': 'demo_ing_5',
+          'productId': 'demo_prod_5',
+          'name': 'هيل وزنجبيل وتوابل قهوة فاخرة',
+          'cost': 24000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 8,
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_5',
+          'quantity': 2.0,
+          'unit': 'كجم',
+          'unitCost': 12000.0,
+        },
+        {
+          'id': 'demo_ing_6',
+          'productId': 'demo_prod_5',
+          'name': 'أكياس قماشية مطبوعة بالعلامة',
+          'cost': 4800.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 8,
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_7',
+          'quantity': 8.0,
+          'unit': 'كيس',
+          'unitCost': 600.0,
+        },
+        // demo_prod_6: بن خولاني
+        {
+          'id': 'demo_ing_7',
+          'productId': 'demo_prod_6',
+          'name': 'حبوب بن يافعي أخضر درجة أولى',
+          'cost': 144000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 8,
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_3',
+          'quantity': 8.0,
+          'unit': 'كجم',
+          'unitCost': 18000.0,
+        },
+        {
+          'id': 'demo_ing_8',
+          'productId': 'demo_prod_6',
+          'name': 'أكياس قماشية مطبوعة بالعلامة',
+          'cost': 4800.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 8,
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_7',
+          'quantity': 8.0,
+          'unit': 'كيس',
+          'unitCost': 600.0,
+        },
+        // demo_prod_9: عطر مخلط
+        {
+          'id': 'demo_ing_9',
+          'productId': 'demo_prod_9',
+          'name': 'دهن عود وعنبر ومسك مخلط',
+          'cost': 65000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 10,
+          'itemType': AppConstants.costItemMaterial,
+          'materialId': 'demo_mat_2',
+          'quantity': 10.0,
+          'unit': 'تولة',
+          'unitCost': 6500.0,
+        },
+        {
+          'id': 'demo_ing_10',
+          'productId': 'demo_prod_9',
+          'name': 'عبوات زجاجية محكمة الإغلاق',
+          'cost': 9000.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 10,
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_8',
+          'quantity': 10.0,
+          'unit': 'عبوة',
+          'unitCost': 900.0,
+        },
+        // demo_prod_10: ثوب مطرز / ضيافة
+        {
+          'id': 'demo_ing_11',
+          'productId': 'demo_prod_10',
+          'name': 'علب تغليف هدايا فاخرة مع شريط',
+          'cost': 14400.0,
+          'currency': AppConstants.currencyYer,
+          'yieldCount': 12,
+          'itemType': AppConstants.costItemPackaging,
+          'materialId': 'demo_mat_6',
+          'quantity': 12.0,
+          'unit': 'علبة',
+          'unitCost': 1200.0,
+        },
+      ];
+
+      for (final ing in demoIngredients) {
+        await txn.insert('product_ingredients', ing);
+      }
+
+      // دفعات إنتاج تجريبية (production_batches)
+      await txn.insert('production_batches', {
+        'id': 'demo_batch_1',
+        'productId': 'demo_prod_3',
+        'productName': itemCatalog[2]['name'],
+        'yieldCount': 10,
+        'totalCost': 360000.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'دفعة بخور عرائسي للموسم',
+        'producedAt': now.subtract(const Duration(days: 5)).toIso8601String(),
+      });
+      await txn.insert('production_batches', {
+        'id': 'demo_batch_2',
+        'productId': 'demo_prod_5',
+        'productName': itemCatalog[4]['name'],
+        'yieldCount': 8,
+        'totalCost': 224000.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'دفعة تحميص طازجة',
+        'producedAt': now.subtract(const Duration(days: 2)).toIso8601String(),
+      });
+
+      // -----------------------------------------------------------------------
+      // د2. بيانات المرحلة السادسة: باقات المنتجات، المتغيرات، التعتيق والهالك
+      // -----------------------------------------------------------------------
+      // 1) باقة مجمعة تجريبية (demo_prod_bundle_1) + مكونين
+      await txn.insert('products', {
+        'id': 'demo_prod_bundle_1',
+        'name': 'باقة ضيافة العيد الفاخرة (بخور عدني + عطر مخلط)',
+        'category': 'cat_perfume_bakhoor',
+        'unit': 'باقة',
+        'costPrice': 133000.0,
+        'sellPrice': 185000.0,
+        'currency': AppConstants.currencyYer,
+        'stockQuantity': 0,
+        'trackStock': 0,
+        'lowStockThreshold': 0,
+        'supplierId': 'demo_sup_4',
+        'productType': AppConstants.productTypeResale,
+        'batchYield': 1,
+        'templateId': null,
+        'isBundle': 1,
+        'notes': 'باقة موسمية جاهزة للضيافة والهدايا',
+        'isActive': 1,
+        'createdAt': now.subtract(const Duration(days: 4)).toIso8601String(),
+      });
+      await txn.insert('product_bundle_items', {
+        'id': 'demo_bundle_item_1',
+        'bundleProductId': 'demo_prod_bundle_1',
+        'componentProductId': 'demo_prod_3',
+        'componentName': itemCatalog[2]['name'],
+        'quantity': 1,
+      });
+      await txn.insert('product_bundle_items', {
+        'id': 'demo_bundle_item_2',
+        'bundleProductId': 'demo_prod_bundle_1',
+        'componentProductId': 'demo_prod_9',
+        'componentName': itemCatalog[18]['name'],
+        'quantity': 1,
+      });
+
+      // 2) متغيرات/أحجام تجريبية على منتج بخور عدني (demo_prod_3)
+      await txn.insert('product_variants', {
+        'id': 'demo_var_1',
+        'productId': 'demo_prod_3',
+        'variantName': 'عبوة 50 جم (حجم قياسي)',
+        'sku': 'BKH-50G',
+        'costPrice': 48000.0,
+        'sellPrice': 75000.0,
+        'stockQuantity': 8,
+        'isActive': 1,
+      });
+      await txn.insert('product_variants', {
+        'id': 'demo_var_2',
+        'productId': 'demo_prod_3',
+        'variantName': 'عبوة 100 جم (حجم ملكي)',
+        'sku': 'BKH-100G',
+        'costPrice': 88000.0,
+        'sellPrice': 135000.0,
+        'stockQuantity': 4,
+        'isActive': 1,
+      });
+
+      // 3) دفعة قيد التعتيق (Curing Batch) ستجهز بعد 5 أيام وتنتهي بعد 35 يوماً
+      await txn.insert('production_batches', {
+        'id': 'demo_batch_curing_1',
+        'productId': 'demo_prod_9',
+        'productName': itemCatalog[18]['name'],
+        'yieldCount': 10,
+        'totalCost': 185000.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'طبخة عطر مخلط قيد التعتيق 5 أيام',
+        'producedAt': now.subtract(const Duration(days: 2)).toIso8601String(),
+        'batchStatus': AppConstants.batchStatusCuring,
+        'readyAt': now.add(const Duration(days: 5)).toIso8601String(),
+        'expiresAt': now.add(const Duration(days: 35)).toIso8601String(),
+      });
+
+      // 4) سجل هالك وتالف تجريبي (waste_logs)
+      await txn.insert('waste_logs', {
+        'id': 'demo_waste_1',
+        'itemType': 'product',
+        'itemId': 'demo_prod_5',
+        'itemName': itemCatalog[4]['name'],
+        'quantity': 1.0,
+        'unit': 'كجم',
+        'estimatedLossYer': 45000.0,
+        'reason': AppConstants.wasteReasonSpoiled,
+        'notes': 'تلف رطوبة أثناء التخزين (بيانات تجريبية)',
+        'loggedAt': now.subtract(const Duration(days: 1)).toIso8601String(),
+      });
+
+      // -----------------------------------------------------------------------
+      // هـ. إدخال العملاء (35 عميلاً)
+      // -----------------------------------------------------------------------
       for (int i = 0; i < customerDefinitions.length; i++) {
         final cust = customerDefinitions[i];
         final custId = 'demo_cust_${i + 1}';
@@ -758,11 +1790,61 @@ class DemoDataService {
           'phone': cust['phone'],
           'whatsapp': cust['whatsapp'],
           'notes': cust['notes'],
+          'returnCount': i == 2 ? 2 : 0,
           'createdAt': createdAt.toIso8601String(),
         });
       }
 
-      // ب. إدخال الشحنات المجمعة
+      // -----------------------------------------------------------------------
+      // هـ2. إدخال مندوبي التوصيل التجريبيين (2 مندوبين) + دفتر حساب مورد (آجل + سداد)
+      // -----------------------------------------------------------------------
+      await txn.insert('couriers', {
+        'id': 'demo_courier_1',
+        'name': 'أحمد للتوصيل السريع',
+        'phone': '+967 771900101',
+        'whatsapp': '+967 771900101',
+        'defaultFee': 1500.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'توصيل أحياء صنعاء: حدة، الأصبحي، الستين',
+        'createdAt': now.subtract(const Duration(days: 20)).toIso8601String(),
+      });
+      await txn.insert('couriers', {
+        'id': 'demo_courier_2',
+        'name': 'سالم إكسبريس للطرود',
+        'phone': '+967 711900202',
+        'whatsapp': '+967 711900202',
+        'defaultFee': 2000.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'توصيل الطلبات بين الأحياء البعيدة وتحصيل الدفع عند الاستلام',
+        'createdAt': now.subtract(const Duration(days: 15)).toIso8601String(),
+      });
+
+      await txn.insert('supplier_transactions', {
+        'id': 'demo_sup_tx_1',
+        'supplierId': 'demo_sup_1',
+        'type': AppConstants.supplierTxPurchaseCredit,
+        'amount': 180000.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'توريد دفعة بن يافعي وهيل على الحساب',
+        'receiptPhotoPath': null,
+        'txDate': now.subtract(const Duration(days: 6)).toIso8601String(),
+        'createdAt': now.subtract(const Duration(days: 6)).toIso8601String(),
+      });
+      await txn.insert('supplier_transactions', {
+        'id': 'demo_sup_tx_2',
+        'supplierId': 'demo_sup_1',
+        'type': AppConstants.supplierTxPayment,
+        'amount': 80000.0,
+        'currency': AppConstants.currencyYer,
+        'notes': 'دفعة سداد أولى للمورد نقداً',
+        'receiptPhotoPath': null,
+        'txDate': now.subtract(const Duration(days: 2)).toIso8601String(),
+        'createdAt': now.subtract(const Duration(days: 2)).toIso8601String(),
+      });
+
+      // -----------------------------------------------------------------------
+      // و. إدخال الشحنات المجمعة (15 شحنة)
+      // -----------------------------------------------------------------------
       for (int i = 0; i < shipmentDefinitions.length; i++) {
         final ship = shipmentDefinitions[i];
         final shipId = 'demo_ship_${i + 1}';
@@ -794,7 +1876,9 @@ class DemoDataService {
         });
       }
 
-      // ج. توليد 120 طلباً فردياً ومئات البنود التابعة لها
+      // -----------------------------------------------------------------------
+      // ز. توليد 120 طلباً فردياً ومئات البنود التابعة لها + حركات الدفع
+      // -----------------------------------------------------------------------
       final currencies = [
         AppConstants.currencyYer, // الأكثر شيوعاً محلياً
         AppConstants.currencySar, // التبادل مع السعودية
@@ -861,10 +1945,14 @@ class DemoDataService {
           shipmentId = 'demo_ship_${shipIndex + 1}';
         }
 
-        // التواريخ
-        final daysAgo = (120 - i) ~/ 3;
-        final createdAt = now.subtract(Duration(days: daysAgo + 1));
-        final expectedDeliveryDate = now.add(Duration(days: (i % 7) + 1));
+        // التواريخ (أحدث 4 طلبات اليوم لضمان حيوية الصندوق اليومي وتقرير الشهر)
+        final daysAgo = i >= 117 ? 0 : ((120 - i) ~/ 3) + 1;
+        final createdAt = daysAgo == 0
+            ? now.subtract(Duration(hours: (120 - i) + 1))
+            : now.subtract(Duration(days: daysAgo));
+        final expectedDeliveryDate = i >= 117
+            ? now
+            : now.add(Duration(days: (i % 7) + 1));
         final actualDeliveryDate =
             orderStatus == AppConstants.orderStatusDelivered
             ? now.subtract(Duration(days: (daysAgo ~/ 2)))
@@ -897,8 +1985,9 @@ class DemoDataService {
         for (int itemIdx = 0; itemIdx < itemsInThisOrder; itemIdx++) {
           globalItemCounter++;
           final itemId = 'demo_item_$globalItemCounter';
-          final catalogItem =
-              itemCatalog[(i + itemIdx * 3) % itemCatalog.length];
+          final catalogIdx = (i + itemIdx * 3) % itemCatalog.length;
+          final catalogItem = itemCatalog[catalogIdx];
+          final linkedProductId = catalogIndexToProductId[catalogIdx];
 
           final int quantity = (globalItemCounter % 3 == 0) ? 2 : 1;
           double costPrice;
@@ -920,6 +2009,7 @@ class DemoDataService {
           await txn.insert('order_items', {
             'id': itemId,
             'orderId': orderId,
+            'productId': linkedProductId,
             'name': catalogItem['name'],
             'description': catalogItem['desc'],
             'quantity': quantity,
@@ -964,9 +2054,273 @@ class DemoDataService {
           'currency': currency,
           'notes': orderNote,
         });
+
+        // تسجيل حركة الدفع في الصندوق (payment_transactions) للطلبات المدفوعة أو الجزئية
+        if (paidAmount > 0) {
+          await txn.insert('payment_transactions', {
+            'id': 'demo_pay_$i',
+            'orderId': orderId,
+            'customerId': customerId,
+            'amount': paidAmount,
+            'currency': currency,
+            'paymentMethod': (i % 2 == 0)
+                ? AppConstants.paymentMethodCash
+                : AppConstants.paymentMethodTransfer,
+            'paidAt': createdAt.toIso8601String(),
+            'notes': orderNum,
+          });
+        }
       }
+
+      // -----------------------------------------------------------------------
+      // ح. إدخال المصاريف المتنوعة (تشغيلية + شخصية + نثريات + دورية + موردين)
+      // -----------------------------------------------------------------------
+      final expenseDefinitions = <Map<String, dynamic>>[
+        // مصاريف يومية / نثريات (قاعدة دورية + حركات حديثة)
+        {
+          'id': 'demo_exp_1',
+          'title': 'مواصلات ونثريات توصيل يومية',
+          'category': 'exp_cat_petty_cash',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 4500.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 2,
+          'recurrence': AppConstants.expenseRecurrenceDaily,
+          'isPettyCash': 1,
+          'supplierId': 'demo_sup_6',
+          'notes': 'نثريات توصيل يومية متكررة',
+        },
+        {
+          'id': 'demo_exp_2',
+          'title': 'توريد علب وأكياس تغليف أسبوعي',
+          'category': 'exp_cat_packaging',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 32000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 8,
+          'recurrence': AppConstants.expenseRecurrenceWeekly,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_2',
+          'notes': 'دفعة تغليف أسبوعية من مطبعة الخليج',
+        },
+        {
+          'id': 'demo_exp_3',
+          'title': 'إيجار الورشة والكهرباء والإنترنت',
+          'category': 'exp_cat_other',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 85000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 3,
+          'recurrence': AppConstants.expenseRecurrenceMonthly,
+          'isPettyCash': 0,
+          'supplierId': null,
+          'notes': 'التزام تشغيلي شهري ثابت',
+        },
+        // مشتريات مواد خام وبضاعة مرتبطة بالموردين
+        {
+          'id': 'demo_exp_4',
+          'title': 'شراء حبوب بن يافعي وهيل وتوابل',
+          'category': 'exp_cat_materials',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 145000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 1,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_1',
+          'notes': 'فاتورة توريد خامات للتحميص',
+        },
+        {
+          'id': 'demo_exp_5',
+          'title': 'شراء خشب عود ودهن عود كمبودي',
+          'category': 'exp_cat_materials',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 210000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 4,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_4',
+          'notes': 'مواد خام لطبخة البخور العدني',
+        },
+        {
+          'id': 'demo_exp_6',
+          'title': 'توريد دفعة عسل دوعني وشبواني بالجملة',
+          'category': 'exp_cat_materials',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 320000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 6,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_3',
+          'notes': 'مخزون إعادة بيع للعسل الملكي',
+        },
+        {
+          'id': 'demo_exp_7',
+          'title': 'طباعة استيكرات وعلب هدايا مخصصة',
+          'category': 'exp_cat_packaging',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 48000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 5,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_2',
+          'notes': 'تغليف خاص بطلبات المناسبات',
+        },
+        {
+          'id': 'demo_exp_8',
+          'title': 'تسوية مشاوير مندوب التوصيل اليوم',
+          'category': 'exp_cat_delivery',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 12000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 0,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_6',
+          'notes': 'توصيل طلبات اليوم داخل المدينة',
+        },
+        {
+          'id': 'demo_exp_9',
+          'title': 'حملة إعلانية ممولة على واتساب وإنستغرام',
+          'category': 'exp_cat_marketing',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 35000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 3,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': null,
+          'notes': 'ترويج عروض البخور والعسل',
+        },
+        {
+          'id': 'demo_exp_10',
+          'title': 'نثريات أكياس وقرطاسية وشاي للضيوف',
+          'category': 'exp_cat_petty_cash',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 6500.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 0,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 1,
+          'supplierId': null,
+          'notes': 'نثريات يومية من الصندوق',
+        },
+        {
+          'id': 'demo_exp_11',
+          'title': 'شراء شيلان ومعاوز جاهزة للموسم',
+          'category': 'exp_cat_materials',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 175000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 7,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': 'demo_sup_5',
+          'notes': 'بضاعة إعادة بيع من مركز النخبة',
+        },
+        {
+          'id': 'demo_exp_12',
+          'title': 'نثريات غاز ووقود وتغليف سريع',
+          'category': 'exp_cat_petty_cash',
+          'expenseType': AppConstants.expenseTypeBusiness,
+          'amount': 9000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 2,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 1,
+          'supplierId': null,
+          'notes': 'صرف سريع من العهدة',
+        },
+        // مسحوبات شخصية (للبيت - لا تنقص صافي ربح المشروع)
+        {
+          'id': 'demo_exp_13',
+          'title': 'مصروف البيت الأسبوعي',
+          'category': 'exp_cat_other',
+          'expenseType': AppConstants.expenseTypePersonal,
+          'amount': 45000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 0,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': null,
+          'notes': 'سحب شخصي للأسرة',
+        },
+        {
+          'id': 'demo_exp_14',
+          'title': 'مستلزمات منزلية ومصاريف شخصية',
+          'category': 'exp_cat_other',
+          'expenseType': AppConstants.expenseTypePersonal,
+          'amount': 60000.0,
+          'currency': AppConstants.currencyYer,
+          'daysAgo': 6,
+          'recurrence': AppConstants.expenseRecurrenceOnce,
+          'isPettyCash': 0,
+          'supplierId': null,
+          'notes': 'سحب شخصي من الأرباح',
+        },
+      ];
+
+      for (final exp in expenseDefinitions) {
+        final daysAgo = exp['daysAgo'] as int;
+        final expDate = now.subtract(Duration(days: daysAgo));
+        await txn.insert('expenses', {
+          'id': exp['id'],
+          'title': exp['title'],
+          'category': exp['category'],
+          'expenseType': exp['expenseType'],
+          'amount': exp['amount'],
+          'currency': exp['currency'],
+          'expenseDate': expDate.toIso8601String(),
+          'notes': exp['notes'],
+          'recurrence': exp['recurrence'],
+          'isPettyCash': exp['isPettyCash'],
+          'supplierId': exp['supplierId'],
+          'receiptPhotoPath': null,
+          'parentRuleId': null,
+          'createdAt': expDate.toIso8601String(),
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // ط. إدخال إغلاقين يوميين للصندوق (الأمس وقبل الأمس) دون المساس بأي إغلاق حقيقي
+      // -----------------------------------------------------------------------
+      final yesterday = now.subtract(const Duration(days: 1));
+      final twoDaysAgo = now.subtract(const Duration(days: 2));
+
+      await txn.insert(
+        'daily_closings',
+        {
+          'id': 'demo_close_1',
+          'closingDate': formatDateOnly(yesterday),
+          'cashInYer': 420000.0,
+          'businessExpensesYer': 145000.0,
+          'personalDrawingsYer': 25000.0,
+          'ordersCount': 6,
+          'notes': 'إغلاق يومي تجريبي — مطابقة الدرج تماماً',
+          'closedAt': yesterday.toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+      await txn.insert(
+        'daily_closings',
+        {
+          'id': 'demo_close_2',
+          'closingDate': formatDateOnly(twoDaysAgo),
+          'cashInYer': 315000.0,
+          'businessExpensesYer': 52000.0,
+          'personalDrawingsYer': 15000.0,
+          'ordersCount': 5,
+          'notes': 'إغلاق يومي تجريبي — يوم عمل ممتاز',
+          'closedAt': twoDaysAgo.toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     });
 
+    _notifyAllDomains();
     return await getDemoDataStats();
   }
 }

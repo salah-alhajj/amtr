@@ -7,11 +7,13 @@ import '../../../../core/widgets/design_system.dart';
 class NetProfitHeroCard extends StatelessWidget {
   final double netProfit;
   final String activeCurrency;
+  final String? subtitle;
 
   const NetProfitHeroCard({
     super.key,
     required this.netProfit,
     required this.activeCurrency,
+    this.subtitle,
   });
 
   @override
@@ -71,7 +73,7 @@ class NetProfitHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'net_profit_description'.i18n(),
+            subtitle ?? 'net_profit_description'.i18n(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.85),
               fontSize: 11,
