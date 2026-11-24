@@ -732,7 +732,7 @@ class BusinessDrawer extends StatelessWidget {
         ? AppColors.darkTextSecondary
         : AppColors.textSecondary;
     final isArabic = context.isArabic;
-    final activePrefix = isArabic ? 'النشطة: ' : 'Active: ';
+    final activePrefix = '${'drawer_active_currency_prefix'.i18n()} ';
 
     Widget activeBadge;
     if (activeCurrency == AppConstants.currencySar) {

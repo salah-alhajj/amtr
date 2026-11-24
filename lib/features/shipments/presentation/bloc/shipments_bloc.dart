@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/localization.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../domain/repositories/shipment_repository.dart';
@@ -189,7 +190,7 @@ class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
         searchQuery: prevQuery,
       ));
     } catch (e) {
-      emit(ShipmentsError('فشل تحميل الشحنات: $e'));
+      emit(ShipmentsError('error_load_shipments'.trParams({'error': '$e'})));
     }
   }
 

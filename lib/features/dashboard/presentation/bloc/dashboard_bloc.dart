@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/consolidated_shipment.dart';
@@ -293,7 +294,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         activeCurrency: currencyService.activeDisplayCurrency,
       ));
     } catch (e) {
-      emit(DashboardError('فشل تحميل بيانات لوحة التحكم: $e'));
+      emit(DashboardError('error_load_dashboard'.trParams({'error': '$e'})));
     }
   }
 

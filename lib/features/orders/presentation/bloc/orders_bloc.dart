@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../core/services/preferences_service.dart';
@@ -278,7 +279,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         searchQuery: prevQuery,
       ));
     } catch (e) {
-      emit(OrdersError('فشل تحميل الطلبات: $e'));
+      emit(OrdersError('error_load_orders'.trParams({'error': '$e'})));
     }
   }
 

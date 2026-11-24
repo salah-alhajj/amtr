@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/customer.dart';
@@ -188,7 +189,7 @@ class CustomersBloc extends Bloc<CustomersEvent, CustomersState> {
         filterCounts: counts,
       ));
     } catch (e) {
-      emit(CustomersError('فشل تحميل العملاء: $e'));
+      emit(CustomersError('error_load_customers'.trParams({'error': '$e'})));
     }
   }
 
