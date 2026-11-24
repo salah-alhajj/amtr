@@ -18,6 +18,19 @@ class IndividualOrder {
   final double paidAmount;
   final String currency;
   final double additionalCost;
+  final double discount;
+  final double deliveryFee;
+  final String deliveryType; // pickup, delivery
+  final String? deliveryAddress;
+  final bool isQuickOrder;
+  final String? occasionLabel;
+  final DateTime? prepReminderAt;
+  final String? courierId;
+  final String courierStatus; // none, assigned, delivered, returned
+  final double courierFee;
+  final bool isSettledWithCourier;
+  final bool requiresDeposit;
+  final double depositAmount;
   final String? notes;
   final List<OrderItem> items;
 
@@ -37,6 +50,19 @@ class IndividualOrder {
     this.isSyncedWithCalendar = false,
     this.paidAmount = 0.0,
     this.additionalCost = 0.0,
+    this.discount = 0.0,
+    this.deliveryFee = 0.0,
+    this.deliveryType = AppConstants.deliveryPickup,
+    this.deliveryAddress,
+    this.isQuickOrder = false,
+    this.occasionLabel,
+    this.prepReminderAt,
+    this.courierId,
+    this.courierStatus = AppConstants.courierStatusNone,
+    this.courierFee = 0.0,
+    this.isSettledWithCourier = false,
+    this.requiresDeposit = false,
+    this.depositAmount = 0.0,
     this.currency = AppConstants.currencyYer,
     this.notes,
     List<OrderItem>? items,
@@ -61,8 +87,8 @@ class IndividualOrder {
     return total;
   }
 
-  /// إجمالي سعر البيع المسعر للعميل (إذا كان فارغاً لبعض البنود يعود بما تم تسعيره)
-  double get totalSellPrice {
+  /// إجمالي سعر البيع للأصناف فقط (قبل رسوم التوصيل والخصم)
+  double get itemsSellOnly {
     double total = 0.0;
     for (final item in items) {
       if (item.sellPrice != null) {
@@ -70,6 +96,12 @@ class IndividualOrder {
       }
     }
     return total;
+  }
+
+  /// إجمالي سعر البيع المسعر للعميل شاملاً رسوم التوصيل ومخصوماً منه الخصم
+  double get totalSellPrice {
+    final total = itemsSellOnly + deliveryFee - discount;
+    return total > 0 ? total : 0.0;
   }
 
   /// هل تم تسعير جميع الأغراض للعميل؟
@@ -90,6 +122,10 @@ class IndividualOrder {
   /// هل الطلب مسدد بالكامل؟
   bool get isFullyPaid => totalSellPrice > 0 && paidAmount >= totalSellPrice;
 
+  /// هل الطلب يتطلب عربوناً ولم يُستوفَ العربون المطلوب بعد؟
+  bool get isAwaitingDeposit =>
+      requiresDeposit && depositAmount > 0 && paidAmount + 0.01 < depositAmount;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -107,6 +143,19 @@ class IndividualOrder {
       'isSyncedWithCalendar': isSyncedWithCalendar ? 1 : 0,
       'paidAmount': paidAmount,
       'additionalCost': additionalCost,
+      'discount': discount,
+      'deliveryFee': deliveryFee,
+      'deliveryType': deliveryType,
+      'deliveryAddress': deliveryAddress,
+      'isQuickOrder': isQuickOrder ? 1 : 0,
+      'occasionLabel': occasionLabel,
+      'prepReminderAt': prepReminderAt?.toIso8601String(),
+      'courierId': courierId,
+      'courierStatus': courierStatus,
+      'courierFee': courierFee,
+      'isSettledWithCourier': isSettledWithCourier ? 1 : 0,
+      'requiresDeposit': requiresDeposit ? 1 : 0,
+      'depositAmount': depositAmount,
       'currency': currency,
       'notes': notes,
     };
@@ -140,6 +189,22 @@ class IndividualOrder {
       isSyncedWithCalendar: (map['isSyncedWithCalendar'] as int?) == 1,
       paidAmount: (map['paidAmount'] as num?)?.toDouble() ?? 0.0,
       additionalCost: (map['additionalCost'] as num?)?.toDouble() ?? 0.0,
+      discount: (map['discount'] as num?)?.toDouble() ?? 0.0,
+      deliveryFee: (map['deliveryFee'] as num?)?.toDouble() ?? 0.0,
+      deliveryType: (map['deliveryType'] as String?) ?? AppConstants.deliveryPickup,
+      deliveryAddress: map['deliveryAddress'] as String?,
+      isQuickOrder: (map['isQuickOrder'] as num?)?.toInt() == 1,
+      occasionLabel: map['occasionLabel'] as String?,
+      prepReminderAt: map['prepReminderAt'] != null
+          ? DateTime.parse(map['prepReminderAt'] as String)
+          : null,
+      courierId: map['courierId'] as String?,
+      courierStatus:
+          (map['courierStatus'] as String?) ?? AppConstants.courierStatusNone,
+      courierFee: (map['courierFee'] as num?)?.toDouble() ?? 0.0,
+      isSettledWithCourier: (map['isSettledWithCourier'] as num?)?.toInt() == 1,
+      requiresDeposit: (map['requiresDeposit'] as num?)?.toInt() == 1,
+      depositAmount: (map['depositAmount'] as num?)?.toDouble() ?? 0.0,
       currency: (map['currency'] as String?) ?? AppConstants.currencyYer,
       notes: map['notes'] as String?,
       items: items,
@@ -162,6 +227,20 @@ class IndividualOrder {
     bool? isSyncedWithCalendar,
     double? paidAmount,
     double? additionalCost,
+    double? discount,
+    double? deliveryFee,
+    String? deliveryType,
+    String? deliveryAddress,
+    bool? isQuickOrder,
+    String? occasionLabel,
+    DateTime? prepReminderAt,
+    String? courierId,
+    bool clearCourierId = false,
+    String? courierStatus,
+    double? courierFee,
+    bool? isSettledWithCourier,
+    bool? requiresDeposit,
+    double? depositAmount,
     String? currency,
     String? notes,
     List<OrderItem>? items,
@@ -182,6 +261,19 @@ class IndividualOrder {
       isSyncedWithCalendar: isSyncedWithCalendar ?? this.isSyncedWithCalendar,
       paidAmount: paidAmount ?? this.paidAmount,
       additionalCost: additionalCost ?? this.additionalCost,
+      discount: discount ?? this.discount,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      deliveryType: deliveryType ?? this.deliveryType,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      isQuickOrder: isQuickOrder ?? this.isQuickOrder,
+      occasionLabel: occasionLabel ?? this.occasionLabel,
+      prepReminderAt: prepReminderAt ?? this.prepReminderAt,
+      courierId: clearCourierId ? null : (courierId ?? this.courierId),
+      courierStatus: courierStatus ?? this.courierStatus,
+      courierFee: courierFee ?? this.courierFee,
+      isSettledWithCourier: isSettledWithCourier ?? this.isSettledWithCourier,
+      requiresDeposit: requiresDeposit ?? this.requiresDeposit,
+      depositAmount: depositAmount ?? this.depositAmount,
       currency: currency ?? this.currency,
       notes: notes ?? this.notes,
       items: items ?? this.items,

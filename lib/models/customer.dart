@@ -4,6 +4,8 @@ class Customer {
   final String? phone;
   final String? whatsapp;
   final String? notes;
+  final String? preferences;
+  final int returnCount;
   final DateTime createdAt;
 
   Customer({
@@ -12,8 +14,13 @@ class Customer {
     this.phone,
     this.whatsapp,
     this.notes,
+    this.preferences,
+    this.returnCount = 0,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
+
+  /// هل للعميل سوابق رفض أو إرجاع طلبات؟
+  bool get hasRepeatRefusals => returnCount > 0;
 
   Map<String, dynamic> toMap() {
     return {
@@ -22,6 +29,8 @@ class Customer {
       'phone': phone,
       'whatsapp': whatsapp,
       'notes': notes,
+      'preferences': preferences,
+      'returnCount': returnCount,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -33,6 +42,8 @@ class Customer {
       phone: map['phone'] as String?,
       whatsapp: map['whatsapp'] as String?,
       notes: map['notes'] as String?,
+      preferences: map['preferences'] as String?,
+      returnCount: (map['returnCount'] as num?)?.toInt() ?? 0,
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'] as String)
           : DateTime.now(),
@@ -45,6 +56,8 @@ class Customer {
     String? phone,
     String? whatsapp,
     String? notes,
+    String? preferences,
+    int? returnCount,
     DateTime? createdAt,
   }) {
     return Customer(
@@ -53,6 +66,8 @@ class Customer {
       phone: phone ?? this.phone,
       whatsapp: whatsapp ?? this.whatsapp,
       notes: notes ?? this.notes,
+      preferences: preferences ?? this.preferences,
+      returnCount: returnCount ?? this.returnCount,
       createdAt: createdAt ?? this.createdAt,
     );
   }

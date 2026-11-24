@@ -4,6 +4,9 @@ import '../core/constants.dart';
 class OrderItem {
   final String id;
   final String orderId;
+  final String? productId;
+  final String? variantId;
+  final String? variantName;
   final String name;
   final String? description;
   final int quantity;
@@ -15,6 +18,9 @@ class OrderItem {
   OrderItem({
     required this.id,
     required this.orderId,
+    this.productId,
+    this.variantId,
+    this.variantName,
     required this.name,
     this.description,
     this.quantity = 1,
@@ -34,6 +40,9 @@ class OrderItem {
     return {
       'id': id,
       'orderId': orderId,
+      'productId': productId,
+      'variantId': variantId,
+      'variantName': variantName,
       'name': name,
       'description': description,
       'quantity': quantity,
@@ -58,6 +67,9 @@ class OrderItem {
     return OrderItem(
       id: map['id'] as String,
       orderId: map['orderId'] as String,
+      productId: map['productId'] as String?,
+      variantId: map['variantId'] as String?,
+      variantName: map['variantName'] as String?,
       name: map['name'] as String,
       description: map['description'] as String?,
       quantity: (map['quantity'] as num?)?.toInt() ?? 1,
@@ -71,6 +83,11 @@ class OrderItem {
   OrderItem copyWith({
     String? id,
     String? orderId,
+    String? productId,
+    String? variantId,
+    bool clearVariantId = false,
+    String? variantName,
+    bool clearVariantName = false,
     String? name,
     String? description,
     int? quantity,
@@ -82,6 +99,9 @@ class OrderItem {
     return OrderItem(
       id: id ?? this.id,
       orderId: orderId ?? this.orderId,
+      productId: productId ?? this.productId,
+      variantId: clearVariantId ? null : (variantId ?? this.variantId),
+      variantName: clearVariantName ? null : (variantName ?? this.variantName),
       name: name ?? this.name,
       description: description ?? this.description,
       quantity: quantity ?? this.quantity,
