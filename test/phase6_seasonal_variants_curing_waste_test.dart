@@ -628,6 +628,117 @@ void main() {
     });
   });
 
+  group('Phase 6 — Legacy SQLite Upgrade Idempotency (v1/v5 -> v12)', () {
+    test('Upgrades v1 and v5 schemas to v12 cleanly without duplicate column errors', () async {
+      for (final oldVer in [1, 5]) {
+        final legacyDb = await databaseFactoryFfi.openDatabase(
+          inMemoryDatabasePath,
+          options: OpenDatabaseOptions(version: 1),
+        );
+        await legacyDb.execute('''
+          CREATE TABLE customers (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone TEXT,
+            notes TEXT,
+            createdAt TEXT NOT NULL
+          )
+        ''');
+        await legacyDb.execute('''
+          CREATE TABLE orders (
+            id TEXT PRIMARY KEY,
+            orderNumber TEXT NOT NULL,
+            customerId TEXT,
+            customerName TEXT,
+            shipmentId TEXT,
+            paymentStatus TEXT NOT NULL,
+            orderStatus TEXT NOT NULL,
+            createdAt TEXT NOT NULL,
+            expectedDeliveryDate TEXT,
+            actualDeliveryDate TEXT,
+            paidAmount REAL NOT NULL,
+            currency TEXT NOT NULL,
+            notes TEXT
+          )
+        ''');
+        await legacyDb.execute('''
+          CREATE TABLE order_items (
+            id TEXT PRIMARY KEY,
+            orderId TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            quantity INTEGER NOT NULL,
+            costPrice REAL NOT NULL,
+            sellPrice REAL NOT NULL,
+            imagePaths TEXT
+          )
+        ''');
+        if (oldVer == 5) {
+          await legacyDb.execute('''
+            CREATE TABLE products (
+              id TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              category TEXT NOT NULL,
+              unit TEXT NOT NULL,
+              costPrice REAL NOT NULL DEFAULT 0.0,
+              sellPrice REAL NOT NULL DEFAULT 0.0,
+              currency TEXT NOT NULL,
+              createdAt TEXT NOT NULL
+            )
+          ''');
+          await legacyDb.execute('''
+            CREATE TABLE expenses (
+              id TEXT PRIMARY KEY,
+              title TEXT NOT NULL,
+              category TEXT NOT NULL,
+              amount REAL NOT NULL,
+              currency TEXT NOT NULL,
+              expenseDate TEXT NOT NULL,
+              notes TEXT,
+              createdAt TEXT NOT NULL
+            )
+          ''');
+        }
+        await legacyDb.insert('customers', {
+          'id': 'c_legacy',
+          'name': 'عميل قديم',
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+        await legacyDb.insert('orders', {
+          'id': 'o_legacy',
+          'orderNumber': 'ORD-LEGACY-1',
+          'customerId': 'c_legacy',
+          'paymentStatus': 'partial',
+          'orderStatus': 'pending',
+          'createdAt': DateTime.now().toIso8601String(),
+          'paidAmount': 500.0,
+          'currency': 'YER',
+        });
+
+        await AppDatabase.instance.upgradeDBForTesting(legacyDb, oldVer, 12);
+        // Re-running upgrade must also be 100% idempotent
+        await AppDatabase.instance.upgradeDBForTesting(legacyDb, oldVer, 12);
+
+        final expCols = await legacyDb.rawQuery('PRAGMA table_info(expenses);');
+        expect(expCols.any((c) => c['name'] == 'expenseType'), isTrue);
+        final ordCols = await legacyDb.rawQuery('PRAGMA table_info(orders);');
+        expect(ordCols.any((c) => c['name'] == 'requiresDeposit'), isTrue);
+        final prodCols = await legacyDb.rawQuery('PRAGMA table_info(products);');
+        expect(prodCols.any((c) => c['name'] == 'isBundle'), isTrue);
+        final tables = await legacyDb.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table'",
+        );
+        final tableNames = tables.map((r) => r['name']).toSet();
+        expect(tableNames, containsAll(['product_variants', 'product_bundle_items', 'waste_logs']));
+
+        final payments = await legacyDb.query('payment_transactions');
+        expect(payments.length, 1);
+
+        await legacyDb.close();
+      }
+    });
+  });
+
   group('Phase 6 — Waste Logs, Monthly Insights & PDF', () {
     test(
         'recordWaste deducts & clamps stock, MonthlyInsightsService aggregates & PDF generates',

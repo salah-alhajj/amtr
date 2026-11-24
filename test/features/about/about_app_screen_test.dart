@@ -98,7 +98,7 @@ void main() {
       expect(find.byType(DeveloperProfileCard), findsOneWidget);
       expect(find.text('صلاح الدين الحاج'), findsOneWidget);
       expect(find.text('Salah aldain alhajj'), findsOneWidget);
-      expect(find.text('مطور ومصمم التطبيق (App Creator & Lead Developer)'), findsOneWidget);
+      expect(find.text('مطور ومصمم التطبيق'), findsOneWidget);
       expect(find.text('كلمة من المطور'), findsOneWidget);
       expect(find.text('تواصل مع المطور عبر واتساب'), findsOneWidget);
       expect(find.text('مشاركة التطبيق'), findsOneWidget);
