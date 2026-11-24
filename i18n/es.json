@@ -1131,7 +1131,7 @@
   "drawer_prep_shopping_sub": "Hoja de preparación diaria y lista de compras de insumos",
   "material_stock_qty_label": "Cantidad en inventario",
   "material_low_stock_threshold_label": "Umbral de alerta de stock bajo",
-  "material_stock_badge_fmt": "Stock: {qty} {unit}",
+  "material_stock_badge_fmt": "Existencias: {qty} {unit}",
   "material_low_stock_badge_fmt": "Stock bajo: {qty} {unit}",
   "mfg_margin_erosion_title": "Alerta de erosión de margen",
   "mfg_margin_erosion_subtitle": "El costo de algunos productos aumentó tras actualizar el precio del insumo. Aplica el precio sugerido con un toque.",
@@ -1364,7 +1364,7 @@
   "business_daily_order_cap_saved": "Límite diario guardado",
   "business_daily_order_cap_unlimited": "Ilimitado",
   "mfg_batch_curing_days_label": "Días de curado (opcional)",
-  "mfg_batch_curing_toast": "Lote en curado de {count} unidades registrado",
+  "mfg_batch_curing_toast": "Lote en curado de {count} unidades registrado por {days} días",
   "mfg_batch_shelf_life_days_label": "Días de vida útil (opcional)",
   "monthly_waste_logs_count_fmt": "{count} registros de merma este mes",
   "monthly_waste_loss_pdf_title": "Pérdidas por mermas",
@@ -1374,7 +1374,7 @@
   "order_awaiting_deposit_title": "Pedido reservado — Esperando anticipo",
   "order_cap_shift_tomorrow": "Pasar a mañana",
   "order_cap_whatsapp_apology": "Disculpa por WhatsApp",
-  "order_daily_cap_warning": "Límite diario alcanzado ({count} pedidos). Pasa la entrega a mañana o continúa.",
+  "order_daily_cap_warning": "Límite diario alcanzado ({count} / {cap}). Pasa la entrega a mañana o continúa.",
   "order_deposit_amount_label": "Anticipo requerido ({symbol})",
   "order_deposit_remaining_fmt": "Restante para completar el anticipo: {amount}",
   "order_deposit_reminder_whatsapp_btn": "Recordatorio de anticipo (WhatsApp)",
@@ -1428,5 +1428,10 @@
   "waste_submit_btn": "Guardar registro de merma",
   "waste_total_loss_label": "Pérdida total por mermas",
   "waste_type_material": "Materia prima",
-  "waste_type_product": "Producto terminado"
+  "waste_type_product": "Producto terminado",
+  "drawer_active_currency_prefix": "Activa:",
+  "error_load_orders": "Error al cargar los pedidos: {error}",
+  "error_load_customers": "Error al cargar los clientes: {error}",
+  "error_load_dashboard": "Error al cargar el panel de control: {error}",
+  "error_load_shipments": "Error al cargar los envíos: {error}"
 }

@@ -279,7 +279,7 @@
   "shipment_paid_transport_fmt": "(Paid {amount} {currency})",
   "shipment_actual_net_profit": "Actual Net Profit:",
   "shipment_card_orders_cost_fmt": "Orders: {count} | Freight: {cost}",
-  "shipment_card_net_profit_prefix": "Net Profit: ",
+  "shipment_card_net_profit_prefix": "Net Profit:",
   "customers_empty_title": "No customers registered currently",
   "customers_empty_subtitle": "You can add a new customer using the button below",
   "customer_edit_title": "Edit Customer",
@@ -1364,7 +1364,7 @@
   "business_daily_order_cap_saved": "Daily order cap saved",
   "business_daily_order_cap_unlimited": "Unlimited",
   "mfg_batch_curing_days_label": "Curing Days (Optional)",
-  "mfg_batch_curing_toast": "Recorded curing batch of {count} units",
+  "mfg_batch_curing_toast": "Recorded curing batch of {count} units for {days} days",
   "mfg_batch_shelf_life_days_label": "Shelf Life Days (Optional)",
   "monthly_waste_logs_count_fmt": "{count} waste records this month",
   "monthly_waste_loss_pdf_title": "Waste & Spoilage Losses",
@@ -1374,7 +1374,7 @@
   "order_awaiting_deposit_title": "Order Reserved — Awaiting Deposit",
   "order_cap_shift_tomorrow": "Shift to Tomorrow",
   "order_cap_whatsapp_apology": "WhatsApp Apology",
-  "order_daily_cap_warning": "Daily order cap reached ({count} orders). Shift delivery to tomorrow or proceed.",
+  "order_daily_cap_warning": "Daily order cap reached ({count} / {cap}). Shift delivery to tomorrow or proceed.",
   "order_deposit_amount_label": "Required Deposit ({symbol})",
   "order_deposit_remaining_fmt": "Remaining to complete deposit: {amount}",
   "order_deposit_reminder_whatsapp_btn": "Deposit Reminder (WhatsApp)",
@@ -1428,5 +1428,10 @@
   "waste_submit_btn": "Save Waste Record",
   "waste_total_loss_label": "Total Waste Loss",
   "waste_type_material": "Raw Material",
-  "waste_type_product": "Finished Product"
+  "waste_type_product": "Finished Product",
+  "drawer_active_currency_prefix": "Active:",
+  "error_load_orders": "Failed to load orders: {error}",
+  "error_load_customers": "Failed to load customers: {error}",
+  "error_load_dashboard": "Failed to load dashboard data: {error}",
+  "error_load_shipments": "Failed to load shipments: {error}"
 }
