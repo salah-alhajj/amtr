@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../business/business_mode_cubit.dart';
 import '../constants.dart';
 import '../localization/localization.dart';
 import '../services/currency_service.dart';
+import '../services/preferences_service.dart';
 import '../theme/app_colors.dart';
 import 'design_system.dart';
 import '../../features/backup/presentation/screens/backup_restore_screen.dart';
+import '../../features/cashbox/presentation/screens/cashbox_screen.dart';
+import '../../features/couriers/presentation/screens/couriers_list_screen.dart';
 import '../../features/customers/presentation/screens/customers_list_screen.dart';
+import '../../features/expenses/presentation/screens/expenses_list_screen.dart';
+import '../../features/manufacturing/presentation/screens/daily_prep_shopping_screen.dart';
+import '../../features/manufacturing/presentation/screens/materials_and_templates_screen.dart';
+import '../../features/manufacturing/presentation/screens/production_batches_screen.dart';
 import '../../features/orders/presentation/screens/orders_list_screen.dart';
+import '../../features/products/presentation/screens/products_list_screen.dart';
+import '../../features/reports/presentation/screens/monthly_report_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shipments/presentation/screens/shipments_list_screen.dart';
+import '../../features/suppliers/presentation/screens/suppliers_list_screen.dart';
 import '../../features/about/presentation/screens/about_app_screen.dart';
 
 /// دراور تجاري ومالي احترافي مصقول يعكس هوية المال والأعمال والشحن
@@ -18,6 +29,8 @@ class BusinessDrawer extends StatelessWidget {
   final VoidCallback? onNavigateHome;
   final VoidCallback? onNavigateOrders;
   final VoidCallback? onNavigateShipments;
+  final VoidCallback? onNavigateCatalog;
+  final VoidCallback? onNavigateCashbox;
   final VoidCallback? onNavigateCustomers;
   final VoidCallback? onNavigateSettings;
   final VoidCallback? onNavigateAbout;
@@ -27,14 +40,39 @@ class BusinessDrawer extends StatelessWidget {
     this.onNavigateHome,
     this.onNavigateOrders,
     this.onNavigateShipments,
+    this.onNavigateCatalog,
+    this.onNavigateCashbox,
     this.onNavigateCustomers,
     this.onNavigateSettings,
     this.onNavigateAbout,
   });
 
+  BusinessModeState _readBusinessModeState(BuildContext context) {
+    try {
+      return context.watch<BusinessModeCubit>().state;
+    } catch (_) {
+      final prefs = PreferencesService.instance;
+      return BusinessModeState(
+        businessMode: prefs.getBusinessMode(),
+        businessName: prefs.getBusinessName(),
+        businessPhone: prefs.getBusinessPhone(),
+        businessAddress: prefs.getBusinessAddress(),
+        invoiceFooterNote: prefs.getInvoiceFooterNote(),
+        defaultCurrency: prefs.getDefaultCurrency(),
+        multiCurrencyEnabled: prefs.isMultiCurrencyEnabled(),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<LocaleBloc>();
+    final businessState = _readBusinessModeState(context);
+    final isProductiveFamily = businessState.isProductiveFamily;
+    final multiCurrencyEnabled = businessState.multiCurrencyEnabled;
+    final displayTitle = businessState.businessName.trim().isNotEmpty
+        ? businessState.businessName.trim()
+        : 'app_name'.i18n();
     final currencyService = CurrencyService.instance;
     final activeCurrency = currencyService.activeDisplayCurrency;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -74,7 +112,9 @@ class BusinessDrawer extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'app_name'.i18n(),
+                              displayTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -111,10 +151,11 @@ class BusinessDrawer extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  if (multiCurrencyEnabled) ...[
+                    const SizedBox(height: 14),
 
-                  // شريط أسعار الصرف الحية المصغر (Live Currency Ticker)
-                  Material(
+                    // شريط أسعار الصرف الحية المصغر (Live Currency Ticker)
+                    Material(
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => _showQuickCurrencyConverter(context),
@@ -200,6 +241,7 @@ class BusinessDrawer extends StatelessWidget {
                       ),
                     ),
                   ),
+                  ],
                 ],
               ),
             ),
@@ -242,25 +284,26 @@ class BusinessDrawer extends StatelessWidget {
                       }
                     },
                   ),
-                  _DrawerMenuItem(
-                    icon: Icons.local_shipping_rounded,
-                    title: 'nav_shipments'.i18n(),
-                    subtitle: 'drawer_shipments_containers'.i18n(),
-                    iconColor: AppColors.primaryGreen,
-                    onTap: () {
-                      Navigator.pop(context);
-                      if (onNavigateShipments != null) {
-                        onNavigateShipments!();
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ShipmentsListScreen(),
-                          ),
-                        );
-                      }
-                    },
-                  ),
+                  if (!isProductiveFamily)
+                    _DrawerMenuItem(
+                      icon: Icons.local_shipping_rounded,
+                      title: 'nav_shipments'.i18n(),
+                      subtitle: 'drawer_shipments_containers'.i18n(),
+                      iconColor: AppColors.primaryGreen,
+                      onTap: () {
+                        Navigator.pop(context);
+                        if (onNavigateShipments != null) {
+                          onNavigateShipments!();
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ShipmentsListScreen(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
                   _DrawerMenuItem(
                     icon: Icons.people_alt_rounded,
                     title: 'nav_customers'.i18n(),
@@ -280,29 +323,170 @@ class BusinessDrawer extends StatelessWidget {
                       }
                     },
                   ),
-
-                  const SizedBox(height: 12),
-                  _buildSectionHeader('drawer_finance_data'.i18n()),
-
                   _DrawerMenuItem(
-                    icon: Icons.currency_exchange_rounded,
-                    title: 'currencies_and_exchange'.i18n(),
-                    subtitle: 'drawer_exchange_rates'.i18n(),
-                    iconColor: AppColors.statusWarning,
+                    icon: Icons.storefront_rounded,
+                    title: 'products_catalog_title'.i18n(),
+                    subtitle: 'drawer_products_catalog_sub'.i18n(),
+                    iconColor: AppColors.primaryBlue,
                     onTap: () {
                       Navigator.pop(context);
-                      if (onNavigateSettings != null) {
-                        onNavigateSettings!();
+                      if (onNavigateCatalog != null) {
+                        onNavigateCatalog!();
                       } else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const SettingsScreen(),
+                            builder: (_) => const ProductsListScreen(),
                           ),
                         );
                       }
                     },
                   ),
+                  _DrawerMenuItem(
+                    icon: Icons.local_shipping_outlined,
+                    title: 'suppliers_title'.i18n(),
+                    subtitle: 'drawer_suppliers_sub'.i18n(),
+                    iconColor: AppColors.primaryGreen,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SuppliersListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.delivery_dining_rounded,
+                    title: 'couriers_title'.i18n(),
+                    subtitle: 'drawer_couriers_sub'.i18n(),
+                    iconColor: AppColors.vibrantTeal,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CouriersListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.auto_awesome_mosaic_outlined,
+                    title: 'manufacturing_hub_title'.i18n(),
+                    subtitle: 'drawer_manufacturing_sub'.i18n(),
+                    iconColor: const Color(0xFF7C3AED),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MaterialsAndTemplatesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.checklist_rtl_rounded,
+                    title: 'prep_screen_title'.i18n(),
+                    subtitle: 'drawer_prep_shopping_sub'.i18n(),
+                    iconColor: AppColors.statusWarning,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DailyPrepAndShoppingScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.timelapse_rounded,
+                    title: 'drawer_batches_waste_title'.i18n(),
+                    subtitle: 'drawer_batches_waste_sub'.i18n(),
+                    iconColor: AppColors.primaryBlue,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProductionBatchesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: isProductiveFamily
+                        ? 'cashbox_title'.i18n()
+                        : 'expenses_title'.i18n(),
+                    subtitle: 'drawer_expenses_sub'.i18n(),
+                    iconColor: AppColors.statusDanger,
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (isProductiveFamily) {
+                        if (onNavigateCashbox != null) {
+                          onNavigateCashbox!();
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CashBoxScreen(),
+                            ),
+                          );
+                        }
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ExpensesListScreen(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+                  _buildSectionHeader('drawer_finance_data'.i18n()),
+
+                  _DrawerMenuItem(
+                    icon: Icons.bar_chart_rounded,
+                    title: 'monthly_report_title'.i18n(),
+                    subtitle: 'monthly_report_subtitle'.i18n(),
+                    iconColor: AppColors.vibrantTeal,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MonthlyReportScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  if (multiCurrencyEnabled)
+                    _DrawerMenuItem(
+                      icon: Icons.currency_exchange_rounded,
+                      title: 'currencies_and_exchange'.i18n(),
+                      subtitle: 'drawer_exchange_rates'.i18n(),
+                      iconColor: AppColors.statusWarning,
+                      onTap: () {
+                        Navigator.pop(context);
+                        if (onNavigateSettings != null) {
+                          onNavigateSettings!();
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
                   _DrawerMenuItem(
                     icon: Icons.save_alt_rounded,
                     title: 'backup_and_restore'.i18n(),

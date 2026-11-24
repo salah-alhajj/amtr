@@ -80,16 +80,21 @@ class AppCustomerSearchDropdown extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label ?? 'order_link_registered_customer'.i18n(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: defaultLabelColor,
-                fontFamily: AppTheme.fontFamily,
+            Expanded(
+              child: Text(
+                label ?? 'order_link_registered_customer'.i18n(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: defaultLabelColor,
+                  fontFamily: AppTheme.fontFamily,
+                ),
               ),
             ),
-            if (!hasSelection)
+            if (!hasSelection) ...[
+              const SizedBox(width: 8),
               GestureDetector(
                 onTap: () => _openPicker(context),
                 child: Row(
@@ -108,6 +113,7 @@ class AppCustomerSearchDropdown extends StatelessWidget {
                   ],
                 ),
               ),
+            ],
           ],
         ),
         const SizedBox(height: 6),

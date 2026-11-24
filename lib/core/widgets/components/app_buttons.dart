@@ -143,13 +143,17 @@ class _AppPrimaryButtonState extends State<AppPrimaryButton>
                             Icon(widget.icon, color: defaultText, size: 18),
                             const SizedBox(width: 8),
                           ],
-                          Text(
-                            widget.label,
-                            style: TextStyle(
-                              color: defaultText,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.2,
+                          Flexible(
+                            child: Text(
+                              widget.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: defaultText,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.2,
+                              ),
                             ),
                           ),
                           if (widget.customTrailingIcon != null) ...[
@@ -232,12 +236,16 @@ class AppSecondaryButton extends StatelessWidget {
                   Icon(icon, color: baseColor, size: 17),
                   const SizedBox(width: 6),
                 ],
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: baseColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: baseColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 if (customTrailingIcon != null) ...[
@@ -318,12 +326,16 @@ class AppOutlinedButton extends StatelessWidget {
                   Icon(icon, color: baseColor, size: 16),
                   const SizedBox(width: 6),
                 ],
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: baseColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: baseColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 if (customTrailingIcon != null) ...[

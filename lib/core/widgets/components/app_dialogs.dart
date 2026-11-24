@@ -91,7 +91,7 @@ class AppModalSheet extends StatelessWidget {
             Divider(height: 20, color: defaultDivider),
           ] else
             const SizedBox(height: 12),
-          child,
+          Flexible(child: child),
         ],
       ),
     );
