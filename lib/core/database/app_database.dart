@@ -20,6 +20,14 @@ class AppDatabase {
     await _createDB(db, 12);
   }
 
+  Future<void> upgradeDBForTesting(
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
+    await _upgradeDB(db, oldVersion, newVersion);
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('mosaed_local.db');
@@ -51,33 +59,49 @@ class AppDatabase {
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE orders ADD COLUMN debtDueDate TEXT;');
-      await db.execute('ALTER TABLE orders ADD COLUMN hasDebtReminder INTEGER DEFAULT 0;');
-      await db.execute('ALTER TABLE orders ADD COLUMN isSyncedWithCalendar INTEGER DEFAULT 0;');
+      await _addColumnIfMissing(db, 'orders', 'debtDueDate TEXT');
+      await _addColumnIfMissing(
+        db,
+        'orders',
+        'hasDebtReminder INTEGER DEFAULT 0',
+      );
+      await _addColumnIfMissing(
+        db,
+        'orders',
+        'isSyncedWithCalendar INTEGER DEFAULT 0',
+      );
     }
     if (oldVersion < 3) {
-      await db.execute('ALTER TABLE customers ADD COLUMN whatsapp TEXT;');
+      await _addColumnIfMissing(db, 'customers', 'whatsapp TEXT');
     }
     if (oldVersion < 4) {
-      await db.execute('ALTER TABLE orders ADD COLUMN additionalCost REAL DEFAULT 0.0;');
+      await _addColumnIfMissing(
+        db,
+        'orders',
+        'additionalCost REAL DEFAULT 0.0',
+      );
     }
     if (oldVersion < 5) {
-      await db.execute('ALTER TABLE orders ADD COLUMN discount REAL DEFAULT 0.0;');
-      await db.execute('ALTER TABLE orders ADD COLUMN deliveryFee REAL DEFAULT 0.0;');
-      await db.execute("ALTER TABLE orders ADD COLUMN deliveryType TEXT DEFAULT 'pickup';");
-      await db.execute('ALTER TABLE orders ADD COLUMN deliveryAddress TEXT;');
+      await _addColumnIfMissing(db, 'orders', 'discount REAL DEFAULT 0.0');
+      await _addColumnIfMissing(db, 'orders', 'deliveryFee REAL DEFAULT 0.0');
+      await _addColumnIfMissing(
+        db,
+        'orders',
+        "deliveryType TEXT DEFAULT 'pickup'",
+      );
+      await _addColumnIfMissing(db, 'orders', 'deliveryAddress TEXT');
       await _createMicroBusinessTables(db);
     }
     if (oldVersion < 6) {
-      await db.execute(
-        "ALTER TABLE expenses ADD COLUMN expenseType TEXT DEFAULT 'business';",
+      await _addColumnIfMissing(
+        db,
+        'expenses',
+        "expenseType TEXT DEFAULT 'business'",
       );
-      await db.execute(
-        'ALTER TABLE orders ADD COLUMN isQuickOrder INTEGER DEFAULT 0;',
-      );
-      await db.execute('ALTER TABLE orders ADD COLUMN occasionLabel TEXT;');
-      await db.execute('ALTER TABLE orders ADD COLUMN prepReminderAt TEXT;');
-      await db.execute('ALTER TABLE order_items ADD COLUMN productId TEXT;');
+      await _addColumnIfMissing(db, 'orders', 'isQuickOrder INTEGER DEFAULT 0');
+      await _addColumnIfMissing(db, 'orders', 'occasionLabel TEXT');
+      await _addColumnIfMissing(db, 'orders', 'prepReminderAt TEXT');
+      await _addColumnIfMissing(db, 'order_items', 'productId TEXT');
       await _createPaymentTransactionsTable(db);
       await _createPerformanceIndexes(db);
 
@@ -93,7 +117,7 @@ class AppDatabase {
       await _createPhase2Tables(db);
     }
     if (oldVersion < 8) {
-      await db.execute('ALTER TABLE customers ADD COLUMN preferences TEXT;');
+      await _addColumnIfMissing(db, 'customers', 'preferences TEXT');
     }
     if (oldVersion < 9) {
       await _addColumnIfMissing(db, 'products', 'supplierId TEXT');
@@ -219,9 +243,11 @@ class AppDatabase {
     String table,
     String columnDef,
   ) async {
-    final columnName = columnDef.trim().split(RegExp(r'\s+')).first;
+    final columnName = columnDef.trim().split(RegExp(r'\s+')).first.toLowerCase();
     final cols = await db.rawQuery('PRAGMA table_info($table);');
-    final exists = cols.any((c) => c['name'] == columnName);
+    final exists = cols.any(
+      (c) => (c['name']?.toString().toLowerCase() ?? '') == columnName,
+    );
     if (!exists) {
       await db.execute('ALTER TABLE $table ADD COLUMN $columnDef;');
     }
