@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../domain/repositories/shipment_repository.dart';
 
@@ -111,6 +113,8 @@ class ShipmentsError extends ShipmentsState {
 // --- BLoC ---
 class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
   final ShipmentRepository repository;
+  late final StreamSubscription<DataDomain> _syncSub;
+  bool _isSelfMutating = false;
 
   ShipmentsBloc({required this.repository}) : super(const ShipmentsInitial()) {
     on<LoadShipments>(_onLoadShipments);
@@ -123,6 +127,30 @@ class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
     on<RemoveOrderFromShipmentEvent>(_onRemoveOrder);
     on<UpdateIndividualOrderStatusEvent>(_onUpdateIndividualStatus);
     on<VerifyAllOrdersInShipmentEvent>(_onVerifyAllOrders);
+    _syncSub = DataSyncBus.instance.stream.listen((domain) {
+      if (!isClosed &&
+          !_isSelfMutating &&
+          state is ShipmentsLoaded &&
+          domain == DataDomain.orders) {
+        add(const LoadShipments());
+      }
+    });
+  }
+
+  Future<void> _runSelfMutation(Future<void> Function() mutation) async {
+    _isSelfMutating = true;
+    try {
+      await mutation();
+      await Future<void>.microtask(() {});
+    } finally {
+      _isSelfMutating = false;
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    await _syncSub.cancel();
+    return super.close();
   }
 
   List<ConsolidatedShipment> _applyFilterAndSearch(
@@ -148,7 +176,9 @@ class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
   Future<void> _onLoadShipments(LoadShipments event, Emitter<ShipmentsState> emit) async {
     final prevFilter = state is ShipmentsLoaded ? (state as ShipmentsLoaded).selectedFilter : 'all';
     final prevQuery = state is ShipmentsLoaded ? (state as ShipmentsLoaded).searchQuery : '';
-    emit(const ShipmentsLoading());
+    if (state is! ShipmentsLoaded) {
+      emit(const ShipmentsLoading());
+    }
     try {
       final all = await repository.getAllShipments();
       final filtered = _applyFilterAndSearch(all, prevFilter, prevQuery);
@@ -177,7 +207,9 @@ class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
       final filtered = _applyFilterAndSearch(current.allShipments, current.selectedFilter, event.query);
       emit(current.copyWith(searchQuery: event.query, shipments: filtered));
     } else {
+      if (state is! ShipmentsLoaded) {
       emit(const ShipmentsLoading());
+    }
       try {
         final all = await repository.getAllShipments();
         final filtered = _applyFilterAndSearch(all, 'all', event.query);
@@ -189,37 +221,37 @@ class ShipmentsBloc extends Bloc<ShipmentsEvent, ShipmentsState> {
   }
 
   Future<void> _onCreateShipment(CreateShipmentEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.saveShipment(event.shipment, event.orderIds);
+    await _runSelfMutation(() => repository.saveShipment(event.shipment, event.orderIds));
     add(const LoadShipments());
   }
 
   Future<void> _onUpdateShipment(UpdateShipmentEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.updateShipment(event.shipment, event.orderIds);
+    await _runSelfMutation(() => repository.updateShipment(event.shipment, event.orderIds));
     add(const LoadShipments());
   }
 
   Future<void> _onDeleteShipment(DeleteShipmentEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.deleteShipment(event.shipmentId);
+    await _runSelfMutation(() => repository.deleteShipment(event.shipmentId));
     add(const LoadShipments());
   }
 
   Future<void> _onAdvanceStatus(AdvanceShipmentStatusEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.updateShipmentStatus(event.shipmentId, event.newStatus);
+    await _runSelfMutation(() => repository.updateShipmentStatus(event.shipmentId, event.newStatus));
     add(const LoadShipments());
   }
 
   Future<void> _onRemoveOrder(RemoveOrderFromShipmentEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.removeOrderFromShipment(event.shipmentId, event.orderId);
+    await _runSelfMutation(() => repository.removeOrderFromShipment(event.shipmentId, event.orderId));
     add(const LoadShipments());
   }
 
   Future<void> _onUpdateIndividualStatus(UpdateIndividualOrderStatusEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.updateIndividualOrderStatus(event.orderId, event.newStatus);
+    await _runSelfMutation(() => repository.updateIndividualOrderStatus(event.orderId, event.newStatus));
     add(const LoadShipments());
   }
 
   Future<void> _onVerifyAllOrders(VerifyAllOrdersInShipmentEvent event, Emitter<ShipmentsState> emit) async {
-    await repository.verifyAllOrdersInShipment(event.shipmentId, event.targetStatus);
+    await _runSelfMutation(() => repository.verifyAllOrdersInShipment(event.shipmentId, event.targetStatus));
     add(const LoadShipments());
   }
 }

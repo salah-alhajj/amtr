@@ -99,6 +99,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
       }
     }
 
+    if (!mounted) return;
     setState(() {
       _availableOrders = allEligible;
       _isLoading = false;
@@ -337,6 +338,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                     firstDate: DateTime(2020),
                                     lastDate: DateTime(2035),
                                   );
+                                  if (!mounted) return;
                                   if (picked != null) {
                                     setState(
                                       () => _expectedDeliveryDate = picked,
@@ -360,6 +362,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                     firstDate: DateTime(2020),
                                     lastDate: DateTime(2035),
                                   );
+                                  if (!mounted) return;
                                   if (picked != null) {
                                     setState(
                                       () => _actualDeliveryDate = picked,
@@ -384,15 +387,18 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'shipment_attach_orders'.trParams({
-                          'count': _selectedOrderIds.length.toString(),
-                        }),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          'shipment_attach_orders'.trParams({
+                            'count': _selectedOrderIds.length.toString(),
+                          }),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       AppSecondaryButton(
                         onPressed: () {
                           setState(() {

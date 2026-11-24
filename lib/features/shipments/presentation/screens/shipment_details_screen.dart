@@ -41,8 +41,10 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
   }
 
   Future<void> _loadShipment() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     final shipment = await _shipmentRepo.getShipmentById(widget.shipmentId);
+    if (!mounted) return;
     setState(() {
       _shipment = shipment;
       _isLoading = false;

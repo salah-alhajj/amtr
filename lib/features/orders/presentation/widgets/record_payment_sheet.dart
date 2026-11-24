@@ -51,6 +51,36 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
     super.dispose();
   }
 
+  String _formatAmount(double amount) {
+    if (amount <= 0) return '0';
+    return amount % 1 == 0
+        ? amount.toInt().toString()
+        : amount.toStringAsFixed(2);
+  }
+
+  void _applyQuickPayment(String status, double amount) {
+    setState(() {
+      _selectedStatus = status;
+      _paidController.text = _formatAmount(amount);
+    });
+  }
+
+  void _onAmountChanged(String value) {
+    final parsed = double.tryParse(value.trim()) ?? 0.0;
+    final total = widget.order.totalSellPrice;
+    final String nextStatus;
+    if (total > 0 && parsed >= total) {
+      nextStatus = AppConstants.paymentPrepaid;
+    } else if (parsed > 0) {
+      nextStatus = AppConstants.paymentPartial;
+    } else {
+      nextStatus = AppConstants.paymentDebt;
+    }
+    if (nextStatus != _selectedStatus) {
+      setState(() => _selectedStatus = nextStatus);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -64,6 +94,8 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final totalSell = widget.order.totalSellPrice;
+
     return Form(
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -71,6 +103,33 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ActionChip(
+                avatar: const Icon(Icons.done_all_rounded, size: 16),
+                label: Text('payment_quick_full'.i18n()),
+                onPressed: () =>
+                    _applyQuickPayment(AppConstants.paymentPrepaid, totalSell),
+              ),
+              ActionChip(
+                avatar: const Icon(Icons.pie_chart_outline_rounded, size: 16),
+                label: Text('payment_quick_half'.i18n()),
+                onPressed: () => _applyQuickPayment(
+                  AppConstants.paymentPartial,
+                  totalSell / 2,
+                ),
+              ),
+              ActionChip(
+                avatar: const Icon(Icons.schedule_rounded, size: 16),
+                label: Text('payment_quick_zero'.i18n()),
+                onPressed: () =>
+                    _applyQuickPayment(AppConstants.paymentDebt, 0.0),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
           AppDropdownField<String>(
             value: _selectedStatus,
             label: 'order_payment_status_label'.i18n(),
@@ -118,6 +177,7 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
             hint: '0.00',
             prefixIcon: Icons.payments_outlined,
             inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+            onChanged: _onAmountChanged,
             validator: (val) => AppValidators.paidAmount(
               val,
               allowEmpty: false,

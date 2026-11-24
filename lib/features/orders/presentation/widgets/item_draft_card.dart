@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/services/preferences_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 
 /// مسودة بيانات بند في نموذج إنشاء الطلب
 class OrderItemDraft {
   final String id;
+  String? productId;
   final TextEditingController nameController;
   final TextEditingController qtyController;
   final TextEditingController costController;
@@ -15,6 +17,7 @@ class OrderItemDraft {
 
   OrderItemDraft({
     String? id,
+    this.productId,
     String? name,
     int? quantity,
     double? costPrice,
@@ -24,7 +27,7 @@ class OrderItemDraft {
        nameController = TextEditingController(text: name ?? ''),
        qtyController = TextEditingController(text: (quantity ?? 1).toString()),
        costController = TextEditingController(
-         text: costPrice != null ? costPrice.toString() : '',
+         text: costPrice != null && costPrice > 0 ? costPrice.toString() : '',
        ),
        sellController = TextEditingController(
          text: sellPrice != null ? sellPrice.toString() : '',
@@ -49,6 +52,7 @@ class ItemDraftCard extends StatelessWidget {
   final VoidCallback? onPickPhotos;
   final ValueChanged<int>? onRemovePhoto;
   final ValueChanged<List<String>>? onPhotosChanged;
+  final bool? isProductiveFamily;
 
   const ItemDraftCard({
     super.key,
@@ -60,10 +64,68 @@ class ItemDraftCard extends StatelessWidget {
     this.onPickPhotos,
     this.onRemovePhoto,
     this.onPhotosChanged,
+    this.isProductiveFamily,
   });
+
+  Widget _buildQtyField() {
+    return AppTextField(
+      controller: draft.qtyController,
+      keyboardType: TextInputType.number,
+      label: 'item_quantity_label'.i18n(),
+      prefixIcon: Icons.format_list_numbered_rounded,
+      inputFormatters: AppFormatters.positiveInteger(maxDigits: 5),
+      validator: (val) => AppValidators.quantity(val, min: 1, max: 10000),
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildCostField() {
+    return AppTextField(
+      controller: draft.costController,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      label: 'item_cost_price_label'.trParams({
+        'symbol': AppConstants.getCurrencySymbol(currency).i18n(),
+      }),
+      prefixIcon: Icons.price_change_outlined,
+      inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+      validator: (val) {
+        if (val == null || val.trim().isEmpty) return null;
+        return AppValidators.positiveAmount(val, allowZero: true);
+      },
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildSellField({required bool isRequired}) {
+    return AppTextField(
+      controller: draft.sellController,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      label: 'item_sell_price_label'.trParams({
+        'symbol': AppConstants.getCurrencySymbol(currency).i18n(),
+      }),
+      hint: 'item_sell_price_hint'.i18n(),
+      prefixIcon: Icons.sell_outlined,
+      inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+      validator: (val) {
+        if (isRequired) {
+          return AppValidators.positiveAmount(
+            val,
+            allowZero: false,
+            customRequiredMsg: 'common_required'.i18n(),
+          );
+        }
+        if (val == null || val.trim().isEmpty) return null;
+        return AppValidators.positiveAmount(val, allowZero: true);
+      },
+      textInputAction: TextInputAction.next,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final pfMode =
+        isProductiveFamily ?? PreferencesService.instance.isProductiveFamilyMode;
+
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -102,60 +164,18 @@ class ItemDraftCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 1,
-                child: AppTextField(
-                  controller: draft.qtyController,
-                  keyboardType: TextInputType.number,
-                  label: 'item_quantity_label'.i18n(),
-                  prefixIcon: Icons.format_list_numbered_rounded,
-                  inputFormatters: AppFormatters.positiveInteger(maxDigits: 5),
-                  validator: (val) =>
-                      AppValidators.quantity(val, min: 1, max: 10000),
-                  textInputAction: TextInputAction.next,
-                ),
-              ),
+              Expanded(flex: 1, child: _buildQtyField()),
               const SizedBox(width: 8),
               Expanded(
                 flex: 2,
-                child: AppTextField(
-                  controller: draft.costController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  label: 'item_cost_price_label'.trParams({
-                    'symbol': AppConstants.getCurrencySymbol(currency).i18n(),
-                  }),
-                  prefixIcon: Icons.price_change_outlined,
-                  inputFormatters: AppFormatters.positiveDecimal(
-                    decimalRange: 2,
-                  ),
-                  validator: (val) => AppValidators.positiveAmount(
-                    val,
-                    allowZero: false,
-                    customRequiredMsg: 'common_required'.i18n(),
-                  ),
-                  textInputAction: TextInputAction.next,
-                ),
+                child: pfMode
+                    ? _buildSellField(isRequired: true)
+                    : _buildCostField(),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          AppTextField(
-            controller: draft.sellController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            label: 'item_sell_price_label'.trParams({
-              'symbol': AppConstants.getCurrencySymbol(currency).i18n(),
-            }),
-            hint: 'item_sell_price_hint'.i18n(),
-            prefixIcon: Icons.sell_outlined,
-            inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
-            validator: (val) {
-              if (val == null || val.trim().isEmpty) return null;
-              return AppValidators.positiveAmount(val, allowZero: true);
-            },
-            textInputAction: TextInputAction.next,
-          ),
+          pfMode ? _buildCostField() : _buildSellField(isRequired: false),
           const SizedBox(height: 10),
 
           // قسم إرفاق الصور الموحد بنمط أبل مع خيارات الكاميرا والمعرض والمعاينة الفورية

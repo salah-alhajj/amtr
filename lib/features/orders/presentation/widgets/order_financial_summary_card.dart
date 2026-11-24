@@ -60,6 +60,25 @@ class OrderFinancialSummaryCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 8),
+          if (order.deliveryFee > 0) ...[
+            _buildRow(
+              context,
+              'order_delivery_fee_label'.i18n(),
+              amount: order.deliveryFee,
+              currencyCode: order.currency,
+            ),
+            const SizedBox(height: 6),
+          ],
+          if (order.discount > 0) ...[
+            _buildRow(
+              context,
+              'order_discount_label'.i18n(),
+              amount: order.discount,
+              currencyCode: order.currency,
+              color: AppColors.primaryGreen,
+            ),
+            const SizedBox(height: 6),
+          ],
           _buildRow(
             context,
             'order_total_sell_price'.i18n(),
@@ -119,31 +138,39 @@ class OrderFinancialSummaryCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: highlight ? context.textPrimary : context.textSecondary,
-            fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: highlight ? context.textPrimary : context.textSecondary,
+              fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         if (amount != null && currencyCode != null)
-          CurrencyPriceDisplay(
-            amount: amount,
-            currency: currencyCode,
-            style: TextStyle(
-              fontSize: highlight ? 14 : 13,
-              fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
-              color: effectiveColor,
+          Flexible(
+            child: CurrencyPriceDisplay(
+              amount: amount,
+              currency: currencyCode,
+              style: TextStyle(
+                fontSize: highlight ? 14 : 13,
+                fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+                color: effectiveColor,
+              ),
             ),
           )
         else
-          Text(
-            textValue ?? '',
-            style: TextStyle(
-              fontSize: highlight ? 14 : 13,
-              fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
-              color: effectiveColor,
+          Flexible(
+            child: Text(
+              textValue ?? '',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: highlight ? 14 : 13,
+                fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+                color: effectiveColor,
+              ),
             ),
           ),
       ],

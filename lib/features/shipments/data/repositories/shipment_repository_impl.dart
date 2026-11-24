@@ -1,5 +1,6 @@
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../../../models/individual_order.dart';
 import '../../../../models/order_item.dart';
@@ -84,6 +85,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         );
       }
     });
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
@@ -124,6 +126,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         );
       }
     });
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
@@ -139,6 +142,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
       );
       await txn.delete('shipments', where: 'id = ?', whereArgs: [id]);
     });
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
@@ -185,6 +189,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         );
       }
     });
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
@@ -201,6 +206,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         whereArgs: [orderId, shipmentId],
       );
     });
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
@@ -216,6 +222,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
       where: 'id = ?',
       whereArgs: [orderId],
     );
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
@@ -231,6 +238,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
       where: 'shipmentId = ?',
       whereArgs: [shipmentId],
     );
+    DataSyncBus.instance.notify(DataDomain.orders);
   }
 
   @override
