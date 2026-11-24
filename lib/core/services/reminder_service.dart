@@ -89,8 +89,69 @@ class ReminderService {
     return false;
   }
 
+  static const int weeklyBackupNotificationId = 990001;
+
   int _generateNotificationId(String orderId) {
     return orderId.hashCode.abs() % 100000;
+  }
+
+  /// جدولة تذكير أسبوعي لطيف لحفظ نسخة احتياطية من البيانات (بعد 7 أيام ويتكرر أسبوعياً)
+  Future<bool> scheduleWeeklyBackupReminder() async {
+    try {
+      await requestPermissions();
+
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+        'weekly_backup_reminder_channel',
+        'backup_weekly_reminder_title',
+        channelDescription: 'backup_weekly_reminder_desc',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: darwinDetails,
+        macOS: darwinDetails,
+      );
+
+      final scheduledDate =
+          tz.TZDateTime.now(tz.local).add(const Duration(days: 7));
+
+      await _notificationsPlugin.zonedSchedule(
+        id: weeklyBackupNotificationId,
+        title: 'backup_weekly_reminder_title'.i18n(),
+        body: 'backup_weekly_reminder_desc'.i18n(),
+        scheduledDate: scheduledDate,
+        notificationDetails: platformDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      );
+      return true;
+    } catch (e) {
+      debugPrint(
+          '[ReminderService] Error scheduling weekly backup reminder: $e');
+      return false;
+    }
+  }
+
+  /// إلغاء التذكير الأسبوعي لحفظ النسخة الاحتياطية
+  Future<void> cancelWeeklyBackupReminder() async {
+    try {
+      await init();
+      await _notificationsPlugin.cancel(id: weeklyBackupNotificationId);
+    } catch (e) {
+      debugPrint(
+          '[ReminderService] Error canceling weekly backup reminder: $e');
+    }
   }
 
   /// جدولة منبه وتنبيه استحقاق الدين بالوقت والتاريخ الدقيق
@@ -154,6 +215,70 @@ class ReminderService {
       return true;
     } catch (e) {
       debugPrint('[ReminderService] Error scheduling reminder: $e');
+      return false;
+    }
+  }
+
+  /// جدولة تنبيه تجهيز الطلب قبل موعد التسليم أو التنبيه المحدد بـ 3 ساعات
+  Future<bool> schedulePrepReminder(IndividualOrder order) async {
+    final targetDate = order.prepReminderAt ?? order.expectedDeliveryDate;
+    if (targetDate == null) return false;
+
+    try {
+      await requestPermissions();
+      final reminderDate = targetDate.subtract(const Duration(hours: 3));
+      final notifId = _generateNotificationId('${order.id}_prep');
+
+      final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'prep_reminders_channel',
+        'order_prep_reminder_scheduled'.i18n(),
+        channelDescription: 'order_prep_reminder_scheduled'.i18n(),
+        importance: Importance.max,
+        priority: Priority.high,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      final NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: darwinDetails,
+        macOS: darwinDetails,
+      );
+
+      final scheduledDate = tz.TZDateTime.from(reminderDate, tz.local);
+      final customer = order.customerName ?? 'customer_unregistered'.i18n();
+      final occasion = order.occasionLabel?.trim();
+      final title = '#${order.orderNumber} - $customer';
+      final body = (occasion != null && occasion.isNotEmpty)
+          ? '$occasion • ${'order_prep_reminder_scheduled'.i18n()}'
+          : 'order_prep_reminder_scheduled'.i18n();
+
+      if (scheduledDate.isAfter(tz.TZDateTime.now(tz.local))) {
+        await _notificationsPlugin.zonedSchedule(
+          id: notifId,
+          title: title,
+          body: body,
+          scheduledDate: scheduledDate,
+          notificationDetails: platformDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+      } else {
+        await _notificationsPlugin.show(
+          id: notifId,
+          title: title,
+          body: body,
+          notificationDetails: platformDetails,
+        );
+      }
+      return true;
+    } catch (e) {
+      debugPrint('[ReminderService] Error scheduling prep reminder: $e');
       return false;
     }
   }

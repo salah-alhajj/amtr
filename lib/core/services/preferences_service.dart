@@ -10,6 +10,16 @@ class PreferencesService {
   static const String _keyThemeMode = 'app_theme_mode';
   static const String _keyLocaleCode = 'app_locale_code';
   static const String _keyOnboardingCompleted = 'app_onboarding_completed';
+  static const String _keyBusinessMode = 'app_business_mode';
+  static const String _keyBusinessName = 'app_business_name';
+  static const String _keyBusinessPhone = 'app_business_phone';
+  static const String _keyBusinessAddress = 'app_business_address';
+  static const String _keyInvoiceFooterNote = 'app_invoice_footer_note';
+  static const String _keyDefaultCurrency = 'app_default_currency';
+  static const String _keyMultiCurrencyEnabled = 'app_multi_currency_enabled';
+  static const String _keyWeeklyBackupReminder = 'app_weekly_backup_reminder';
+  static const String _keyLastBackupAt = 'app_last_backup_at';
+  static const String _keyDailyOrderCap = 'daily_order_cap';
 
   SharedPreferences? _prefs;
 
@@ -75,5 +85,110 @@ class PreferencesService {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
     _prefs = prefs;
     await prefs.setBool(_keyOnboardingCompleted, completed);
+  }
+
+  /// وضع النشاط التجاري: 'productive_family' (أسر منتجة / متجر منزلي) أو 'trade_logistics' (تجارة وشحنات)
+  String getBusinessMode() {
+    return _prefs?.getString(_keyBusinessMode) ?? 'productive_family';
+  }
+
+  bool get isProductiveFamilyMode => getBusinessMode() == 'productive_family';
+
+  Future<void> setBusinessMode(String mode) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyBusinessMode, mode);
+  }
+
+  /// بيانات هوية المشروع / الأسرة المنتجة (تظهر في الفواتير ورسائل الواتساب)
+  String getBusinessName() => _prefs?.getString(_keyBusinessName) ?? '';
+
+  Future<void> setBusinessName(String value) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyBusinessName, value.trim());
+  }
+
+  String getBusinessPhone() => _prefs?.getString(_keyBusinessPhone) ?? '';
+
+  Future<void> setBusinessPhone(String value) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyBusinessPhone, value.trim());
+  }
+
+  String getBusinessAddress() => _prefs?.getString(_keyBusinessAddress) ?? '';
+
+  Future<void> setBusinessAddress(String value) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyBusinessAddress, value.trim());
+  }
+
+  String getInvoiceFooterNote() =>
+      _prefs?.getString(_keyInvoiceFooterNote) ?? '';
+
+  Future<void> setInvoiceFooterNote(String value) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyInvoiceFooterNote, value.trim());
+  }
+
+  /// العملة الأساسية الافتراضية للمشروع
+  String getDefaultCurrency() {
+    return _prefs?.getString(_keyDefaultCurrency) ?? 'yer';
+  }
+
+  Future<void> setDefaultCurrency(String currencyCode) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyDefaultCurrency, currencyCode);
+  }
+
+  /// هل تعدد العملات وأسعار الصرف مفعّلة للمستخدم؟
+  /// افتراضياً: معطّل في وضع الأسر المنتجة ومفعّل في وضع التجارة والشحنات
+  bool isMultiCurrencyEnabled() {
+    final stored = _prefs?.getBool(_keyMultiCurrencyEnabled);
+    if (stored != null) return stored;
+    return !isProductiveFamilyMode;
+  }
+
+  Future<void> setMultiCurrencyEnabled(bool enabled) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setBool(_keyMultiCurrencyEnabled, enabled);
+  }
+
+  /// التذكير الأسبوعي لحفظ نسخة احتياطية
+  bool isWeeklyBackupReminderEnabled() {
+    return _prefs?.getBool(_keyWeeklyBackupReminder) ?? false;
+  }
+
+  Future<void> setWeeklyBackupReminderEnabled(bool enabled) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setBool(_keyWeeklyBackupReminder, enabled);
+  }
+
+  /// تاريخ آخر نسخة احتياطية محفوظة
+  DateTime? getLastBackupAt() {
+    final raw = _prefs?.getString(_keyLastBackupAt);
+    if (raw == null || raw.isEmpty) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  Future<void> setLastBackupAt(DateTime dt) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyLastBackupAt, dt.toIso8601String());
+  }
+
+  /// الحد الأقصى للطلبات اليومية (السعة الاستيعابية اليومية؛ 0 = غير مفعّل)
+  int getDailyOrderCap() => _prefs?.getInt(_keyDailyOrderCap) ?? 0;
+
+  Future<void> setDailyOrderCap(int cap) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setInt(_keyDailyOrderCap, cap < 0 ? 0 : cap);
   }
 }

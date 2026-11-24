@@ -144,6 +144,14 @@ class YemenPhoneHelper {
       return '966${digits.substring(1)}';
     }
 
+    // أرقام الخليج الدولية المعتمدة (966, 971, 965, 974, 968, 973)
+    const gulfPrefixes = ['966', '971', '965', '974', '968', '973'];
+    for (final prefix in gulfPrefixes) {
+      if (digits.startsWith(prefix) && digits.length >= 11 && digits.length <= 12) {
+        return digits;
+      }
+    }
+
     // إذا كان بالفعل بصيغة دولية يمنية 9677...
     return digits;
   }
@@ -327,6 +335,11 @@ class YemenPhoneHelper {
 
     // رقم سعودي (محلي أو دولي)
     if (RegExp(r'^(05[0-9]{8}|(00966|966)5[0-9]{8})$').hasMatch(digits)) {
+      return true;
+    }
+
+    // أرقام دول الخليج (الإمارات 971، الكويت 965، قطر 974، عمان 968، البحرين 973)
+    if (RegExp(r'^(00)?(971|965|974|968|973)[0-9]{7,9}$').hasMatch(digits)) {
       return true;
     }
 
