@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/customer.dart';
 import '../../../../models/individual_order.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
@@ -13,7 +15,8 @@ abstract class CustomersEvent {
 }
 
 class LoadCustomers extends CustomersEvent {
-  const LoadCustomers();
+  final bool silent;
+  const LoadCustomers({this.silent = false});
 }
 
 class SearchCustomers extends CustomersEvent {
@@ -99,6 +102,8 @@ class CustomersError extends CustomersState {
 class CustomersBloc extends Bloc<CustomersEvent, CustomersState> {
   final CustomerRepository repository;
   final OrderRepository? orderRepository;
+  late final StreamSubscription<DataDomain> _syncSub;
+  bool _isSelfMutating = false;
 
   CustomersBloc({
     required this.repository,
@@ -110,13 +115,41 @@ class CustomersBloc extends Bloc<CustomersEvent, CustomersState> {
     on<CreateCustomerEvent>(_onCreateCustomer);
     on<UpdateCustomerEvent>(_onUpdateCustomer);
     on<DeleteCustomerEvent>(_onDeleteCustomer);
+    _syncSub = DataSyncBus.instance.stream.listen((domain) {
+      if (!isClosed &&
+          !_isSelfMutating &&
+          state is CustomersLoaded &&
+          (domain == DataDomain.customers ||
+              domain == DataDomain.orders ||
+              domain == DataDomain.payments)) {
+        add(const LoadCustomers(silent: true));
+      }
+    });
+  }
+
+  Future<void> _runSelfMutation(Future<void> Function() mutation) async {
+    _isSelfMutating = true;
+    try {
+      await mutation();
+      await Future<void>.microtask(() {});
+    } finally {
+      _isSelfMutating = false;
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    await _syncSub.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadCustomers(LoadCustomers event, Emitter<CustomersState> emit) async {
     final currentSearch = state is CustomersLoaded ? (state as CustomersLoaded).searchQuery : '';
     final currentFilter = state is CustomersLoaded ? (state as CustomersLoaded).activeFilter : CustomerListFilter.all;
 
-    emit(const CustomersLoading());
+    if (!event.silent || state is! CustomersLoaded) {
+      emit(const CustomersLoading());
+    }
     try {
       final allCustomers = await repository.getAllCustomers();
       final Map<String, CustomerFinancialSummary> summaries = {};
@@ -254,17 +287,17 @@ class CustomersBloc extends Bloc<CustomersEvent, CustomersState> {
   }
 
   Future<void> _onCreateCustomer(CreateCustomerEvent event, Emitter<CustomersState> emit) async {
-    await repository.saveCustomer(event.customer);
+    await _runSelfMutation(() => repository.saveCustomer(event.customer));
     add(const LoadCustomers());
   }
 
   Future<void> _onUpdateCustomer(UpdateCustomerEvent event, Emitter<CustomersState> emit) async {
-    await repository.updateCustomer(event.customer);
+    await _runSelfMutation(() => repository.updateCustomer(event.customer));
     add(const LoadCustomers());
   }
 
   Future<void> _onDeleteCustomer(DeleteCustomerEvent event, Emitter<CustomersState> emit) async {
-    await repository.deleteCustomer(event.customerId);
+    await _runSelfMutation(() => repository.deleteCustomer(event.customerId));
     add(const LoadCustomers());
   }
 }

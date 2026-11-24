@@ -1,4 +1,5 @@
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/customer.dart';
 import '../../../../core/utils/yemen_phone_helper.dart';
 import '../../domain/repositories/customer_repository.dart';
@@ -34,6 +35,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<void> saveCustomer(Customer customer) async {
     final db = await dbHelper.database;
     await db.insert('customers', customer.toMap());
+    DataSyncBus.instance.notify(DataDomain.customers);
   }
 
   @override
@@ -45,12 +47,14 @@ class CustomerRepositoryImpl implements CustomerRepository {
       where: 'id = ?',
       whereArgs: [customer.id],
     );
+    DataSyncBus.instance.notify(DataDomain.customers);
   }
 
   @override
   Future<void> deleteCustomer(String id) async {
     final db = await dbHelper.database;
     await db.delete('customers', where: 'id = ?', whereArgs: [id]);
+    DataSyncBus.instance.notify(DataDomain.customers);
   }
 
   @override

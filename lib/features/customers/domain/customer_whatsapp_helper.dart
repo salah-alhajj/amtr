@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants.dart';
 import '../../../core/localization/localization.dart';
 import '../../../core/services/currency_service.dart';
+import '../../../core/services/preferences_service.dart';
 import '../../../core/widgets/design_system.dart';
 import '../../../models/customer.dart';
 import '../../../models/individual_order.dart';
@@ -30,7 +31,15 @@ class CustomerWhatsAppHelper {
     required Customer customer,
     required IndividualOrder order,
   }) {
+    final prefs = PreferencesService.instance;
+    final businessName = prefs.getBusinessName();
+    final businessPhone = prefs.getBusinessPhone();
+    final footerNote = prefs.getInvoiceFooterNote();
+
     final buffer = StringBuffer();
+    if (businessName.isNotEmpty) {
+      buffer.writeln('*$businessName*');
+    }
     buffer.writeln('السلام عليكم ورحمة الله وبركاته');
     buffer.writeln('مرحباً أخي/أختي: *${customer.name}*');
     buffer.writeln('تفاصيل ومتابعة حالة طلبكم رقم: *#${order.orderNumber}*');
@@ -51,6 +60,12 @@ class CustomerWhatsAppHelper {
     }
 
     buffer.writeln('--------------------------------');
+    if (order.deliveryFee > 0) {
+      buffer.writeln('*رسوم التوصيل:* ${order.deliveryFee.toStringAsFixed(0)} ${AppConstants.getCurrencySymbol(order.currency)}');
+    }
+    if (order.discount > 0) {
+      buffer.writeln('*الخصم:* -${order.discount.toStringAsFixed(0)} ${AppConstants.getCurrencySymbol(order.currency)}');
+    }
     buffer.writeln('*إجمالي المطلوب:* ${order.totalSellPrice.toStringAsFixed(0)} ${AppConstants.getCurrencySymbol(order.currency)}');
     buffer.writeln('*المسدد:* ${order.paidAmount.toStringAsFixed(0)} ${AppConstants.getCurrencySymbol(order.currency)}');
 
@@ -64,6 +79,12 @@ class CustomerWhatsAppHelper {
     }
 
     buffer.writeln('--------------------------------');
+    if (footerNote.isNotEmpty) {
+      buffer.writeln(footerNote);
+    }
+    if (businessPhone.isNotEmpty) {
+      buffer.writeln('للتواصل: $businessPhone');
+    }
     buffer.writeln('يسعدنا دائماً خدمتكم، دمتم بخير.');
     return buffer.toString();
   }
@@ -74,7 +95,21 @@ class CustomerWhatsAppHelper {
     required List<IndividualOrder> selectedOrders,
     CurrencyService? currencyService,
   }) {
+    final prefs = PreferencesService.instance;
+    final businessName = prefs.getBusinessName();
+    final businessPhone = prefs.getBusinessPhone();
+    final footerNote = prefs.getInvoiceFooterNote();
+
     final buffer = StringBuffer();
+    if (businessName.isNotEmpty) {
+      buffer.writeln('*$businessName*');
+    }
+    if (businessPhone.isNotEmpty) {
+      buffer.writeln('للتواصل: $businessPhone');
+    }
+    if (footerNote.isNotEmpty) {
+      buffer.writeln(footerNote);
+    }
     buffer.writeln('السلام عليكم ورحمة الله وبركاته');
     buffer.writeln('مرحباً *${customer.name}*');
     buffer.writeln('إليك كشف ومتابعة حالة الطلبات المحددة (*${selectedOrders.length} طلبات*):');

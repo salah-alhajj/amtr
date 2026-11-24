@@ -12,12 +12,15 @@ import '../../../orders/domain/repositories/order_repository.dart';
 import '../../../orders/presentation/screens/add_edit_order_screen.dart';
 import '../../../orders/presentation/screens/order_details_screen.dart';
 import '../../domain/customer_financial_helper.dart';
+import '../../domain/customer_loyalty_helper.dart';
 import '../../domain/customer_whatsapp_helper.dart';
+import '../../domain/smart_reorder_service.dart';
 import '../../../../core/utils/yemen_phone_helper.dart';
 import '../bloc/customers_bloc.dart';
 import '../widgets/add_edit_customer_sheet.dart';
 import '../widgets/settle_partial_debt_sheet.dart';
 import '../../../printing/presentation/widgets/print_options_sheet.dart';
+import '../../../whatsapp/domain/whatsapp_template_engine.dart';
 
 /// صفحة العميل المتكاملة بتصميم آبل الموحد
 /// تحتوي على تابات منفصلة للطلبات، المديونيات كل على حدة مع إمكانية تسديد جزء،
@@ -37,6 +40,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     with SingleTickerProviderStateMixin {
   final OrderRepository _orderRepo = OrderRepositoryImpl();
   final CurrencyService _currencyService = CurrencyService.instance;
+  final SmartReorderService _smartReorderService = SmartReorderService();
 
   late Customer _customer;
   late TabController _tabController;
@@ -113,6 +117,36 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       orders: _orders,
       currencyService: _currencyService,
       filter: _calcFilter,
+    );
+  }
+
+  CustomerDebtAging get _debtAging {
+    return _smartReorderService.computeDebtAging(_orders);
+  }
+
+  void _sendGentleDebtReminderWhatsApp() {
+    final unpaidOrders = _orders
+        .where((o) => o.remainingDebt > 0.001)
+        .toList();
+    if (unpaidOrders.isEmpty) return;
+
+    final message = unpaidOrders.length == 1
+        ? WhatsAppTemplateEngine.renderOrderMessage(
+            order: unpaidOrders.first,
+            type: WhatsAppTemplateEngine.typeReminder,
+            tone: WhatsAppTemplateEngine.toneWarm,
+            customerName: _customer.name,
+          )
+        : CustomerWhatsAppHelper.buildMultipleOrdersStatusMessage(
+            customer: _customer,
+            selectedOrders: unpaidOrders,
+            currencyService: _currencyService,
+          );
+
+    CustomerWhatsAppHelper.launchChat(
+      context: context,
+      customer: _customer,
+      message: message,
     );
   }
 
@@ -215,6 +249,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       phone: _customer.phone,
       whatsapp: _customer.whatsapp,
       notes: encodedNotes.isNotEmpty ? encodedNotes : null,
+      preferences: _customer.preferences,
+      returnCount: _customer.returnCount,
       createdAt: _customer.createdAt,
     );
 
@@ -244,6 +280,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       phone: _customer.phone,
       whatsapp: _customer.whatsapp,
       notes: encodedNotes,
+      preferences: _customer.preferences,
+      returnCount: _customer.returnCount,
       createdAt: _customer.createdAt,
     );
 
@@ -380,6 +418,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     final phoneOp = hasPhone
         ? YemenPhoneHelper.getOperator(_customer.phone)
         : YemenTelecomOperator.unknown;
+    final totalSalesYer = _currencyService.toBaseYer(
+      summary.totalSales,
+      summary.activeCurrency,
+    );
+    final loyaltyTier = CustomerLoyaltyHelper.computeTier(
+      ordersCount: summary.allOrdersCount,
+      totalSalesYer: totalSalesYer,
+    );
+    final hasPreferences =
+        _customer.preferences != null && _customer.preferences!.trim().isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -428,17 +476,51 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _customer.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: context.textPrimary,
-                      ),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          _customer.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: context.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        AppBadge(
+                          label: CustomerLoyaltyHelper.label(loyaltyTier),
+                          color: CustomerLoyaltyHelper.color(loyaltyTier),
+                          icon: CustomerLoyaltyHelper.icon(loyaltyTier),
+                          fontSize: 10,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                        ),
+                        if (_customer.hasRepeatRefusals)
+                          AppBadge(
+                            label: 'customer_refusal_badge'.trParams({
+                              'count': _customer.returnCount.toString(),
+                            }),
+                            color: AppColors.statusDanger,
+                            icon: Icons.warning_amber_rounded,
+                            fontSize: 10,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                          ),
+                      ],
                     ),
                     if (hasPhone) ...[
                       const SizedBox(height: 2),
-                      Row(
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             YemenPhoneHelper.formatForDisplay(
@@ -452,8 +534,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                               color: context.textSecondary,
                             ),
                           ),
-                          if (phoneOp != YemenTelecomOperator.unknown) ...[
-                            const SizedBox(width: 6),
+                          if (phoneOp != YemenTelecomOperator.unknown)
                             AppBadge(
                               label: YemenPhoneHelper.getOperatorLabel(phoneOp),
                               color: AppColors.primaryBlue,
@@ -463,7 +544,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                 vertical: 1,
                               ),
                             ),
-                          ],
                         ],
                       ),
                     ],
@@ -474,17 +554,20 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         children: [
                           const WhatsAppIcon(size: 13),
                           const SizedBox(width: 4),
-                          Text(
-                            YemenPhoneHelper.formatForDisplay(
+                          Flexible(
+                            child: Text(
+                              YemenPhoneHelper.formatForDisplay(
+                                    _customer.whatsapp!,
+                                    context: context,
+                                  ) ??
                                   _customer.whatsapp!,
-                                  context: context,
-                                ) ??
-                                _customer.whatsapp!,
-                            textDirection: TextDirection.ltr,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.primaryGreen,
-                              fontWeight: FontWeight.w600,
+                              textDirection: TextDirection.ltr,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.primaryGreen,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -531,6 +614,58 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             ],
           ),
 
+          if (hasPreferences) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primaryBlue.withValues(
+                  alpha: isDark ? 0.12 : 0.06,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.22),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.straighten_rounded,
+                    size: 16,
+                    color: AppColors.primaryBlue,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'customer_preferences_label'.i18n(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryBlue,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _customer.preferences!.trim(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 12),
 
           // -------------------------------------------------------------------
@@ -569,12 +704,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     // أحمر: المبالغ مديونياته لنا وتختفي تماماً إذا كان صفر
     if (summary.showDebt) {
       cards.add(
-        _buildFinancialTile(
-          title: 'customer_debts_owed'.i18n(),
+        _buildDebtFinancialTile(
           amount: summary.debtsOwed,
           currency: summary.activeCurrency.i18n(),
-          icon: Icons.receipt_long_rounded,
-          color: AppColors.statusDanger,
+          debtAging: _debtAging,
           isDark: isDark,
         ),
       );
@@ -638,6 +771,123 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           if (i < cards.length - 1) const SizedBox(height: 6),
         ],
       ],
+    );
+  }
+
+  Widget _buildDebtFinancialTile({
+    required double amount,
+    required String currency,
+    required CustomerDebtAging debtAging,
+    required bool isDark,
+  }) {
+    const color = AppColors.statusDanger;
+    final showAgingRow =
+        debtAging.remainingDebtYer > 0 && debtAging.oldestUnpaidDays > 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.receipt_long_rounded,
+                  color: color,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'customer_debts_owed'.i18n(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: context.textPrimary,
+                  ),
+                ),
+              ),
+              CurrencyPriceDisplay(
+                amount: amount,
+                currency: currency,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          if (showAgingRow) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                AppBadge(
+                  icon: Icons.schedule_rounded,
+                  label: 'customer_debt_aging_badge'.trParams({
+                    'days': debtAging.oldestUnpaidDays.toString(),
+                  }),
+                  color: AppColors.statusWarning,
+                  fontSize: 10.5,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                ),
+                Material(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10),
+                  child: InkWell(
+                    onTap: _sendGentleDebtReminderWhatsApp,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const WhatsAppIcon(size: 14),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              'customer_debt_gentle_reminder_btn'.i18n(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryGreen,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 

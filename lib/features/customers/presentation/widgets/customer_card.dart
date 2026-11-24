@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/customer.dart';
 import '../../domain/customer_financial_helper.dart';
+import '../../domain/customer_loyalty_helper.dart';
 import '../../domain/customer_whatsapp_helper.dart';
 import '../../../../core/utils/yemen_phone_helper.dart';
 
@@ -25,6 +26,16 @@ class CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loyaltyTier = (summary != null && summary!.allOrdersCount >= 2)
+        ? CustomerLoyaltyHelper.computeTier(
+            ordersCount: summary!.allOrdersCount,
+            totalSalesYer: CurrencyService.instance.toBaseYer(
+              summary!.totalSales,
+              summary!.activeCurrency,
+            ),
+          )
+        : null;
+
     return AppAnimatedCard(
       margin: const EdgeInsets.only(bottom: 8),
       onTap: onTap,
@@ -151,6 +162,17 @@ class CustomerCard extends StatelessWidget {
                           ),
                         ),
                       ],
+                      if (loyaltyTier != null)
+                        AppBadge(
+                          label: CustomerLoyaltyHelper.label(loyaltyTier),
+                          color: CustomerLoyaltyHelper.color(loyaltyTier),
+                          icon: CustomerLoyaltyHelper.icon(loyaltyTier),
+                          fontSize: 10,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                        ),
                       if (summary!.allOrdersCount == 0) ...[
                         AppBadge(
                           label: 'customer_badge_no_orders'.i18n(),

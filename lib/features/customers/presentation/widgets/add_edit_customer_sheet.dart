@@ -47,6 +47,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _whatsappCtrl;
+  late final TextEditingController _preferencesCtrl;
   late final TextEditingController _notesCtrl;
 
   @override
@@ -67,6 +68,9 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
           ? YemenPhoneHelper.localizeDigits(initialWhatsapp, languageCode: currentLang)
           : '',
     );
+    _preferencesCtrl = TextEditingController(
+      text: widget.customerToEdit?.preferences ?? '',
+    );
     _notesCtrl = TextEditingController(
       text: CustomerFinancialHelper.cleanUserNotes(widget.customerToEdit?.notes),
     );
@@ -86,6 +90,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
     _whatsappCtrl.dispose();
+    _preferencesCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -96,10 +101,12 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
     final name = _nameCtrl.text.trim();
     final rawPhone = _phoneCtrl.text.trim();
     final rawWhatsapp = _whatsappCtrl.text.trim();
+    final cleanPreferences = _preferencesCtrl.text.trim();
     final cleanNotes = _notesCtrl.text.trim();
 
     final phone = rawPhone.isNotEmpty ? YemenPhoneHelper.cleanPhoneNumber(rawPhone) : null;
     final whatsapp = rawWhatsapp.isNotEmpty ? YemenPhoneHelper.cleanPhoneNumber(rawWhatsapp) : null;
+    final finalPreferences = cleanPreferences.isNotEmpty ? cleanPreferences : null;
 
     // الحفاظ على كائن التسوية المالية اليدوية دون فقدان أو تشويه
     final override = CustomerFinancialHelper.parseOverride(widget.customerToEdit?.notes);
@@ -118,6 +125,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             phone: phone,
             whatsapp: whatsapp,
             notes: finalNotes,
+            preferences: finalPreferences,
             createdAt: widget.customerToEdit!.createdAt,
           )
         : Customer(
@@ -126,6 +134,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
             phone: phone,
             whatsapp: whatsapp,
             notes: finalNotes,
+            preferences: finalPreferences,
           );
 
     widget.onSave(customer);
@@ -305,6 +314,17 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
                 const SizedBox(width: 6),
               ],
             ),
+          ),
+          const SizedBox(height: 14),
+          AppTextField(
+            controller: _preferencesCtrl,
+            maxLines: 2,
+            label: 'customer_preferences_label'.i18n(),
+            hint: 'customer_preferences_hint'.i18n(),
+            prefixIcon: Icons.straighten_rounded,
+            inputFormatters: AppFormatters.notes(),
+            validator: AppValidators.notes,
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 14),
           AppTextField(
