@@ -172,17 +172,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
+          const SizedBox(width: 8),
           // زر التخطي (يختفي في السلايد الأخير)
-          AnimatedOpacity(
-            duration: const Duration(milliseconds: 250),
-            opacity: isLastSlide ? 0.0 : 1.0,
-            child: AppSecondaryButton(
-              onPressed: isLastSlide ? null : _completeOnboarding,
-              label: 'common_skip'.i18n(),
-              height: 32,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 4,
+          Flexible(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 250),
+              opacity: isLastSlide ? 0.0 : 1.0,
+              child: AppSecondaryButton(
+                onPressed: isLastSlide ? null : _completeOnboarding,
+                label: 'common_skip'.i18n(),
+                height: 32,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
               ),
             ),
           ),
@@ -217,49 +220,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // زر السابق: في لغة RTL الرجوع للخلف يشير لليمين (→)
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: isFirstSlide ? 0.0 : 1.0,
-                  child: AppSecondaryButton(
-                    onPressed: isFirstSlide ? null : _goToPrevious,
-                    label: 'common_previous'.i18n(),
-                    customIcon: const BackChevron(size: 14),
-                    height: 42,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                Flexible(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: isFirstSlide ? 0.0 : 1.0,
+                    child: AppSecondaryButton(
+                      onPressed: isFirstSlide ? null : _goToPrevious,
+                      label: 'common_previous'.i18n(),
+                      customIcon: const BackChevron(size: 14),
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
 
+                const SizedBox(width: 6),
+
                 // مؤشر الصفحات الكبسولي
-                OnboardingPageIndicator(
-                  count: _totalPages,
-                  activeIndex: _currentPage,
-                  onDotTapped: (index) {
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                  },
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: OnboardingPageIndicator(
+                      count: _totalPages,
+                      activeIndex: _currentPage,
+                      onDotTapped: (index) {
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.fastOutSlowIn,
+                        );
+                      },
+                    ),
+                  ),
                 ),
 
+                const SizedBox(width: 6),
+
                 // زر التالي: في لغة RTL التقدم للأمام يشير لليسار (←)
-                AppPrimaryButton(
-                  onPressed: _goToNext,
-                  label: 'common_next'.i18n(),
-                  customTrailingIcon: const ForwardChevron(
-                    size: 14,
-                    color: Colors.white,
+                Flexible(
+                  child: AppPrimaryButton(
+                    onPressed: _goToNext,
+                    label: 'common_next'.i18n(),
+                    customTrailingIcon: const ForwardChevron(
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                    gradient: AppColors.appleGradient,
+                    height: 42,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    borderRadius: 14,
                   ),
-                  gradient: AppColors.appleGradient,
-                  height: 42,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 8,
-                  ),
-                  borderRadius: 14,
                 ),
               ],
             ),
