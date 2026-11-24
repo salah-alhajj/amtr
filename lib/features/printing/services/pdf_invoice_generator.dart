@@ -929,8 +929,8 @@ class PdfInvoiceGenerator {
   static String _getCurrencySymbol(String currencyCode) {
     switch (currencyCode.toUpperCase()) {
       case AppConstants.currencySar:
-        // استخدام النص العربي المعتمد (ر.س) للطباعة لضمان التوافق التام مع خطوط PDF المضمنة
-        return 'ر.س';
+        // استخدام الرمز الرسمي للريال السعودي المعتمد من البنك المركزي السعودي (U+20C1)
+        return AppConstants.sarSymbol;
       case AppConstants.currencyUsd:
         return AppConstants.usdSymbol;
       case AppConstants.currencyYer:
