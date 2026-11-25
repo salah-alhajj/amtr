@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../business/app_feature_flags.dart';
 import '../business/business_mode_cubit.dart';
 import '../constants.dart';
 import '../localization/localization.dart';
@@ -19,7 +20,9 @@ import '../../features/manufacturing/presentation/screens/production_batches_scr
 import '../../features/orders/presentation/screens/orders_list_screen.dart';
 import '../../features/products/presentation/screens/products_list_screen.dart';
 import '../../features/reports/presentation/screens/monthly_report_screen.dart';
+import '../../features/settings/presentation/screens/feature_settings_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/guide/presentation/screens/app_user_guide_screen.dart';
 import '../../features/shipments/presentation/screens/shipments_list_screen.dart';
 import '../../features/suppliers/presentation/screens/suppliers_list_screen.dart';
 import '../../features/about/presentation/screens/about_app_screen.dart';
@@ -60,6 +63,7 @@ class BusinessDrawer extends StatelessWidget {
         invoiceFooterNote: prefs.getInvoiceFooterNote(),
         defaultCurrency: prefs.getDefaultCurrency(),
         multiCurrencyEnabled: prefs.isMultiCurrencyEnabled(),
+        features: prefs.getFeatureFlags(),
       );
     }
   }
@@ -70,6 +74,7 @@ class BusinessDrawer extends StatelessWidget {
     final businessState = _readBusinessModeState(context);
     final isProductiveFamily = businessState.isProductiveFamily;
     final multiCurrencyEnabled = businessState.multiCurrencyEnabled;
+    final AppFeatureFlags features = businessState.features;
     final displayTitle = businessState.businessName.trim().isNotEmpty
         ? businessState.businessName.trim()
         : 'app_name'.i18n();
@@ -284,7 +289,7 @@ class BusinessDrawer extends StatelessWidget {
                       }
                     },
                   ),
-                  if (!isProductiveFamily)
+                  if (features.shipments)
                     _DrawerMenuItem(
                       icon: Icons.local_shipping_rounded,
                       title: 'nav_shipments'.i18n(),
@@ -342,81 +347,86 @@ class BusinessDrawer extends StatelessWidget {
                       }
                     },
                   ),
-                  _DrawerMenuItem(
-                    icon: Icons.local_shipping_outlined,
-                    title: 'suppliers_title'.i18n(),
-                    subtitle: 'drawer_suppliers_sub'.i18n(),
-                    iconColor: AppColors.primaryGreen,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SuppliersListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerMenuItem(
-                    icon: Icons.delivery_dining_rounded,
-                    title: 'couriers_title'.i18n(),
-                    subtitle: 'drawer_couriers_sub'.i18n(),
-                    iconColor: AppColors.vibrantTeal,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CouriersListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerMenuItem(
-                    icon: Icons.auto_awesome_mosaic_outlined,
-                    title: 'manufacturing_hub_title'.i18n(),
-                    subtitle: 'drawer_manufacturing_sub'.i18n(),
-                    iconColor: const Color(0xFF7C3AED),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MaterialsAndTemplatesScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerMenuItem(
-                    icon: Icons.checklist_rtl_rounded,
-                    title: 'prep_screen_title'.i18n(),
-                    subtitle: 'drawer_prep_shopping_sub'.i18n(),
-                    iconColor: AppColors.statusWarning,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DailyPrepAndShoppingScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerMenuItem(
-                    icon: Icons.timelapse_rounded,
-                    title: 'drawer_batches_waste_title'.i18n(),
-                    subtitle: 'drawer_batches_waste_sub'.i18n(),
-                    iconColor: AppColors.primaryBlue,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ProductionBatchesScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  if (features.suppliers)
+                    _DrawerMenuItem(
+                      icon: Icons.local_shipping_outlined,
+                      title: 'suppliers_title'.i18n(),
+                      subtitle: 'drawer_suppliers_sub'.i18n(),
+                      iconColor: AppColors.primaryGreen,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SuppliersListScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (features.couriers)
+                    _DrawerMenuItem(
+                      icon: Icons.delivery_dining_rounded,
+                      title: 'couriers_title'.i18n(),
+                      subtitle: 'drawer_couriers_sub'.i18n(),
+                      iconColor: AppColors.vibrantTeal,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CouriersListScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (features.manufacturing)
+                    _DrawerMenuItem(
+                      icon: Icons.auto_awesome_mosaic_outlined,
+                      title: 'manufacturing_hub_title'.i18n(),
+                      subtitle: 'drawer_manufacturing_sub'.i18n(),
+                      iconColor: const Color(0xFF7C3AED),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MaterialsAndTemplatesScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (features.dailyPrep)
+                    _DrawerMenuItem(
+                      icon: Icons.checklist_rtl_rounded,
+                      title: 'prep_screen_title'.i18n(),
+                      subtitle: 'drawer_prep_shopping_sub'.i18n(),
+                      iconColor: AppColors.statusWarning,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DailyPrepAndShoppingScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (features.curingWaste)
+                    _DrawerMenuItem(
+                      icon: Icons.timelapse_rounded,
+                      title: 'drawer_batches_waste_title'.i18n(),
+                      subtitle: 'drawer_batches_waste_sub'.i18n(),
+                      iconColor: AppColors.primaryBlue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProductionBatchesScreen(),
+                          ),
+                        );
+                      },
+                    ),
                   _DrawerMenuItem(
                     icon: Icons.account_balance_wallet_outlined,
                     title: isProductiveFamily
@@ -498,6 +508,36 @@ class BusinessDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const BackupRestoreScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.tune_rounded,
+                    title: 'feature_settings_title'.i18n(),
+                    subtitle: 'drawer_features_sub'.i18n(),
+                    iconColor: AppColors.primaryGreen,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FeatureSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerMenuItem(
+                    icon: Icons.menu_book_rounded,
+                    title: 'guide_screen_title'.i18n(),
+                    subtitle: 'drawer_guide_sub'.i18n(),
+                    iconColor: AppColors.vibrantTeal,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AppUserGuideScreen(),
                         ),
                       );
                     },

@@ -978,31 +978,36 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
                     )
                   else
                     _buildPaidAmountField(),
-                  const SizedBox(height: 10),
-                  AppSwitchTile(
-                    title: 'order_requires_deposit_label'.i18n(),
-                    subtitle: 'order_requires_deposit_hint'.i18n(),
-                    value: _requiresDeposit,
-                    onChanged: (val) => setState(() => _requiresDeposit = val),
-                  ),
-                  if (_requiresDeposit) ...[
-                    const SizedBox(height: 8),
-                    AppTextField(
-                      controller: _depositAmountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      label: 'order_deposit_amount_label'.trParams({
-                        'symbol': AppConstants.getCurrencySymbol(
-                          _currency,
-                        ).i18n(),
-                      }),
-                      hint: '0.00',
-                      prefixIcon: Icons.savings_outlined,
-                      inputFormatters: AppFormatters.positiveDecimal(
-                        decimalRange: 2,
-                      ),
+                  if (PreferencesService.instance
+                          .getFeatureFlags()
+                          .seasonalDeposit ||
+                      _requiresDeposit) ...[
+                    const SizedBox(height: 10),
+                    AppSwitchTile(
+                      title: 'order_requires_deposit_label'.i18n(),
+                      subtitle: 'order_requires_deposit_hint'.i18n(),
+                      value: _requiresDeposit,
+                      onChanged: (val) => setState(() => _requiresDeposit = val),
                     ),
+                    if (_requiresDeposit) ...[
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: _depositAmountController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        label: 'order_deposit_amount_label'.trParams({
+                          'symbol': AppConstants.getCurrencySymbol(
+                            _currency,
+                          ).i18n(),
+                        }),
+                        hint: '0.00',
+                        prefixIcon: Icons.savings_outlined,
+                        inputFormatters: AppFormatters.positiveDecimal(
+                          decimalRange: 2,
+                        ),
+                      ),
+                    ],
                   ],
                   const SizedBox(height: 14),
                   // نوع التسليم (استلام من المنزل / توصيل) والخصم ورسوم التوصيل

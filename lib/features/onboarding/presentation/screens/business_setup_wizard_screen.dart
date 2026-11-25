@@ -204,9 +204,10 @@ class _BusinessSetupWizardScreenState extends State<BusinessSetupWizardScreen> {
               child: AppPrimaryButton(
                 onPressed: _isSaving ? null : _nextStep,
                 isLoading: _isSaving,
-                icon: _currentStep == 2
-                    ? Icons.rocket_launch_rounded
-                    : Icons.arrow_forward_rounded,
+                icon: _currentStep == 2 ? Icons.rocket_launch_rounded : null,
+                trailingIcon: _currentStep < 2
+                    ? Icons.arrow_forward_rounded
+                    : null,
                 label: _currentStep == 2
                     ? 'wizard_start_btn'.i18n()
                     : 'onboarding_next'.i18n(),
@@ -258,14 +259,41 @@ class _BusinessSetupWizardScreenState extends State<BusinessSetupWizardScreen> {
         ),
         const SizedBox(height: 20),
         _buildModeOptionCard(
+          mode: AppConstants.businessModeSimpleSeller,
+          icon: Icons.sell_outlined,
+          title: 'business_mode_simple_seller'.i18n(),
+          description: 'role_simple_seller_desc'.i18n(),
+          accentColor: AppColors.primaryGreen,
+          isDark: isDark,
+        ),
+        const SizedBox(height: 10),
+        _buildModeOptionCard(
           mode: AppConstants.businessModeProductiveFamily,
           icon: Icons.home_work_rounded,
           title: 'business_mode_family'.i18n(),
           description: 'wizard_family_desc'.i18n(),
-          accentColor: AppColors.primaryGreen,
+          accentColor: AppColors.statusWarning,
           isDark: isDark,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+        _buildModeOptionCard(
+          mode: AppConstants.businessModeArtisanCraft,
+          icon: Icons.handyman_outlined,
+          title: 'business_mode_artisan'.i18n(),
+          description: 'role_artisan_desc'.i18n(),
+          accentColor: const Color(0xFF7C3AED),
+          isDark: isDark,
+        ),
+        const SizedBox(height: 10),
+        _buildModeOptionCard(
+          mode: AppConstants.businessModeRetailShop,
+          icon: Icons.store_mall_directory_outlined,
+          title: 'business_mode_retail'.i18n(),
+          description: 'role_retail_desc'.i18n(),
+          accentColor: AppColors.vibrantTeal,
+          isDark: isDark,
+        ),
+        const SizedBox(height: 10),
         _buildModeOptionCard(
           mode: AppConstants.businessModeTradeLogistics,
           icon: Icons.local_shipping_rounded,
@@ -531,10 +559,7 @@ class _BusinessSetupWizardScreenState extends State<BusinessSetupWizardScreen> {
   }
 
   Widget _buildStep3(bool isDark) {
-    final modeLabel =
-        _selectedMode == AppConstants.businessModeProductiveFamily
-        ? 'business_mode_family'.i18n()
-        : 'business_mode_trade'.i18n();
+    final modeLabel = AppConstants.getBusinessModeLabel(_selectedMode);
     final projectName = _nameController.text.trim();
 
     return Column(

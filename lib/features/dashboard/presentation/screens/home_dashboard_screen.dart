@@ -131,6 +131,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         invoiceFooterNote: prefs.getInvoiceFooterNote(),
         defaultCurrency: prefs.getDefaultCurrency(),
         multiCurrencyEnabled: prefs.isMultiCurrencyEnabled(),
+        features: prefs.getFeatureFlags(),
       );
     }
   }
@@ -501,7 +502,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     const SizedBox(height: 12),
                   ],
 
-                  if (isProductiveFamily) ...[
+                  if (businessState.features.dailyPrep) ...[
                     AppCard(
                       onTap: () {
                         Navigator.push(
@@ -619,7 +620,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
                   const SizedBox(height: 24),
 
-                  if (!isProductiveFamily) ...[
+                  if (businessState.features.shipments) ...[
                     // قسم الشحنات المجمعة النشطة
                     DashboardSectionHeader(
                       title: 'dashboard_active_shipments_title'.i18n(),

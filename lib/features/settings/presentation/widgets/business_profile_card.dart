@@ -173,24 +173,25 @@ class _BusinessProfileCardState extends State<BusinessProfileCard> {
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildModeChip(
-                  mode: AppConstants.businessModeProductiveFamily,
-                  icon: Icons.home_work_outlined,
-                  label: 'business_mode_family'.i18n(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildModeChip(
-                  mode: AppConstants.businessModeTradeLogistics,
-                  icon: Icons.local_shipping_outlined,
-                  label: 'business_mode_trade'.i18n(),
-                ),
-              ),
-            ],
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: AppConstants.allBusinessModes.map((mode) {
+              final icon = switch (mode) {
+                AppConstants.businessModeSimpleSeller => Icons.sell_outlined,
+                AppConstants.businessModeArtisanCraft => Icons.handyman_outlined,
+                AppConstants.businessModeRetailShop =>
+                  Icons.store_mall_directory_outlined,
+                AppConstants.businessModeTradeLogistics =>
+                  Icons.local_shipping_outlined,
+                _ => Icons.home_work_outlined,
+              };
+              return _buildModeChip(
+                mode: mode,
+                icon: icon,
+                label: AppConstants.getBusinessModeLabel(mode),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 14),
           AppTextField(
@@ -436,7 +437,7 @@ class _BusinessProfileCardState extends State<BusinessProfileCard> {
           ),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,

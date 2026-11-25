@@ -876,6 +876,12 @@ class _AddEditProductSheetState extends State<AddEditProductSheet> {
   Widget build(BuildContext context) {
     final multiCurrencyEnabled =
         PreferencesService.instance.isMultiCurrencyEnabled();
+    final features = PreferencesService.instance.getFeatureFlags();
+    final showManufacturing = features.manufacturing ||
+        _productType == AppConstants.productTypeManufactured;
+    final showSuppliers = features.suppliers || _supplierId != null;
+    final showVariantsBundles =
+        features.variantsBundles || _isBundle || _variantDrafts.isNotEmpty;
 
     return SingleChildScrollView(
       child: Form(
@@ -918,41 +924,45 @@ class _AddEditProductSheetState extends State<AddEditProductSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _buildProductTypeSelector(),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: AppDropdownField<String?>(
-                  label: 'product_supplier_label'.i18n(),
-                  value: _suppliers.any((s) => s.id == _supplierId)
-                      ? _supplierId
-                      : null,
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('supplier_none'.i18n()),
-                    ),
-                    ..._suppliers.map(
-                      (s) => DropdownMenuItem<String?>(
-                        value: s.id,
-                        child: Text(s.name),
+          if (showManufacturing) ...[
+            const SizedBox(height: 12),
+            _buildProductTypeSelector(),
+          ],
+          if (showSuppliers) ...[
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: AppDropdownField<String?>(
+                    label: 'product_supplier_label'.i18n(),
+                    value: _suppliers.any((s) => s.id == _supplierId)
+                        ? _supplierId
+                        : null,
+                    items: [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('supplier_none'.i18n()),
                       ),
-                    ),
-                  ],
-                  onChanged: (val) => setState(() => _supplierId = val),
+                      ..._suppliers.map(
+                        (s) => DropdownMenuItem<String?>(
+                          value: s.id,
+                          child: Text(s.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) => setState(() => _supplierId = val),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              IconButton.filledTonal(
-                onPressed: _quickAddSupplier,
-                icon: const Icon(Icons.person_add_alt_1_outlined),
-                tooltip: 'supplier_add_title'.i18n(),
-              ),
-            ],
-          ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  onPressed: _quickAddSupplier,
+                  icon: const Icon(Icons.person_add_alt_1_outlined),
+                  tooltip: 'supplier_add_title'.i18n(),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           InkWell(
             onTap: _productType == AppConstants.productTypeManufactured
@@ -1022,8 +1032,8 @@ class _AddEditProductSheetState extends State<AddEditProductSheet> {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
+                  ForwardChevron(
+                    size: 16,
                     color: _productType == AppConstants.productTypeManufactured
                         ? const Color(0xFF7C3AED)
                         : AppColors.primaryBlue,
@@ -1121,10 +1131,12 @@ class _AddEditProductSheetState extends State<AddEditProductSheet> {
               ],
             ),
           ],
-          const SizedBox(height: 12),
-          _buildBundleSection(),
-          const SizedBox(height: 12),
-          _buildVariantsSection(),
+          if (showVariantsBundles) ...[
+            const SizedBox(height: 12),
+            _buildBundleSection(),
+            const SizedBox(height: 12),
+            _buildVariantsSection(),
+          ],
           const SizedBox(height: 12),
           _buildReorderCycleSelector(),
           const SizedBox(height: 12),

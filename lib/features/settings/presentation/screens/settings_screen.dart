@@ -9,8 +9,10 @@ import '../../../../core/services/preferences_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../backup/presentation/screens/backup_restore_screen.dart';
+import '../../../guide/presentation/screens/app_user_guide_screen.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 import '../../../about/presentation/screens/about_app_screen.dart';
+import 'feature_settings_screen.dart';
 import '../widgets/business_profile_card.dart';
 import '../widgets/database_backup_tile.dart';
 import '../widgets/demo_data_card.dart';
@@ -89,6 +91,110 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           // هوية المشروع ونمط العمل (أسر منتجة / بزنس صغير)
           const BusinessProfileCard(),
+
+          const SizedBox(height: 16),
+
+          // تخصيص الأدوار وإظهار/إخفاء الميزات
+          AppCard(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FeatureSettingsScreen()),
+              );
+            },
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    color: AppColors.primaryGreen,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'feature_settings_title'.i18n(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'drawer_features_sub'.i18n(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const ForwardChevron(size: 13),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // دليل الاستخدام الشامل
+          AppCard(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AppUserGuideScreen()),
+              );
+            },
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.vibrantTeal.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.menu_book_rounded,
+                    color: AppColors.vibrantTeal,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'guide_screen_title'.i18n(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'drawer_guide_sub'.i18n(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const ForwardChevron(size: 13),
+              ],
+            ),
+          ),
 
           const SizedBox(height: 16),
 
