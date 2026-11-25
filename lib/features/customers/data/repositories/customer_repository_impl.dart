@@ -1,3 +1,4 @@
+import '../../../../core/audit/audit.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/customer.dart';
@@ -34,18 +35,40 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<void> saveCustomer(Customer customer) async {
     final db = await dbHelper.database;
-    await db.insert('customers', customer.toMap());
+    final map = customer.toMap();
+    await db.insert('customers', map);
+    await CentralAuditService.instance.log(
+      entityType: AuditEntityType.customer,
+      entityId: customer.id,
+      entityLabel: customer.name,
+      action: AuditAction.create,
+      summary: customer.name,
+      after: map,
+      sourceModule: 'customers',
+    );
     DataSyncBus.instance.notify(DataDomain.customers);
   }
 
   @override
   Future<void> updateCustomer(Customer customer) async {
     final db = await dbHelper.database;
+    final beforeCustomer = await getCustomerById(customer.id);
+    final afterMap = customer.toMap();
     await db.update(
       'customers',
-      customer.toMap(),
+      afterMap,
       where: 'id = ?',
       whereArgs: [customer.id],
+    );
+    await CentralAuditService.instance.log(
+      entityType: AuditEntityType.customer,
+      entityId: customer.id,
+      entityLabel: customer.name,
+      action: AuditAction.update,
+      summary: customer.name,
+      before: beforeCustomer?.toMap(),
+      after: afterMap,
+      sourceModule: 'customers',
     );
     DataSyncBus.instance.notify(DataDomain.customers);
   }
@@ -53,7 +76,19 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<void> deleteCustomer(String id) async {
     final db = await dbHelper.database;
+    final beforeCustomer = await getCustomerById(id);
     await db.delete('customers', where: 'id = ?', whereArgs: [id]);
+    if (beforeCustomer != null) {
+      await CentralAuditService.instance.log(
+        entityType: AuditEntityType.customer,
+        entityId: id,
+        entityLabel: beforeCustomer.name,
+        action: AuditAction.delete,
+        summary: beforeCustomer.name,
+        before: beforeCustomer.toMap(),
+        sourceModule: 'customers',
+      );
+    }
     DataSyncBus.instance.notify(DataDomain.customers);
   }
 

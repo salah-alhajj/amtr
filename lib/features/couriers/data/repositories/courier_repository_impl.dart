@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/localization/localization.dart';
@@ -148,16 +149,30 @@ class CourierRepositoryImpl {
 
   Future<void> saveCourier(Courier courier) async {
     final db = await _dbHelper.database;
+    final beforeCourier = await getCourierById(courier.id);
+    final afterMap = courier.toMap();
     await db.insert(
       'couriers',
-      courier.toMap(),
+      afterMap,
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await CentralAuditService.instance.log(
+      entityType: AuditEntityType.courier,
+      entityId: courier.id,
+      entityLabel: courier.name,
+      action: beforeCourier == null ? AuditAction.create : AuditAction.update,
+      summary: courier.name,
+      before: beforeCourier?.toMap(),
+      after: afterMap,
+      currency: courier.currency,
+      sourceModule: 'couriers',
     );
     DataSyncBus.instance.notify(DataDomain.couriers);
   }
 
   Future<void> deleteCourier(String id) async {
     final db = await _dbHelper.database;
+    final beforeCourier = await getCourierById(id);
     await db.transaction((txn) async {
       await txn.update(
         'orders',
@@ -180,9 +195,23 @@ class CourierRepositoryImpl {
         where: 'id = ?',
         whereArgs: [id],
       );
+      if (beforeCourier != null) {
+        await CentralAuditService.instance.logInTxn(
+          txn,
+          entityType: AuditEntityType.courier,
+          entityId: id,
+          entityLabel: beforeCourier.name,
+          action: AuditAction.delete,
+          summary: beforeCourier.name,
+          before: beforeCourier.toMap(),
+          currency: beforeCourier.currency,
+          sourceModule: 'couriers',
+        );
+      }
     });
     DataSyncBus.instance.notify(DataDomain.couriers);
     DataSyncBus.instance.notify(DataDomain.orders);
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   Future<List<IndividualOrder>> getCourierOrders(
@@ -631,12 +660,25 @@ class CourierRepositoryImpl {
         );
         await txn.insert('expenses', expense.toMap());
       }
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.courierSettlement,
+        entityId: settlement.id,
+        entityLabel: courier.name,
+        action: AuditAction.settlement,
+        summary: '${courier.name} (${settleableOrders.length})',
+        after: settlement.toMap(),
+        financialImpactYer: settlement.netRemittedYer,
+        currency: AppConstants.currencyYer,
+        sourceModule: 'couriers',
+      );
     });
 
     DataSyncBus.instance.notify(DataDomain.couriers);
     DataSyncBus.instance.notify(DataDomain.orders);
     DataSyncBus.instance.notify(DataDomain.expenses);
     DataSyncBus.instance.notify(DataDomain.payments);
+    CentralAuditService.instance.notifyAuditChanged();
 
     return settlement;
   }

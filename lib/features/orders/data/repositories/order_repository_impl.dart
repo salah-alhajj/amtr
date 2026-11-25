@@ -1,7 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/individual_order.dart';
 import '../../../../models/order_item.dart';
@@ -245,6 +247,25 @@ class OrderRepositoryImpl implements OrderRepository {
           'notes': order.orderNumber,
         });
       }
+      final afterSnapshot = Map<String, dynamic>.from(order.toMap())
+        ..['itemsCount'] = items.length
+        ..['totalSellPrice'] = order.totalSellPrice;
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.order,
+        entityId: order.id,
+        entityLabel: '#${order.orderNumber}',
+        action: AuditAction.create,
+        summary: '${order.customerName ?? ''} (#${order.orderNumber})',
+        before: null,
+        after: afterSnapshot,
+        financialImpactYer: CurrencyService.instance.toBaseYer(
+          order.paidAmount,
+          order.currency,
+        ),
+        currency: order.currency,
+        sourceModule: 'orders',
+      );
     });
     DataSyncBus.instance.notify(DataDomain.orders);
     if (order.paidAmount > 0) {
@@ -253,6 +274,7 @@ class OrderRepositoryImpl implements OrderRepository {
     if (stockChanged) {
       DataSyncBus.instance.notify(DataDomain.products);
     }
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override
@@ -263,11 +285,13 @@ class OrderRepositoryImpl implements OrderRepository {
     await db.transaction((txn) async {
       final existing = await txn.query(
         'orders',
-        columns: ['paidAmount'],
         where: 'id = ?',
         whereArgs: [order.id],
         limit: 1,
       );
+      final beforeMap = existing.isNotEmpty
+          ? Map<String, dynamic>.from(existing.first)
+          : null;
       final prevPaid = existing.isNotEmpty
           ? ((existing.first['paidAmount'] as num?)?.toDouble() ?? 0.0)
           : 0.0;
@@ -361,6 +385,27 @@ class OrderRepositoryImpl implements OrderRepository {
           'notes': order.orderNumber,
         });
       }
+      if (beforeMap != null) {
+        beforeMap['itemsCount'] = existingItemRows.length;
+      }
+      final afterSnapshot = Map<String, dynamic>.from(order.toMap())
+        ..['itemsCount'] = items.length;
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.order,
+        entityId: order.id,
+        entityLabel: '#${order.orderNumber}',
+        action: AuditAction.update,
+        summary: '${order.customerName ?? ''} (#${order.orderNumber})',
+        before: beforeMap,
+        after: afterSnapshot,
+        financialImpactYer: CurrencyService.instance.toBaseYer(
+          delta,
+          order.currency,
+        ),
+        currency: order.currency,
+        sourceModule: 'orders',
+      );
     });
     DataSyncBus.instance.notify(DataDomain.orders);
     if (addedPayment) {
@@ -369,6 +414,7 @@ class OrderRepositoryImpl implements OrderRepository {
     if (stockChanged) {
       DataSyncBus.instance.notify(DataDomain.products);
     }
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override
@@ -403,15 +449,49 @@ class OrderRepositoryImpl implements OrderRepository {
         stockChanged = stockChanged || vChanged;
       }
 
+      final existingOrders = await txn.query(
+        'orders',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      final beforeOrder = existingOrders.isNotEmpty
+          ? Map<String, dynamic>.from(existingOrders.first)
+          : null;
+
       await txn.delete('payment_transactions', where: 'orderId = ?', whereArgs: [id]);
       await txn.delete('order_items', where: 'orderId = ?', whereArgs: [id]);
       await txn.delete('orders', where: 'id = ?', whereArgs: [id]);
+
+      if (beforeOrder != null) {
+        final orderNum = (beforeOrder['orderNumber'] as String?) ?? id;
+        final currency =
+            (beforeOrder['currency'] as String?) ?? AppConstants.currencyYer;
+        final paidAmt = (beforeOrder['paidAmount'] as num?)?.toDouble() ?? 0.0;
+        await CentralAuditService.instance.logInTxn(
+          txn,
+          entityType: AuditEntityType.order,
+          entityId: id,
+          entityLabel: '#$orderNum',
+          action: AuditAction.delete,
+          summary: '${beforeOrder['customerName'] ?? ''} (#$orderNum)',
+          before: beforeOrder,
+          after: null,
+          financialImpactYer: -CurrencyService.instance.toBaseYer(
+            paidAmt,
+            currency,
+          ),
+          currency: currency,
+          sourceModule: 'orders',
+        );
+      }
     });
     DataSyncBus.instance.notify(DataDomain.orders);
     DataSyncBus.instance.notify(DataDomain.payments);
     if (stockChanged) {
       DataSyncBus.instance.notify(DataDomain.products);
     }
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override
@@ -425,19 +505,23 @@ class OrderRepositoryImpl implements OrderRepository {
     await db.transaction((txn) async {
       final existing = await txn.query(
         'orders',
-        columns: ['paidAmount', 'customerId', 'currency', 'orderNumber'],
+        columns: ['paidAmount', 'paymentStatus', 'customerId', 'customerName', 'currency', 'orderNumber'],
         where: 'id = ?',
         whereArgs: [orderId],
         limit: 1,
       );
 
       double prevPaid = 0.0;
+      String? prevStatus;
       String? customerId;
+      String? customerName;
       String currency = AppConstants.currencyYer;
       String? orderNumber;
       if (existing.isNotEmpty) {
         prevPaid = (existing.first['paidAmount'] as num?)?.toDouble() ?? 0.0;
+        prevStatus = existing.first['paymentStatus'] as String?;
         customerId = existing.first['customerId'] as String?;
+        customerName = existing.first['customerName'] as String?;
         currency =
             (existing.first['currency'] as String?) ?? AppConstants.currencyYer;
         orderNumber = existing.first['orderNumber'] as String?;
@@ -467,11 +551,36 @@ class OrderRepositoryImpl implements OrderRepository {
           'notes': orderNumber,
         });
       }
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.payment,
+        entityId: orderId,
+        entityLabel: '#${orderNumber ?? orderId}',
+        action: AuditAction.payment,
+        summary: '${customerName ?? ''} (#${orderNumber ?? orderId})',
+        before: {
+          'paymentStatus': prevStatus,
+          'paidAmount': prevPaid,
+          'currency': currency,
+        },
+        after: {
+          'paymentStatus': status,
+          'paidAmount': paidAmount,
+          'currency': currency,
+        },
+        financialImpactYer: CurrencyService.instance.toBaseYer(
+          delta,
+          currency,
+        ),
+        currency: currency,
+        sourceModule: 'orders',
+      );
     });
     DataSyncBus.instance.notify(DataDomain.orders);
     if (addedPayment) {
       DataSyncBus.instance.notify(DataDomain.payments);
     }
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override

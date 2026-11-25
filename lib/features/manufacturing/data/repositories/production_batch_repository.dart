@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/localization/localization.dart';
@@ -225,6 +226,20 @@ class ProductionBatchRepository {
         await txn.insert('expenses', expense.toMap());
         expenseLogged = true;
       }
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.productionBatch,
+        entityId: createdBatch.id,
+        entityLabel: product.name,
+        action: AuditAction.create,
+        summary: '${product.name} (×$yieldCount)',
+        after: createdBatch.toMap(),
+        financialImpactYer: expenseLogged
+            ? -currencyService.toBaseYer(totalCost, product.currency)
+            : 0.0,
+        currency: product.currency,
+        sourceModule: 'manufacturing',
+      );
     });
 
     DataSyncBus.instance.notify(DataDomain.products);
@@ -232,6 +247,7 @@ class ProductionBatchRepository {
     if (expenseLogged) {
       DataSyncBus.instance.notify(DataDomain.expenses);
     }
+    CentralAuditService.instance.notifyAuditChanged();
 
     return createdBatch;
   }
@@ -293,10 +309,23 @@ class ProductionBatchRepository {
         readyAt: now,
       );
       didTransition = true;
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.productionBatch,
+        entityId: current.id,
+        entityLabel: current.productName,
+        action: AuditAction.statusChange,
+        summary: '${current.productName} (+${current.yieldCount})',
+        before: current.toMap(),
+        after: resultBatch.toMap(),
+        currency: current.currency,
+        sourceModule: 'manufacturing',
+      );
     });
 
     if (didTransition) {
       DataSyncBus.instance.notify(DataDomain.products);
+      CentralAuditService.instance.notifyAuditChanged();
     }
 
     return resultBatch;

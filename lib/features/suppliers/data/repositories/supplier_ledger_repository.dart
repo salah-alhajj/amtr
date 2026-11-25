@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/localization/localization.dart';
@@ -187,6 +188,28 @@ class SupplierLedgerRepository {
           );
         }
       }
+
+      final afterSnapshot = Map<String, dynamic>.from(tx.toMap());
+      if (hasStockReplenishment) {
+        afterSnapshot['stockItemType'] = stockItemType;
+        afterSnapshot['stockItemId'] = stockItemId;
+        afterSnapshot['quantity'] = stockQuantity;
+      }
+      final impactYer = affectsCashBox
+          ? -_currencyService.toBaseYer(tx.amount, tx.currency)
+          : 0.0;
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.supplierTx,
+        entityId: tx.id,
+        entityLabel: supplierName.trim(),
+        action: tx.isPayment ? AuditAction.payment : AuditAction.create,
+        summary: '${supplierName.trim()} (${tx.type})',
+        after: afterSnapshot,
+        financialImpactYer: impactYer,
+        currency: tx.currency,
+        sourceModule: 'suppliers',
+      );
     });
 
     DataSyncBus.instance.notify(DataDomain.suppliers);
@@ -200,16 +223,39 @@ class SupplierLedgerRepository {
         DataSyncBus.instance.notify(DataDomain.materials);
       }
     }
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   /// حذف حركة من دفتر حساب المورد
   Future<void> deleteTransaction(String txId) async {
     final db = await _dbHelper.database;
+    final rows = await db.query(
+      'supplier_transactions',
+      where: 'id = ?',
+      whereArgs: [txId],
+      limit: 1,
+    );
+    final beforeMap = rows.isNotEmpty
+        ? Map<String, dynamic>.from(rows.first)
+        : null;
     await db.delete(
       'supplier_transactions',
       where: 'id = ?',
       whereArgs: [txId],
     );
+    if (beforeMap != null) {
+      final curr = (beforeMap['currency'] as String?) ?? AppConstants.currencyYer;
+      await CentralAuditService.instance.log(
+        entityType: AuditEntityType.supplierTx,
+        entityId: txId,
+        entityLabel: (beforeMap['supplierId'] as String?) ?? txId,
+        action: AuditAction.delete,
+        summary: '${beforeMap['type'] ?? ''}',
+        before: beforeMap,
+        currency: curr,
+        sourceModule: 'suppliers',
+      );
+    }
     DataSyncBus.instance.notify(DataDomain.suppliers);
   }
 }

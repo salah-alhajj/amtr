@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/raw_material.dart';
@@ -41,16 +42,30 @@ class RawMaterialRepository {
 
   Future<void> save(RawMaterial material) async {
     final db = await dbHelper.database;
+    final beforeMat = await getById(material.id);
+    final afterMap = material.toMap();
     await db.insert(
       'raw_materials',
-      material.toMap(),
+      afterMap,
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await CentralAuditService.instance.log(
+      entityType: AuditEntityType.material,
+      entityId: material.id,
+      entityLabel: material.name,
+      action: beforeMat == null ? AuditAction.create : AuditAction.update,
+      summary: material.name,
+      before: beforeMat?.toMap(),
+      after: afterMap,
+      currency: material.currency,
+      sourceModule: 'manufacturing',
     );
     DataSyncBus.instance.notify(DataDomain.materials);
   }
 
   Future<void> delete(String id) async {
     final db = await dbHelper.database;
+    final beforeMat = await getById(id);
     await db.transaction((txn) async {
       await txn.update(
         'product_ingredients',
@@ -65,7 +80,21 @@ class RawMaterialRepository {
         whereArgs: [id],
       );
       await txn.delete('raw_materials', where: 'id = ?', whereArgs: [id]);
+      if (beforeMat != null) {
+        await CentralAuditService.instance.logInTxn(
+          txn,
+          entityType: AuditEntityType.material,
+          entityId: id,
+          entityLabel: beforeMat.name,
+          action: AuditAction.delete,
+          summary: beforeMat.name,
+          before: beforeMat.toMap(),
+          currency: beforeMat.currency,
+          sourceModule: 'manufacturing',
+        );
+      }
     });
     DataSyncBus.instance.notify(DataDomain.materials);
+    CentralAuditService.instance.notifyAuditChanged();
   }
 }

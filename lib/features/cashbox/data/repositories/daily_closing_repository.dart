@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../models/daily_closing.dart';
 
@@ -15,10 +16,22 @@ class DailyClosingRepository {
 
   Future<void> saveClosing(DailyClosing closing) async {
     final db = await dbHelper.database;
+    final map = closing.toMap();
     await db.insert(
       'daily_closings',
-      closing.toMap(),
+      map,
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await CentralAuditService.instance.log(
+      entityType: AuditEntityType.dailyClosing,
+      entityId: closing.id,
+      entityLabel: closing.closingDate,
+      action: AuditAction.closing,
+      summary: closing.closingDate,
+      after: map,
+      financialImpactYer: closing.cashInYer - closing.businessExpensesYer,
+      currency: 'YER',
+      sourceModule: 'cashbox',
     );
   }
 

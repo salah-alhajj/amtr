@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import '../audit/audit.dart';
 import '../constants.dart';
 import '../database/app_database.dart';
 
@@ -42,6 +43,8 @@ class CurrencyService extends ChangeNotifier {
     required double newSarToYer,
     required double newUsdToYer,
   }) async {
+    final prevSar = _sarToYer;
+    final prevUsd = _usdToYer;
     _sarToYer = newSarToYer;
     _usdToYer = newUsdToYer;
 
@@ -56,6 +59,21 @@ class CurrencyService extends ChangeNotifier {
       where: 'id = ?',
       whereArgs: ['default_rates'],
     );
+
+    if ((prevSar - newSarToYer).abs() > 0.0001 ||
+        (prevUsd - newUsdToYer).abs() > 0.0001) {
+      await CentralAuditService.instance.log(
+        entityType: AuditEntityType.exchangeRate,
+        entityId: 'default_rates',
+        entityLabel: 'SAR / USD',
+        action: AuditAction.rateUpdate,
+        summary: 'SAR=$newSarToYer, USD=$newUsdToYer',
+        before: {'sarToYer': prevSar, 'usdToYer': prevUsd},
+        after: {'sarToYer': newSarToYer, 'usdToYer': newUsdToYer},
+        currency: AppConstants.currencyYer,
+        sourceModule: 'currency',
+      );
+    }
 
     notifyListeners();
   }

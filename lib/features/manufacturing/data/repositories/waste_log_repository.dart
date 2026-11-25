@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:sqflite/sqflite.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/waste_log.dart';
@@ -65,11 +66,24 @@ class WasteLogRepository {
           }
         }
       }
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.wasteLog,
+        entityId: log.id,
+        entityLabel: log.itemName,
+        action: AuditAction.create,
+        summary: '${log.itemName} (${log.quantity})',
+        after: log.toMap(),
+        financialImpactYer: -log.estimatedLossYer,
+        currency: 'YER',
+        sourceModule: 'manufacturing',
+      );
     });
 
     DataSyncBus.instance.notify(
       log.isProduct ? DataDomain.products : DataDomain.materials,
     );
+    CentralAuditService.instance.notifyAuditChanged();
     return log;
   }
 
@@ -101,11 +115,34 @@ class WasteLogRepository {
   /// حذف سجل هالك محدد
   Future<void> delete(String id) async {
     final db = await dbHelper.database;
+    final rows = await db.query(
+      'waste_logs',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    final beforeMap = rows.isNotEmpty
+        ? Map<String, dynamic>.from(rows.first)
+        : null;
     await db.delete(
       'waste_logs',
       where: 'id = ?',
       whereArgs: [id],
     );
+    if (beforeMap != null) {
+      await CentralAuditService.instance.log(
+        entityType: AuditEntityType.wasteLog,
+        entityId: id,
+        entityLabel: (beforeMap['itemName'] as String?) ?? id,
+        action: AuditAction.delete,
+        summary: (beforeMap['itemName'] as String?) ?? id,
+        before: beforeMap,
+        financialImpactYer:
+            (beforeMap['estimatedLossYer'] as num?)?.toDouble() ?? 0.0,
+        currency: 'YER',
+        sourceModule: 'manufacturing',
+      );
+    }
     DataSyncBus.instance.notify(DataDomain.materials);
   }
 }

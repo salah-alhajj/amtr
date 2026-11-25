@@ -1,3 +1,4 @@
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/services/data_sync_bus.dart';
@@ -84,13 +85,27 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
           whereArgs: [orderId],
         );
       }
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.shipment,
+        entityId: shipment.id,
+        entityLabel: shipment.title,
+        action: AuditAction.create,
+        summary: '#${shipment.shipmentNumber} (${orderIds.length})',
+        after: Map<String, dynamic>.from(shipment.toMap())
+          ..['itemsCount'] = orderIds.length,
+        currency: shipment.transportCostCurrency,
+        sourceModule: 'shipments',
+      );
     });
     DataSyncBus.instance.notify(DataDomain.orders);
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override
   Future<void> updateShipment(ConsolidatedShipment shipment, List<String> orderIds) async {
     final db = await dbHelper.database;
+    final beforeShipment = await getShipmentById(shipment.id);
     await db.transaction((txn) async {
       await txn.update(
         'shipments',
@@ -125,13 +140,31 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
           whereArgs: [orderId],
         );
       }
+      await CentralAuditService.instance.logInTxn(
+        txn,
+        entityType: AuditEntityType.shipment,
+        entityId: shipment.id,
+        entityLabel: shipment.title,
+        action: AuditAction.update,
+        summary: '#${shipment.shipmentNumber}',
+        before: beforeShipment != null
+            ? (Map<String, dynamic>.from(beforeShipment.toMap())
+              ..['itemsCount'] = beforeShipment.orders.length)
+            : null,
+        after: Map<String, dynamic>.from(shipment.toMap())
+          ..['itemsCount'] = orderIds.length,
+        currency: shipment.transportCostCurrency,
+        sourceModule: 'shipments',
+      );
     });
     DataSyncBus.instance.notify(DataDomain.orders);
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override
   Future<void> deleteShipment(String id) async {
     final db = await dbHelper.database;
+    final beforeShipment = await getShipmentById(id);
     await db.transaction((txn) async {
       // فك ربط الطلبات أولاً دون حذفها
       await txn.update(
@@ -141,8 +174,22 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         whereArgs: [id],
       );
       await txn.delete('shipments', where: 'id = ?', whereArgs: [id]);
+      if (beforeShipment != null) {
+        await CentralAuditService.instance.logInTxn(
+          txn,
+          entityType: AuditEntityType.shipment,
+          entityId: id,
+          entityLabel: beforeShipment.title,
+          action: AuditAction.delete,
+          summary: '#${beforeShipment.shipmentNumber}',
+          before: beforeShipment.toMap(),
+          currency: beforeShipment.transportCostCurrency,
+          sourceModule: 'shipments',
+        );
+      }
     });
     DataSyncBus.instance.notify(DataDomain.orders);
+    CentralAuditService.instance.notifyAuditChanged();
   }
 
   @override
