@@ -11,6 +11,7 @@ enum DataDomain {
   materials,
   couriers,
   businessMode,
+  audit,
 }
 
 /// حافلة إشعارات خفيفة لتحديث لوحة التحكم والصندوق اليومي تلقائياً عند أي تغيير

@@ -17,7 +17,7 @@ class AppDatabase {
   }
 
   Future<void> createDBForTesting(Database db) async {
-    await _createDB(db, 12);
+    await _createDB(db, 13);
   }
 
   Future<void> upgradeDBForTesting(
@@ -51,7 +51,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 12,
+      version: 13,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -235,6 +235,9 @@ class AppDatabase {
       await _addColumnIfMissing(db, 'production_batches', 'readyAt TEXT');
       await _addColumnIfMissing(db, 'production_batches', 'expiresAt TEXT');
       await _createV12Tables(db);
+    }
+    if (oldVersion < 13) {
+      await _createV13Tables(db);
     }
   }
 
@@ -695,7 +698,41 @@ class AppDatabase {
     await _createV10Tables(db);
     await _createV11Tables(db);
     await _createV12Tables(db);
+    await _createV13Tables(db);
     await _createPerformanceIndexes(db);
+  }
+
+  Future<void> _createV13Tables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id TEXT PRIMARY KEY,
+        sequenceNo INTEGER NOT NULL DEFAULT 0,
+        entityType TEXT NOT NULL,
+        entityId TEXT NOT NULL,
+        entityLabel TEXT NOT NULL,
+        action TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        beforeJson TEXT,
+        afterJson TEXT,
+        diffJson TEXT NOT NULL,
+        changedFieldsCount INTEGER NOT NULL DEFAULT 0,
+        financialImpactYer REAL NOT NULL DEFAULT 0.0,
+        currency TEXT,
+        actorLabel TEXT NOT NULL DEFAULT 'owner',
+        sourceModule TEXT NOT NULL DEFAULT 'app',
+        checksum TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_createdAt ON audit_logs(createdAt DESC, sequenceNo DESC);',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entityType, entityId);',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);',
+    );
   }
 
   /// مسار ملف قاعدة البيانات الفعلي للاستخدام في التصدير
@@ -734,6 +771,10 @@ class AppDatabase {
     final productVariants = await db.query('product_variants');
     final productBundleItems = await db.query('product_bundle_items');
     final wasteLogs = await db.query('waste_logs');
+    List<Map<String, dynamic>> auditLogs = const [];
+    try {
+      auditLogs = await db.query('audit_logs');
+    } catch (_) {}
 
     // تضمين ملفات الصور المرفقة كـ Base64 لضمان عدم ضياعها
     final photosData = <String, String>{};
@@ -781,6 +822,7 @@ class AppDatabase {
       'product_variants': productVariants,
       'product_bundle_items': productBundleItems,
       'waste_logs': wasteLogs,
+      'audit_logs': auditLogs,
       'photos_data': photosData,
     };
   }
@@ -821,6 +863,9 @@ class AppDatabase {
       await txn.delete('product_variants');
       await txn.delete('product_bundle_items');
       await txn.delete('waste_logs');
+      try {
+        await txn.delete('audit_logs');
+      } catch (_) {}
       await txn.delete('daily_closings');
       await txn.delete('manufacturing_template_items');
       await txn.delete('manufacturing_templates');
@@ -1004,6 +1049,16 @@ class AppDatabase {
             Map<String, dynamic>.from(item as Map),
           );
         }
+      }
+      if (data['audit_logs'] is List) {
+        try {
+          for (final item in data['audit_logs']) {
+            await txn.insert(
+              'audit_logs',
+              Map<String, dynamic>.from(item as Map),
+            );
+          }
+        } catch (_) {}
       }
     });
   }
