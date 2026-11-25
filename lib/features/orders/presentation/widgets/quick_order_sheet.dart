@@ -6,6 +6,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/preferences_service.dart';
@@ -17,11 +18,8 @@ import '../../../../models/individual_order.dart';
 import '../../../../models/order_item.dart';
 import '../../../../models/product.dart';
 import '../../../../models/product_variant.dart';
-import '../../../customers/data/repositories/customer_repository_impl.dart';
-import '../../../products/data/product_variant_repository.dart';
-import '../../../products/data/repositories/product_repository_impl.dart';
 import '../../../whatsapp/domain/whatsapp_template_engine.dart';
-import '../../data/repositories/order_repository_impl.dart';
+import '../../domain/services/order_business_service.dart';
 import '../../domain/whatsapp_order_parser.dart';
 import '../screens/add_edit_order_screen.dart';
 
@@ -83,10 +81,7 @@ class QuickOrderSheet extends StatefulWidget {
 }
 
 class _QuickOrderSheetState extends State<QuickOrderSheet> {
-  final _productRepo = ProductRepositoryImpl();
-  final _variantRepo = ProductVariantRepository();
-  final _customerRepo = CustomerRepositoryImpl();
-  final _orderRepo = OrderRepositoryImpl();
+  final OrderBusinessService _orderService = AppServices.instance.orderService;
 
   final _customNameCtrl = TextEditingController();
   final _customSellCtrl = TextEditingController();
@@ -150,26 +145,13 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
 
   Future<void> _loadInitialData() async {
     try {
-      final results = await Future.wait([
-        _productRepo.getActiveProducts(),
-        _customerRepo.getAllCustomers(),
-        _variantRepo.getAllGroupedByProduct(),
-        _orderRepo.getAllOrders(),
-      ]);
+      final data = await _orderService.loadQuickOrderData();
       if (!mounted) return;
-      final groupedVariants = results[2] as Map<String, List<ProductVariant>>;
-      final activeVariants = <String, List<ProductVariant>>{};
-      for (final entry in groupedVariants.entries) {
-        final active = entry.value.where((v) => v.isActive).toList();
-        if (active.isNotEmpty) {
-          activeVariants[entry.key] = active;
-        }
-      }
       setState(() {
-        _products = results[0] as List<Product>;
-        _customers = results[1] as List<Customer>;
-        _variantsByProduct = activeVariants;
-        _existingOrders = results[3] as List<IndividualOrder>;
+        _products = data.products;
+        _customers = data.customers;
+        _variantsByProduct = data.activeVariantsByProduct;
+        _existingOrders = data.existingOrders;
         _isLoadingData = false;
       });
     } catch (_) {
@@ -222,8 +204,11 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
         ? (double.tryParse(_deliveryFeeCtrl.text.trim()) ?? 0.0)
         : 0.0;
     final discount = double.tryParse(_discountCtrl.text.trim()) ?? 0.0;
-    final net = itemsTotal + deliveryFee - discount;
-    return net > 0 ? net : 0.0;
+    return OrderBusinessService.calculateNetTotal(
+      itemsTotal: itemsTotal,
+      deliveryFee: deliveryFee,
+      discount: discount,
+    );
   }
 
   int _totalItemCount() {
@@ -815,7 +800,7 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
         items: items,
       );
 
-      await _orderRepo.saveOrder(order, items);
+      await _orderService.saveQuickOrder(order, items);
 
       if (!mounted) return;
       AppToast.showSuccess(context, 'quick_order_saved_success'.i18n());

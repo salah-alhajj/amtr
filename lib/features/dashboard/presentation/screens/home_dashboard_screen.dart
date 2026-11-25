@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/business/business_mode_cubit.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
@@ -11,18 +12,13 @@ import '../../../../core/services/preferences_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../cashbox/presentation/screens/cashbox_screen.dart';
-import '../../../customers/data/repositories/customer_repository_impl.dart';
-import '../../../customers/domain/repositories/customer_repository.dart';
 import '../../../customers/domain/smart_reorder_service.dart';
 import '../../../customers/presentation/screens/customers_list_screen.dart';
 import '../../../customers/presentation/widgets/quick_debt_collection_sheet.dart';
-import '../../../expenses/data/repositories/expense_repository_impl.dart';
 import '../../../expenses/presentation/bloc/expenses_bloc.dart';
 import '../../../expenses/presentation/screens/expenses_list_screen.dart';
 import '../../../expenses/presentation/widgets/add_edit_expense_sheet.dart';
 import '../../../manufacturing/presentation/screens/daily_prep_shopping_screen.dart';
-import '../../../orders/data/repositories/order_repository_impl.dart';
-import '../../../orders/domain/repositories/order_repository.dart';
 import '../../../orders/presentation/bloc/orders_bloc.dart';
 import '../../../orders/presentation/screens/add_edit_order_screen.dart';
 import '../../../orders/presentation/screens/order_details_screen.dart';
@@ -33,13 +29,12 @@ import '../../../products/presentation/screens/products_list_screen.dart';
 import '../../../reports/presentation/screens/monthly_report_screen.dart';
 import '../../../search/global_search_delegate.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
-import '../../../shipments/data/repositories/shipment_repository_impl.dart';
-import '../../../shipments/domain/repositories/shipment_repository.dart';
 import '../../../shipments/presentation/screens/add_edit_shipment_screen.dart';
 import '../../../shipments/presentation/screens/shipment_details_screen.dart';
 import '../../../shipments/presentation/screens/shipments_list_screen.dart';
 import '../../../shipments/presentation/widgets/shipment_card.dart';
 import '../../../whatsapp/domain/whatsapp_template_engine.dart';
+import '../../domain/services/dashboard_operations_service.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../../../navigation/main_navigation_shell.dart';
 import '../widgets/currency_selector_bar.dart';
@@ -64,12 +59,9 @@ class HomeDashboardScreen extends StatefulWidget {
 }
 
 class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
-  final OrderRepository _orderRepo = OrderRepositoryImpl();
-  final ShipmentRepository _shipmentRepo = ShipmentRepositoryImpl();
-  final CustomerRepository _customerRepo = CustomerRepositoryImpl();
+  final DashboardOperationsService _opsService =
+      AppServices.instance.dashboardService;
   final CurrencyService _currencyService = CurrencyService.instance;
-  final SmartReorderService _smartReorderService = SmartReorderService();
-  final ExpenseRepositoryImpl _expenseRepo = ExpenseRepositoryImpl();
 
   List<SmartReorderNudge> _reorderNudges = const [];
   StreamSubscription<DataDomain>? _syncSub;
@@ -96,7 +88,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
   Future<void> _loadReorderNudges() async {
     try {
-      final nudges = await _smartReorderService.getDueReorderNudges(limit: 3);
+      final nudges = await _opsService.loadDueReorderNudges(limit: 3);
       if (!mounted) return;
       setState(() => _reorderNudges = nudges);
     } catch (_) {}
@@ -163,9 +155,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     showSearch(
       context: context,
       delegate: GlobalSearchDelegate(
-        orderRepo: _orderRepo,
-        shipmentRepo: _shipmentRepo,
-        customerRepo: _customerRepo,
+        orderRepo: _opsService.orderRepository,
+        shipmentRepo: _opsService.shipmentRepository,
+        customerRepo: _opsService.customerRepository,
       ),
     );
   }
@@ -886,7 +878,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     await AddEditExpenseSheet.show(
       context,
       onSave: (expense) async {
-        await _expenseRepo.createExpense(expense);
+        await _opsService.recordQuickExpense(expense);
         if (!mounted) return;
         try {
           context.read<ExpensesBloc>().add(const LoadExpenses());

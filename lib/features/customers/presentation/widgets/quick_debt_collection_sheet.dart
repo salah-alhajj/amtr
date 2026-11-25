@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
-import '../../../orders/data/repositories/order_repository_impl.dart';
+import '../../../orders/domain/services/order_business_service.dart';
 import 'settle_partial_debt_sheet.dart';
 
 /// نافذة سريعة لاستلام دفعات الديون المعلقة مباشرة من الشاشة الرئيسية
@@ -26,7 +27,7 @@ class QuickDebtCollectionSheet extends StatefulWidget {
 }
 
 class _QuickDebtCollectionSheetState extends State<QuickDebtCollectionSheet> {
-  final OrderRepositoryImpl _orderRepo = OrderRepositoryImpl();
+  final OrderBusinessService _orderService = AppServices.instance.orderService;
   List<IndividualOrder> _unpaidOrders = const [];
   bool _isLoading = true;
   bool _didCollect = false;
@@ -39,15 +40,9 @@ class _QuickDebtCollectionSheetState extends State<QuickDebtCollectionSheet> {
 
   Future<void> _loadUnpaidOrders() async {
     try {
-      final all = await _orderRepo.getAllOrders();
-      final unpaid = all
-          .where(
-            (o) =>
-                o.remainingDebt > 0.01 &&
-                o.courierStatus != AppConstants.courierStatusReturned,
-          )
-          .toList()
-        ..sort((a, b) => b.remainingDebt.compareTo(a.remainingDebt));
+      final unpaid = await _orderService.loadUnpaidOrdersForCollection(
+        returnedCourierStatus: AppConstants.courierStatusReturned,
+      );
       if (!mounted) return;
       setState(() {
         _unpaidOrders = unpaid;
@@ -63,8 +58,11 @@ class _QuickDebtCollectionSheetState extends State<QuickDebtCollectionSheet> {
       context,
       order: order,
       onConfirmPayment: (amountPaid, newStatus) async {
-        final newTotalPaid = order.paidAmount + amountPaid;
-        await _orderRepo.updatePaymentStatus(order.id, newStatus, newTotalPaid);
+        await _orderService.collectOrderPayment(
+          order: order,
+          amountPaid: amountPaid,
+          newStatus: newStatus,
+        );
         _didCollect = true;
         if (!mounted) return;
         AppToast.showSuccess(

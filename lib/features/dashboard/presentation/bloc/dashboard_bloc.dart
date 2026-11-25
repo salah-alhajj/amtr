@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants.dart';
-import '../../../../core/database/app_database.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../models/consolidated_shipment.dart';
 import '../../../../models/individual_order.dart';
-import '../../../../models/payment_transaction.dart';
+import '../../../cashbox/data/repositories/cashbox_repository_impl.dart';
+import '../../../cashbox/domain/repositories/cashbox_repository.dart';
 import '../../../customers/domain/repositories/customer_repository.dart';
 import '../../../expenses/data/repositories/expense_repository_impl.dart';
 import '../../../expenses/domain/repositories/expense_repository.dart';
@@ -84,6 +84,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final CustomerRepository customerRepo;
   final ExpenseRepository expenseRepo;
   final ProductRepository productRepo;
+  final CashBoxRepository cashBoxRepo;
   final CurrencyService currencyService;
   late final StreamSubscription<DataDomain> _syncSub;
 
@@ -93,9 +94,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required this.customerRepo,
     ExpenseRepository? expenseRepo,
     ProductRepository? productRepo,
+    CashBoxRepository? cashBoxRepo,
     CurrencyService? currency,
   })  : expenseRepo = expenseRepo ?? ExpenseRepositoryImpl(),
         productRepo = productRepo ?? ProductRepositoryImpl(),
+        cashBoxRepo = cashBoxRepo ?? CashBoxRepositoryImpl(),
         currencyService = currency ?? CurrencyService.instance,
         super(const DashboardInitial()) {
     on<LoadDashboardData>(_onLoadDashboardData);
@@ -145,18 +148,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
       double todayCashInYer = 0.0;
       try {
-        final db = await AppDatabase.instance.database;
-        final todayPrefix =
-            '${nowDate.year.toString().padLeft(4, '0')}-${nowDate.month.toString().padLeft(2, '0')}-${nowDate.day.toString().padLeft(2, '0')}';
-        final paymentMaps = await db.query(
-          'payment_transactions',
-          where: 'paidAt LIKE ?',
-          whereArgs: ['$todayPrefix%'],
-        );
-        for (final map in paymentMaps) {
-          final tx = PaymentTransaction.fromMap(map);
-          todayCashInYer += currencyService.toBaseYer(tx.amount, tx.currency);
-        }
+        todayCashInYer = await cashBoxRepo.getCashInForDateYer(nowDate);
       } catch (_) {
         // تجاهل آمن في بيئات الاختبار التي لا تهيئ قاعدة البيانات
       }

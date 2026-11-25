@@ -54,7 +54,7 @@ class CashBoxCubit extends Cubit<CashBoxState> {
       if (domain == DataDomain.orders ||
           domain == DataDomain.payments ||
           domain == DataDomain.expenses) {
-        loadDate(_selectedDate);
+        loadDate(_selectedDate, silent: true);
       }
     });
   }
@@ -64,9 +64,14 @@ class CashBoxCubit extends Cubit<CashBoxState> {
   static DateTime _normalizeDate(DateTime d) =>
       DateTime(d.year, d.month, d.day);
 
-  Future<void> loadDate(DateTime date) async {
-    _selectedDate = _normalizeDate(date);
-    emit(const CashBoxLoading());
+  Future<void> loadDate(DateTime date, {bool silent = false}) async {
+    final normalized = _normalizeDate(date);
+    final alreadyLoadedSameDate = state is CashBoxLoaded &&
+        (state as CashBoxLoaded).selectedDate == normalized;
+    _selectedDate = normalized;
+    if (!silent && !alreadyLoadedSameDate) {
+      emit(const CashBoxLoading());
+    }
     try {
       final summary = await cashBoxRepo.getDailySummary(_selectedDate);
       if (isClosed) return;
@@ -87,8 +92,7 @@ class CashBoxCubit extends Cubit<CashBoxState> {
 
   Future<void> recordExpense(Expense expense) async {
     await expenseRepo.createExpense(expense);
-    DataSyncBus.instance.notify(DataDomain.expenses);
-    await loadDate(_selectedDate);
+    await loadDate(_selectedDate, silent: true);
   }
 
   @override

@@ -5,19 +5,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants.dart';
-import '../../../../core/database/app_database.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/product.dart';
-import '../../../manufacturing/data/repositories/production_batch_repository.dart';
 import '../../../manufacturing/presentation/screens/materials_and_templates_screen.dart';
 import '../../../printing/services/catalog_pdf_generator.dart';
-import '../../../suppliers/data/repositories/supplier_repository_impl.dart';
 import '../../../suppliers/presentation/screens/suppliers_list_screen.dart';
 import '../../../whatsapp/domain/whatsapp_template_engine.dart';
+import '../../domain/services/product_catalog_service.dart';
 import '../bloc/products_bloc.dart';
 import '../widgets/add_edit_product_sheet.dart';
 
@@ -30,8 +29,8 @@ class ProductsListScreen extends StatefulWidget {
 
 class _ProductsListScreenState extends State<ProductsListScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final SupplierRepositoryImpl _supplierRepo = SupplierRepositoryImpl();
-  final ProductionBatchRepository _batchRepo = ProductionBatchRepository();
+  final ProductCatalogService _catalogService =
+      AppServices.instance.productCatalogService;
   Map<String, String> _supplierNames = const {};
   Set<String> _variantProductIds = const {};
   StreamSubscription<DataDomain>? _syncSub;
@@ -39,8 +38,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSupplierNames();
-    _loadVariantProductIds();
+    _loadCatalogMetadata();
     _syncSub = DataSyncBus.instance.stream.listen((domain) {
       if (!mounted) return;
       if (domain == DataDomain.suppliers) {
@@ -51,30 +49,29 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
     });
   }
 
-  Future<void> _loadVariantProductIds() async {
+  Future<void> _loadCatalogMetadata() async {
     try {
-      final db = await AppDatabase.instance.database;
-      final rows = await db.rawQuery(
-        'SELECT DISTINCT productId FROM product_variants WHERE isActive = 1',
-      );
+      final meta = await _catalogService.loadCatalogMetadata();
       if (!mounted) return;
       setState(() {
-        _variantProductIds = rows
-            .map((r) => r['productId'] as String?)
-            .whereType<String>()
-            .toSet();
+        _supplierNames = meta.supplierNames;
+        _variantProductIds = meta.variantProductIds;
       });
+    } catch (_) {}
+  }
+
+  Future<void> _loadVariantProductIds() async {
+    try {
+      final ids = await _catalogService.loadVariantProductIds();
+      if (!mounted) return;
+      setState(() => _variantProductIds = ids);
     } catch (_) {}
   }
 
   Future<void> _loadSupplierNames() async {
     try {
-      final list = await _supplierRepo.getAllSuppliers();
+      final map = await _catalogService.loadSupplierNames();
       if (!mounted) return;
-      final map = <String, String>{};
-      for (final s in list) {
-        map[s.id] = s.name;
-      }
       setState(() => _supplierNames = map);
     } catch (_) {}
   }
@@ -322,7 +319,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
     if (confirmed != true || !mounted) return;
 
     try {
-      final batch = await _batchRepo.produceBatch(
+      final batch = await _catalogService.produceBatch(
         product: product,
         customYield: (parsedYield != null && parsedYield > 0)
             ? parsedYield

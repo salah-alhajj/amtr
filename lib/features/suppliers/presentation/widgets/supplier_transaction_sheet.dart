@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/preferences_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,8 +10,7 @@ import '../../../../core/widgets/design_system.dart';
 import '../../../../models/product.dart';
 import '../../../../models/raw_material.dart';
 import '../../../../models/supplier_transaction.dart';
-import '../../../manufacturing/data/repositories/raw_material_repository.dart';
-import '../../../products/data/repositories/product_repository_impl.dart';
+import '../../domain/services/supplier_business_service.dart';
 
 /// نتيجة ورقة تسجيل حركة المورد شاملةً التزويد الاختياري للمخزون
 class SupplierTransactionResult {
@@ -93,8 +93,8 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   final _stockQtyController = TextEditingController(text: '1');
-  final _productRepo = ProductRepositoryImpl();
-  final _materialRepo = RawMaterialRepository();
+  final SupplierBusinessService _supplierService =
+      AppServices.instance.supplierService;
 
   late String _txType;
   late String _currency;
@@ -121,13 +121,10 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
 
   Future<void> _loadStockCatalog() async {
     try {
-      final results = await Future.wait([
-        _productRepo.getActiveProducts(),
-        _materialRepo.getAll(),
-      ]);
+      final options = await _supplierService.loadStockOptions();
       if (!mounted) return;
-      final prods = results[0] as List<Product>;
-      final mats = results[1] as List<RawMaterial>;
+      final prods = options.products;
+      final mats = options.materials;
       setState(() {
         _products = prods;
         _materials = mats;
