@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../business/app_feature_flags.dart';
 
 /// خدمة إدارة وتخزين تفضيلات المستخدم المحلية بصورة دائمة
 /// تشمل: نمط المظهر (تلقائي / فاتح / داكن) ولغة التطبيق والعملة الافتراضية
@@ -20,6 +22,7 @@ class PreferencesService {
   static const String _keyWeeklyBackupReminder = 'app_weekly_backup_reminder';
   static const String _keyLastBackupAt = 'app_last_backup_at';
   static const String _keyDailyOrderCap = 'daily_order_cap';
+  static const String _keyFeatureOverrides = 'app_feature_overrides_json';
 
   SharedPreferences? _prefs;
 
@@ -87,17 +90,60 @@ class PreferencesService {
     await prefs.setBool(_keyOnboardingCompleted, completed);
   }
 
-  /// وضع النشاط التجاري: 'productive_family' (أسر منتجة / متجر منزلي) أو 'trade_logistics' (تجارة وشحنات)
+  /// وضع النشاط التجاري (بائع بسيط / أسر منتجة / حرف ومشغولات / متجر تجزئة / تجارة وشحنات)
   String getBusinessMode() {
     return _prefs?.getString(_keyBusinessMode) ?? 'productive_family';
   }
 
-  bool get isProductiveFamilyMode => getBusinessMode() == 'productive_family';
+  bool get isProductiveFamilyMode => getBusinessMode() != 'trade_logistics';
 
-  Future<void> setBusinessMode(String mode) async {
+  Future<void> setBusinessMode(
+    String mode, {
+    bool resetFeatureOverrides = false,
+  }) async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
     _prefs = prefs;
     await prefs.setString(_keyBusinessMode, mode);
+    if (resetFeatureOverrides) {
+      await prefs.remove(_keyFeatureOverrides);
+    }
+  }
+
+  /// أعلام إظهار/إخفاء الميزات بناءً على الدور الحالي + التخصيصات اليدوية
+  AppFeatureFlags getFeatureFlags() {
+    final base = AppFeatureFlags.defaultsForMode(getBusinessMode());
+    final raw = _prefs?.getString(_keyFeatureOverrides);
+    if (raw == null || raw.trim().isEmpty) return base;
+    try {
+      final decoded = json.decode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return base.applyOverrides(decoded);
+      }
+    } catch (_) {}
+    return base;
+  }
+
+  Future<void> setFeatureOverride(String featureKey, bool enabled) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    Map<String, dynamic> map = {};
+    final raw = prefs.getString(_keyFeatureOverrides);
+    if (raw != null && raw.trim().isNotEmpty) {
+      try {
+        final decoded = json.decode(raw);
+        if (decoded is Map<String, dynamic>) {
+          map = Map<String, dynamic>.from(decoded);
+        }
+      } catch (_) {}
+    }
+    map[featureKey] = enabled;
+    await prefs.setString(_keyFeatureOverrides, json.encode(map));
+  }
+
+  Future<void> clearFeatureOverrides() async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.remove(_keyFeatureOverrides);
   }
 
   /// بيانات هوية المشروع / الأسرة المنتجة (تظهر في الفواتير ورسائل الواتساب)

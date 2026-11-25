@@ -151,9 +151,52 @@ class AppConstants {
     }
   }
 
-  // أوضاع النشاط التجاري
+  // أوضاع النشاط التجاري (الأدوار المبسّطة حسب الفئة)
+  static const String businessModeSimpleSeller = 'simple_home_seller';
   static const String businessModeProductiveFamily = 'productive_family';
+  static const String businessModeArtisanCraft = 'artisan_craft';
+  static const String businessModeRetailShop = 'retail_shop';
   static const String businessModeTradeLogistics = 'trade_logistics';
+
+  static const List<String> allBusinessModes = [
+    businessModeSimpleSeller,
+    businessModeProductiveFamily,
+    businessModeArtisanCraft,
+    businessModeRetailShop,
+    businessModeTradeLogistics,
+  ];
+
+  static String getBusinessModeLabel(String mode) {
+    switch (mode) {
+      case businessModeSimpleSeller:
+        return 'business_mode_simple_seller'.i18n();
+      case businessModeArtisanCraft:
+        return 'business_mode_artisan'.i18n();
+      case businessModeRetailShop:
+        return 'business_mode_retail'.i18n();
+      case businessModeTradeLogistics:
+        return 'business_mode_trade'.i18n();
+      case businessModeProductiveFamily:
+      default:
+        return 'business_mode_family'.i18n();
+    }
+  }
+
+  static String getBusinessModeDescription(String mode) {
+    switch (mode) {
+      case businessModeSimpleSeller:
+        return 'role_simple_seller_desc'.i18n();
+      case businessModeArtisanCraft:
+        return 'role_artisan_desc'.i18n();
+      case businessModeRetailShop:
+        return 'role_retail_desc'.i18n();
+      case businessModeTradeLogistics:
+        return 'wizard_trade_desc'.i18n();
+      case businessModeProductiveFamily:
+      default:
+        return 'wizard_family_desc'.i18n();
+    }
+  }
 
   // طرق تسليم الطلب
   static const String deliveryPickup = 'pickup';
