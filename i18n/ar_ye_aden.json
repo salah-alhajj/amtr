@@ -1,4 +1,10 @@
 {
+  "audit_entity_customer": "زبون",
+  "audit_entity_supplier": "تاجر / مورد",
+  "audit_field_cashInYer": "البيس الداخلة للصندوق",
+  "audit_field_customerName": "اسم الزبون",
+  "audit_field_paidAmount": "البيس المدفوعة",
+  "audit_field_personalDrawingsYer": "سحب للبيت",
   "backup_export_json_action": "شارك نسخة أمان سريعة",
   "backup_quick_whatsapp_title": "احفظ نسخة أمان بواتسابك",
   "cashbox_add_business_expense": "مصروف للمحل",
