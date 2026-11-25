@@ -808,7 +808,11 @@ void main() {
       final upgradedDb = await AppDatabase.instance.database;
 
       final verRes = await upgradedDb.rawQuery('PRAGMA user_version;');
-      expect(verRes.first.values.first, 12);
+      expect(verRes.first.values.first, 13);
+      final auditTables = await upgradedDb.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='audit_logs'",
+      );
+      expect(auditTables, isNotEmpty);
 
       // Verify backfill of payment_transactions
       final backfilled = await upgradedDb.query(

@@ -668,7 +668,10 @@ void main() {
           await pumpAndWait(tester);
 
           // Add business expense
-          final bizExpBtn = find.text(arStrings['cashbox_add_business_expense']!);
+          final bizExpBtn = find.widgetWithText(
+            AppPrimaryButton,
+            arStrings['cashbox_add_business_expense']!,
+          );
           expect(bizExpBtn, findsWidgets);
           await tester.ensureVisible(bizExpBtn.first);
           await tester.tap(bizExpBtn.first);
@@ -687,8 +690,10 @@ void main() {
           await pumpAndWait(tester);
 
           // Add personal drawing
-          final personalBtn =
-              find.text(arStrings['cashbox_add_personal_drawing']!);
+          final personalBtn = find.widgetWithText(
+            AppPrimaryButton,
+            arStrings['cashbox_add_personal_drawing']!,
+          );
           if (personalBtn.evaluate().isNotEmpty) {
             await tester.ensureVisible(personalBtn.first);
             await pumpAndWait(tester);
@@ -708,7 +713,10 @@ void main() {
           }
 
           // Open DailyClosingSheet and complete daily closing
-          final closeBtn = find.textContaining('إغلاق');
+          final closeBtn = find.widgetWithText(
+            AppPrimaryButton,
+            arStrings['daily_close_btn']!,
+          );
           if (closeBtn.evaluate().isNotEmpty) {
             await tester.ensureVisible(closeBtn.first);
             await pumpAndWait(tester);
