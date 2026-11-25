@@ -238,7 +238,7 @@ class _CashBoxScreenState extends State<CashBoxScreen> {
         child: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.chevron_left_rounded),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
               onPressed: () => _cubit.previousDay(),
               tooltip: 'common_previous'.i18n(),
             ),
@@ -286,7 +286,7 @@ class _CashBoxScreenState extends State<CashBoxScreen> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.chevron_right_rounded),
+              icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
               onPressed: () => _cubit.nextDay(),
               tooltip: 'common_next'.i18n(),
             ),

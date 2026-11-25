@@ -182,7 +182,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
               children: [
                 IconButton(
                   onPressed: () => _shiftMonth(-1),
-                  icon: const Icon(Icons.chevron_left_rounded),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
                   tooltip: 'monthly_prev_month'.i18n(),
                 ),
                 Expanded(
@@ -204,7 +204,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
                   ),
                 IconButton(
                   onPressed: _isCurrentMonth ? null : () => _shiftMonth(1),
-                  icon: const Icon(Icons.chevron_right_rounded),
+                  icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
                   tooltip: 'monthly_next_month'.i18n(),
                 ),
               ],

@@ -35,11 +35,10 @@ class BackChevron extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // في واجهات RTL، الانتقال للأمام والاستمرار يكون دوماً لليسار (←)
-    // وفي واجهات LTR يكون لليمين (→)
-    // استخدام arrow_back_rounded مع matchTextDirection: true يحقق هذا السلوك تلقائياً
+    // في واجهات RTL، الرجوع للخلف يشير لليمين (→) وفي واجهات LTR يشير لليسار (←)
+    // استخدام arrow_back_ios_new_rounded مع matchTextDirection: true يحقق هذا السلوك تلقائياً
     return Icon(
-      Icons.arrow_back_ios_rounded,
+      Icons.arrow_back_ios_new_rounded,
       size: size,
       color:
           color ??

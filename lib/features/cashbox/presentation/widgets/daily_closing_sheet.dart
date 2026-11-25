@@ -459,7 +459,7 @@ class _DailyClosingSheetState extends State<DailyClosingSheet> {
         const SizedBox(height: 16),
         AppPrimaryButton(
           label: 'common_next'.i18n(),
-          icon: Icons.arrow_forward_rounded,
+          trailingIcon: Icons.arrow_forward_rounded,
           backgroundColor: AppColors.primaryBlue,
           onPressed: () {
             setState(() => _step = 1);

@@ -210,21 +210,24 @@ class OrderCard extends StatelessWidget {
                         horizontal: 12, vertical: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          'order_next_stage_btn'
-                              .trParams({'stage': nextStatusLabel!}),
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryBlue,
+                        Flexible(
+                          child: Text(
+                            'order_next_stage_btn'
+                                .trParams({'stage': nextStatusLabel!}),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryBlue,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Icon(
-                          Directionality.of(context) == TextDirection.rtl
-                              ? Icons.arrow_back_rounded
-                              : Icons.arrow_forward_rounded,
+                        const Icon(
+                          Icons.arrow_forward_rounded,
                           size: 16,
                           color: AppColors.primaryBlue,
                         ),
