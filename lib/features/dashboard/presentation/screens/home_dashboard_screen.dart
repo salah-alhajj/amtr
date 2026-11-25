@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/business/business_mode_cubit.dart';
+import '../../../../core/constants.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
@@ -14,7 +15,11 @@ import '../../../customers/data/repositories/customer_repository_impl.dart';
 import '../../../customers/domain/repositories/customer_repository.dart';
 import '../../../customers/domain/smart_reorder_service.dart';
 import '../../../customers/presentation/screens/customers_list_screen.dart';
+import '../../../customers/presentation/widgets/quick_debt_collection_sheet.dart';
+import '../../../expenses/data/repositories/expense_repository_impl.dart';
+import '../../../expenses/presentation/bloc/expenses_bloc.dart';
 import '../../../expenses/presentation/screens/expenses_list_screen.dart';
+import '../../../expenses/presentation/widgets/add_edit_expense_sheet.dart';
 import '../../../manufacturing/presentation/screens/daily_prep_shopping_screen.dart';
 import '../../../orders/data/repositories/order_repository_impl.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
@@ -64,9 +69,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   final CustomerRepository _customerRepo = CustomerRepositoryImpl();
   final CurrencyService _currencyService = CurrencyService.instance;
   final SmartReorderService _smartReorderService = SmartReorderService();
+  final ExpenseRepositoryImpl _expenseRepo = ExpenseRepositoryImpl();
 
   List<SmartReorderNudge> _reorderNudges = const [];
   StreamSubscription<DataDomain>? _syncSub;
+  bool? _analyticsExpandedOverride;
 
   @override
   void initState() {
@@ -328,23 +335,28 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 16),
-
-                  // بطاقة التحليلات والرسوم البيانية المالية المتقدمة
-                  FinancialAnalyticsCard(
-                    collectedAmount: collected,
-                    remainingAmount: remaining,
-                    debtAmount: debts,
-                    totalRevenue: totalCapital,
-                    activeCurrency: activeCurrency,
-                    weeklySales: weeklySales,
-                    dayLabels: weeklySalesDayLabels,
-                  ),
+                  if (isProductiveFamily) ...[
+                    const SizedBox(height: 14),
+                    _buildDailyActionBar(context),
+                  ],
 
                   const SizedBox(height: 16),
+
+                  if (!isProductiveFamily) ...[
+                    FinancialAnalyticsCard(
+                      collectedAmount: collected,
+                      remainingAmount: remaining,
+                      debtAmount: debts,
+                      totalRevenue: totalCapital,
+                      activeCurrency: activeCurrency,
+                      weeklySales: weeklySales,
+                      dayLabels: weeklySalesDayLabels,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // شبكة البطاقات الأربع
-                  if (isProductiveFamily)
+                  if (isProductiveFamily) ...[
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
@@ -403,7 +415,20 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                           ),
                         ),
                       ],
-                    )
+                    ),
+                    const SizedBox(height: 14),
+                    _buildCollapsibleAnalyticsSection(
+                      context: context,
+                      businessMode: businessState.businessMode,
+                      collected: collected,
+                      remaining: remaining,
+                      debts: debts,
+                      totalCapital: totalCapital,
+                      activeCurrency: activeCurrency,
+                      weeklySales: weeklySales,
+                      weeklySalesDayLabels: weeklySalesDayLabels,
+                    ),
+                  ]
                   else
                     GridView.count(
                       crossAxisCount: 2,
@@ -854,6 +879,199 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           }),
         ],
       ),
+    );
+  }
+
+  Future<void> _openQuickExpenseSheet() async {
+    await AddEditExpenseSheet.show(
+      context,
+      onSave: (expense) async {
+        await _expenseRepo.createExpense(expense);
+        if (!mounted) return;
+        try {
+          context.read<ExpensesBloc>().add(const LoadExpenses());
+        } catch (_) {}
+        context.read<DashboardBloc>().add(const LoadDashboardData());
+        AppToast.showSuccess(context, 'expense_added_success'.i18n());
+      },
+    );
+  }
+
+  Future<void> _openQuickDebtCollection() async {
+    final collected = await QuickDebtCollectionSheet.show(context);
+    if (collected == true && mounted) {
+      context.read<DashboardBloc>().add(const LoadDashboardData());
+    }
+  }
+
+  Widget _buildDailyActionBar(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildPrimaryDailyActionBtn(
+            context: context,
+            label: 'home_quick_action_sale'.i18n(),
+            icon: Icons.bolt_rounded,
+            color: AppColors.primaryBlue,
+            filled: true,
+            onTap: () async {
+              final res = await QuickOrderSheet.show(
+                context,
+                initialInstantCash: true,
+              );
+              if (res == true && context.mounted) {
+                context.read<DashboardBloc>().add(const LoadDashboardData());
+              }
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildPrimaryDailyActionBtn(
+            context: context,
+            label: 'home_quick_action_expense'.i18n(),
+            icon: Icons.receipt_long_rounded,
+            color: AppColors.statusDanger,
+            filled: false,
+            onTap: _openQuickExpenseSheet,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildPrimaryDailyActionBtn(
+            context: context,
+            label: 'home_quick_action_collect_debt'.i18n(),
+            icon: Icons.payments_rounded,
+            color: AppColors.primaryGreen,
+            filled: false,
+            onTap: _openQuickDebtCollection,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrimaryDailyActionBtn({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool filled,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = filled
+        ? color
+        : (isDark ? AppColors.darkSurfaceCard : AppColors.surfaceWhite);
+    final fgColor = filled ? Colors.white : color;
+
+    return Material(
+      color: bgColor,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: filled ? color : color.withValues(alpha: 0.35),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 17, color: fgColor),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: fgColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsibleAnalyticsSection({
+    required BuildContext context,
+    required String businessMode,
+    required double collected,
+    required double remaining,
+    required double debts,
+    required double totalCapital,
+    required String activeCurrency,
+    required List<double> weeklySales,
+    required List<String> weeklySalesDayLabels,
+  }) {
+    final isExpanded = _analyticsExpandedOverride ??
+        (businessMode != AppConstants.businessModeSimpleSeller);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: () => setState(() => _analyticsExpandedOverride = !isExpanded),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.insights_rounded,
+                  size: 16,
+                  color: context.primaryBlue,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    isExpanded
+                        ? 'home_analytics_hide_btn'.i18n()
+                        : 'home_analytics_show_btn'.i18n(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: context.primaryBlue,
+                    ),
+                  ),
+                ),
+                Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  size: 18,
+                  color: context.primaryBlue,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isExpanded) ...[
+          const SizedBox(height: 6),
+          FinancialAnalyticsCard(
+            collectedAmount: collected,
+            remainingAmount: remaining,
+            debtAmount: debts,
+            totalRevenue: totalCapital,
+            activeCurrency: activeCurrency,
+            weeklySales: weeklySales,
+            dayLabels: weeklySalesDayLabels,
+          ),
+        ],
+      ],
     );
   }
 
