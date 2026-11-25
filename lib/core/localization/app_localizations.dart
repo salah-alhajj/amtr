@@ -3,15 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // ignore: implementation_imports
 import 'package:localization/src/localization_service.dart';
+import 'arabic_dialect.dart';
 import 'localization_helper.dart';
 
 /// يدير تحميل النصوص المترجمة والوصول إليها عبر السياق أو المفاتيح
-/// يدعم العربية (الأساسية) والإنجليزية مع fallback آمن يمنع أي توقف مفاجئ
+/// يدعم العربية (الأساسية + اللهجات الإقليمية كطبقة فوقها) واللغات الأخرى مع fallback آمن
 class AppLocalizations {
   final Locale locale;
+  final String arabicDialect;
   Map<String, String> _localizedStrings = {};
 
-  AppLocalizations(this.locale);
+  AppLocalizations(
+    this.locale, {
+    this.arabicDialect = ArabicDialect.standardId,
+  });
 
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
@@ -20,6 +25,7 @@ class AppLocalizations {
 
   AppLocalizations._fallback()
       : locale = const Locale('ar'),
+        arabicDialect = ArabicDialect.standardId,
         _localizedStrings = const {};
 
   /// تحميل ملفات الترجمة للغة المطلوبة
@@ -67,6 +73,22 @@ class AppLocalizations {
       }
     }
 
+    // 3. عند اختيار العربية مع لهجة بلدية محددة، تحميل ملف اللهجة كطبقة فوق i18n/ar.json
+    if (lc == 'ar') {
+      final dialect = ArabicDialect.fromId(arabicDialect);
+      if (dialect.id != ArabicDialect.standardId && dialect.assetPath != null) {
+        try {
+          final dialectJson = await rootBundle.loadString(dialect.assetPath!);
+          final Map<String, dynamic> dialectMap = json.decode(dialectJson);
+          dialectMap.forEach((key, value) {
+            merged[key] = value.toString();
+          });
+        } catch (_) {
+          // الرجوع الهادئ إلى العربية الفصحى عند تعذر قراءة ملف اللهجة
+        }
+      }
+    }
+
     if (merged.isNotEmpty) {
       _localizedStrings = merged;
       // مزامنة مع مكتبة localization الداخلية لدعم .i18n()
@@ -76,7 +98,8 @@ class AppLocalizations {
 
     if (LocalizationHelper.localizedStrings != null &&
         LocalizationHelper.localizedStrings!.isNotEmpty &&
-        LocalizationHelper.currentLanguage == lc) {
+        LocalizationHelper.currentLanguage == lc &&
+        (lc != 'ar' || LocalizationHelper.currentArabicDialect == arabicDialect)) {
       _localizedStrings = LocalizationHelper.localizedStrings!;
       LocalizationService.instance.changeLanguageFromMap(locale, _localizedStrings);
       return true;
@@ -105,7 +128,11 @@ class AppLocalizations {
 
 /// Delegator الخاص بـ Flutter Localizations
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
-  const AppLocalizationsDelegate();
+  final String arabicDialect;
+
+  const AppLocalizationsDelegate({
+    this.arabicDialect = ArabicDialect.standardId,
+  });
 
   static const List<Locale> supportedLocales = [
     Locale('ar'),
@@ -124,11 +151,15 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
-    final localizations = AppLocalizations(locale);
+    final localizations = AppLocalizations(
+      locale,
+      arabicDialect: arabicDialect,
+    );
     await localizations.load();
     return localizations;
   }
 
   @override
-  bool shouldReload(AppLocalizationsDelegate old) => false;
+  bool shouldReload(AppLocalizationsDelegate old) =>
+      old.arabicDialect != arabicDialect;
 }

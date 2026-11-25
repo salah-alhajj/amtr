@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../business/app_feature_flags.dart';
+import '../localization/arabic_dialect.dart';
 
 /// خدمة إدارة وتخزين تفضيلات المستخدم المحلية بصورة دائمة
 /// تشمل: نمط المظهر (تلقائي / فاتح / داكن) ولغة التطبيق والعملة الافتراضية
@@ -11,6 +12,7 @@ class PreferencesService {
 
   static const String _keyThemeMode = 'app_theme_mode';
   static const String _keyLocaleCode = 'app_locale_code';
+  static const String _keyArabicDialect = 'app_arabic_dialect';
   static const String _keyOnboardingCompleted = 'app_onboarding_completed';
   static const String _keyBusinessMode = 'app_business_mode';
   static const String _keyBusinessName = 'app_business_name';
@@ -76,6 +78,18 @@ class PreferencesService {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
     _prefs = prefs;
     await prefs.setString(_keyLocaleCode, code);
+  }
+
+  /// استرجاع اللهجة / المسميات البلدية العربية المختارة (الافتراضي: الفصحى المعاصرة)
+  String getArabicDialect() {
+    return ArabicDialect.fromId(_prefs?.getString(_keyArabicDialect)).id;
+  }
+
+  /// حفظ اللهجة العربية المختارة للمستخدم
+  Future<void> setArabicDialect(String dialectId) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setString(_keyArabicDialect, ArabicDialect.fromId(dialectId).id);
   }
 
   /// استرجاع حالة إكمال شاشات الترحيب والتعريف (Onboarding)

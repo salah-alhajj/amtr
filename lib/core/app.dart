@@ -29,7 +29,6 @@ class RetailAssistantApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    LocalJsonLocalization.delegate.directories = ['i18n'];
     final orderRepo = OrderRepositoryImpl();
     final shipmentRepo = ShipmentRepositoryImpl();
     final customerRepo = CustomerRepositoryImpl();
@@ -110,8 +109,9 @@ class RetailAssistantApp extends StatelessWidget {
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
-                  const AppLocalizationsDelegate(),
-                  LocalJsonLocalization.delegate,
+                  AppLocalizationsDelegate(
+                    arabicDialect: localeState.arabicDialect,
+                  ),
                 ],
                 builder: (context, child) {
                   return Directionality(
