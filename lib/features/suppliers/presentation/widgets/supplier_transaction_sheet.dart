@@ -6,7 +6,32 @@ import '../../../../core/localization/localization.dart';
 import '../../../../core/services/preferences_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/design_system.dart';
+import '../../../../models/product.dart';
+import '../../../../models/raw_material.dart';
 import '../../../../models/supplier_transaction.dart';
+import '../../../manufacturing/data/repositories/raw_material_repository.dart';
+import '../../../products/data/repositories/product_repository_impl.dart';
+
+/// نتيجة ورقة تسجيل حركة المورد شاملةً التزويد الاختياري للمخزون
+class SupplierTransactionResult {
+  final SupplierTransaction transaction;
+  final String? stockItemType;
+  final String? stockItemId;
+  final double stockQuantity;
+
+  const SupplierTransactionResult({
+    required this.transaction,
+    this.stockItemType,
+    this.stockItemId,
+    this.stockQuantity = 0.0,
+  });
+
+  bool get hasStockLink =>
+      !transaction.isPayment &&
+      stockItemId != null &&
+      stockItemId!.isNotEmpty &&
+      stockQuantity > 0;
+}
 
 /// نافذة تسجيل حركة مالية مع المورد (اشتريت منه: آجل/نقدي، أو سددت له)
 class SupplierTransactionSheet extends StatefulWidget {
@@ -26,8 +51,23 @@ class SupplierTransactionSheet extends StatefulWidget {
     required String supplierId,
     required String supplierName,
     required bool isPayment,
+  }) async {
+    final res = await showWithStock(
+      context,
+      supplierId: supplierId,
+      supplierName: supplierName,
+      isPayment: isPayment,
+    );
+    return res?.transaction;
+  }
+
+  static Future<SupplierTransactionResult?> showWithStock(
+    BuildContext context, {
+    required String supplierId,
+    required String supplierName,
+    required bool isPayment,
   }) {
-    return showAppModalSheet<SupplierTransaction>(
+    return showAppModalSheet<SupplierTransactionResult>(
       context: context,
       title: isPayment
           ? 'supplier_tx_sheet_pay_title'.i18n()
@@ -52,11 +92,20 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _stockQtyController = TextEditingController(text: '1');
+  final _productRepo = ProductRepositoryImpl();
+  final _materialRepo = RawMaterialRepository();
 
   late String _txType;
   late String _currency;
   DateTime _txDate = DateTime.now();
   String? _receiptPhotoPath;
+
+  bool _linkToStock = false;
+  String _stockItemType = 'product';
+  String? _selectedStockItemId;
+  List<Product> _products = const [];
+  List<RawMaterial> _materials = const [];
 
   @override
   void initState() {
@@ -65,12 +114,39 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
         ? AppConstants.supplierTxPayment
         : AppConstants.supplierTxPurchaseCredit;
     _currency = PreferencesService.instance.getDefaultCurrency();
+    if (!widget.isPayment) {
+      _loadStockCatalog();
+    }
+  }
+
+  Future<void> _loadStockCatalog() async {
+    try {
+      final results = await Future.wait([
+        _productRepo.getActiveProducts(),
+        _materialRepo.getAll(),
+      ]);
+      if (!mounted) return;
+      final prods = results[0] as List<Product>;
+      final mats = results[1] as List<RawMaterial>;
+      setState(() {
+        _products = prods;
+        _materials = mats;
+        if (prods.isEmpty && mats.isNotEmpty) {
+          _stockItemType = 'material';
+          _selectedStockItemId = mats.first.id;
+        } else if (prods.isNotEmpty) {
+          _stockItemType = 'product';
+          _selectedStockItemId = prods.first.id;
+        }
+      });
+    } catch (_) {}
   }
 
   @override
   void dispose() {
     _amountController.dispose();
     _notesController.dispose();
+    _stockQtyController.dispose();
     super.dispose();
   }
 
@@ -91,6 +167,18 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
     if (!_formKey.currentState!.validate()) {
       AppToast.showError(context, 'form_validation_failed'.i18n());
       return;
+    }
+
+    if (!widget.isPayment && _linkToStock) {
+      if (_selectedStockItemId == null || _selectedStockItemId!.isEmpty) {
+        AppToast.showError(context, 'supplier_stock_item_required'.i18n());
+        return;
+      }
+      final qty = double.tryParse(_stockQtyController.text.trim()) ?? 0.0;
+      if (qty <= 0) {
+        AppToast.showError(context, 'supplier_stock_qty_required'.i18n());
+        return;
+      }
     }
 
     final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
@@ -117,7 +205,19 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
       createdAt: now,
     );
 
-    Navigator.pop(context, tx);
+    final qty = (!widget.isPayment && _linkToStock)
+        ? (double.tryParse(_stockQtyController.text.trim()) ?? 0.0)
+        : 0.0;
+
+    Navigator.pop(
+      context,
+      SupplierTransactionResult(
+        transaction: tx,
+        stockItemType: (!widget.isPayment && _linkToStock) ? _stockItemType : null,
+        stockItemId: (!widget.isPayment && _linkToStock) ? _selectedStockItemId : null,
+        stockQuantity: qty,
+      ),
+    );
   }
 
   Widget _buildPurchaseModeSelector() {
@@ -343,6 +443,15 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
                       )
                     else
                       amountField,
+                    const SizedBox(height: 8),
+                    QuickAmountChips(
+                      controller: _amountController,
+                      currency: _currency,
+                    ),
+                    if (!widget.isPayment) ...[
+                      const SizedBox(height: 12),
+                      _buildStockReplenishmentCard(),
+                    ],
                     const SizedBox(height: 12),
                     InkWell(
                       onTap: _pickDate,
@@ -441,6 +550,138 @@ class _SupplierTransactionSheetState extends State<SupplierTransactionSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStockReplenishmentCard() {
+    final isProduct = _stockItemType == 'product';
+    final hasAnyItems =
+        isProduct ? _products.isNotEmpty : _materials.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _linkToStock
+            ? AppColors.primaryGreen.withValues(alpha: 0.06)
+            : context.surfaceMuted,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _linkToStock
+              ? AppColors.primaryGreen.withValues(alpha: 0.35)
+              : context.borderSubtle,
+          width: 0.9,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppSwitchTile(
+            title: 'supplier_stock_link_toggle'.i18n(),
+            subtitle: 'supplier_stock_link_subtitle'.i18n(),
+            value: _linkToStock,
+            onChanged: (val) => setState(() => _linkToStock = val),
+          ),
+          if (_linkToStock) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildModeOption(
+                    label: 'supplier_stock_type_product'.i18n(),
+                    icon: Icons.inventory_2_outlined,
+                    selected: isProduct,
+                    color: AppColors.primaryGreen,
+                    onTap: () {
+                      setState(() {
+                        _stockItemType = 'product';
+                        _selectedStockItemId =
+                            _products.isNotEmpty ? _products.first.id : null;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildModeOption(
+                    label: 'supplier_stock_type_material'.i18n(),
+                    icon: Icons.science_outlined,
+                    selected: !isProduct,
+                    color: AppColors.primaryGreen,
+                    onTap: () {
+                      setState(() {
+                        _stockItemType = 'material';
+                        _selectedStockItemId =
+                            _materials.isNotEmpty ? _materials.first.id : null;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (!hasAnyItems)
+              Text(
+                'supplier_stock_no_items'.i18n(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.textSecondary,
+                ),
+              )
+            else ...[
+              AppDropdownField<String>(
+                label: isProduct
+                    ? 'supplier_stock_select_product'.i18n()
+                    : 'supplier_stock_select_material'.i18n(),
+                value: _selectedStockItemId,
+                items: isProduct
+                    ? _products
+                        .map(
+                          (p) => DropdownMenuItem<String>(
+                            value: p.id,
+                            child: Text(
+                              '${p.name} (${p.stockQuantity})',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList()
+                    : _materials
+                        .map(
+                          (m) => DropdownMenuItem<String>(
+                            value: m.id,
+                            child: Text(
+                              '${m.name} (${m.stockQuantity})',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                onChanged: (val) => setState(() => _selectedStockItemId = val),
+              ),
+              const SizedBox(height: 10),
+              AppTextField(
+                controller: _stockQtyController,
+                label: 'supplier_stock_qty_label'.i18n(),
+                prefixIcon: Icons.add_box_outlined,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: AppFormatters.positiveDecimal(decimalRange: 2),
+                validator: (val) {
+                  if (!_linkToStock) return null;
+                  final parsed = double.tryParse(val?.trim() ?? '');
+                  if (parsed == null || parsed <= 0) {
+                    return 'supplier_stock_qty_required'.i18n();
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ],
+        ],
       ),
     );
   }

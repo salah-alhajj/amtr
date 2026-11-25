@@ -128,15 +128,22 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
   }
 
   Future<void> _openTransactionSheet({required bool isPayment}) async {
-    final tx = await SupplierTransactionSheet.show(
+    final result = await SupplierTransactionSheet.showWithStock(
       context,
       supplierId: _supplier.id,
       supplierName: _supplier.name,
       isPayment: isPayment,
     );
-    if (tx == null || !mounted) return;
+    if (result == null || !mounted) return;
 
-    await _ledgerRepo.recordTransaction(tx, supplierName: _supplier.name);
+    final tx = result.transaction;
+    await _ledgerRepo.recordTransaction(
+      tx,
+      supplierName: _supplier.name,
+      stockItemType: result.stockItemType,
+      stockItemId: result.stockItemId,
+      stockQuantity: result.stockQuantity,
+    );
     await _loadLinkedData();
     if (!mounted) return;
 
@@ -153,6 +160,8 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
         actionLabel: 'supplier_send_receipt_whatsapp'.i18n(),
         onAction: () => _sendPaymentReceiptWhatsApp(tx, remainingYer),
       );
+    } else if (result.hasStockLink) {
+      AppToast.showSuccess(context, 'supplier_stock_saved_toast'.i18n());
     } else {
       AppToast.showSuccess(context, 'supplier_tx_saved_success'.i18n());
     }

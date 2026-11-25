@@ -120,12 +120,20 @@ class SupplierLedgerRepository {
   /// تسجيل حركة جديدة في دفتر حساب المورد
   /// - الشراء النقدي والسداد يسجلان تلقائياً مصروف شغل في الصندوق ضمن نفس المعاملة
   /// - الشراء الآجل يزيد الرصيد المستحق للمورد فقط دون خصم فوري من الصندوق
+  /// - عند تمرير [stockItemId] و [stockQuantity] > 0 في عملية شراء، يُحدَّث مخزون المنتج أو المادة الخام ضمن نفس المعاملة الذرية
   Future<void> recordTransaction(
     SupplierTransaction tx, {
     required String supplierName,
+    String? stockItemType,
+    String? stockItemId,
+    double stockQuantity = 0.0,
   }) async {
     final db = await _dbHelper.database;
     final affectsCashBox = tx.isCashPurchase || tx.isPayment;
+    final hasStockReplenishment = !tx.isPayment &&
+        stockItemId != null &&
+        stockItemId.trim().isNotEmpty &&
+        stockQuantity > 0;
 
     await db.transaction((txn) async {
       await txn.insert(
@@ -164,11 +172,33 @@ class SupplierLedgerRepository {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
+
+      if (hasStockReplenishment) {
+        final targetId = stockItemId.trim();
+        if (stockItemType == 'product') {
+          await txn.rawUpdate(
+            'UPDATE products SET stockQuantity = stockQuantity + ? WHERE id = ?',
+            [stockQuantity.round(), targetId],
+          );
+        } else if (stockItemType == 'material') {
+          await txn.rawUpdate(
+            'UPDATE raw_materials SET stockQuantity = stockQuantity + ? WHERE id = ?',
+            [stockQuantity, targetId],
+          );
+        }
+      }
     });
 
     DataSyncBus.instance.notify(DataDomain.suppliers);
     if (affectsCashBox) {
       DataSyncBus.instance.notify(DataDomain.expenses);
+    }
+    if (hasStockReplenishment) {
+      if (stockItemType == 'product') {
+        DataSyncBus.instance.notify(DataDomain.products);
+      } else if (stockItemType == 'material') {
+        DataSyncBus.instance.notify(DataDomain.materials);
+      }
     }
   }
 
