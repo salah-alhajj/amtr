@@ -1531,5 +1531,19 @@
   "guide_faq3_q": "Kişisel harcamaları işletme giderlerinden nasıl ayırırım?",
   "guide_faq3_a": "Gider eklerken \"Kişisel Çekim\" seçeneğini seçin; kasa izler ancak işletme net kârını düşürmez.",
   "guide_faq4_q": "Ana para birimi ve çoklu para birimi nasıl çalışır?",
-  "guide_faq4_a": "Sadelik için tek para birimi kullanabilir veya Ayarlardan çoklu para birimini açabilirsiniz."
+  "guide_faq4_a": "Sadelik için tek para birimi kullanabilir veya Ayarlardan çoklu para birimini açabilirsiniz.",
+  "batch_add_btn": "Üretim Partisi Ekle",
+  "batch_sheet_title": "Yeni Üretim Partisi Kaydet",
+  "batch_sheet_subtitle": "Hazır veya dinlendirilecek parti ekleyin ve hammadde düşün",
+  "batch_select_product": "Ürün Seçin",
+  "batch_curing_presets_label": "Dinlendirme Süresi",
+  "batch_ready_now_preset": "Hemen Hazır (0)",
+  "batch_days_short_fmt": "{days}g",
+  "batch_kpi_curing": "Dinlendirmede",
+  "batch_kpi_ready": "Hazır",
+  "batch_kpi_expiring": "Yaklaşan SKT",
+  "batch_filter_all": "Tümü",
+  "batch_no_products_hint": "Henüz katalog ürünü yok. Üretim partisi eklemek için önce ürün oluşturun.",
+  "batch_create_product_btn": "Şimdi Ürün Ekle",
+  "batch_recipe_tag": "Üretim"
 }

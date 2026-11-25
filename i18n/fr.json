@@ -1531,5 +1531,19 @@
   "guide_faq3_q": "Comment séparer les dépenses personnelles des frais professionnels ?",
   "guide_faq3_a": "Choisissez « Retrait personnel » lors de la saisie afin de ne pas fausser le bénéfice net.",
   "guide_faq4_q": "Comment fonctionnent la devise de base et le multi-devises ?",
-  "guide_faq4_a": "Utilisez une seule devise ou activez le multi-devises dans les Paramètres."
+  "guide_faq4_a": "Utilisez une seule devise ou activez le multi-devises dans les Paramètres.",
+  "batch_add_btn": "Nouveau lot de production",
+  "batch_sheet_title": "Enregistrer un lot de production",
+  "batch_sheet_subtitle": "Ajouter un lot prêt ou en affinage et déduire les matières",
+  "batch_select_product": "Choisir le produit",
+  "batch_curing_presets_label": "Durée d'affinage",
+  "batch_ready_now_preset": "Prêt de suite (0)",
+  "batch_days_short_fmt": "{days}j",
+  "batch_kpi_curing": "Affinage",
+  "batch_kpi_ready": "Prêts",
+  "batch_kpi_expiring": "Bientôt expiré",
+  "batch_filter_all": "Tous",
+  "batch_no_products_hint": "Aucun produit au catalogue. Créez un produit pour enregistrer des lots.",
+  "batch_create_product_btn": "Créer un produit",
+  "batch_recipe_tag": "Fabriqué"
 }

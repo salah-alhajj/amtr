@@ -1531,5 +1531,19 @@
   "guide_faq3_q": "How do I separate personal drawings from business expenses?",
   "guide_faq3_a": "Select \"Personal Drawing\" when logging an expense so Cashbox tracks it without lowering business net profit.",
   "guide_faq4_q": "How does the base currency and multi-currency work?",
-  "guide_faq4_a": "Use a single currency for simplicity or enable Multi-Currency in Settings to convert between YER, SAR, and USD."
+  "guide_faq4_a": "Use a single currency for simplicity or enable Multi-Currency in Settings to convert between YER, SAR, and USD.",
+  "batch_add_btn": "Add Production Batch",
+  "batch_sheet_title": "Record Production Batch",
+  "batch_sheet_subtitle": "Add a ready or curing batch and deduct materials",
+  "batch_select_product": "Select Product",
+  "batch_curing_presets_label": "Curing / Maturation Period",
+  "batch_ready_now_preset": "Ready Now (0)",
+  "batch_days_short_fmt": "{days}d",
+  "batch_kpi_curing": "Curing",
+  "batch_kpi_ready": "Ready",
+  "batch_kpi_expiring": "Expiring",
+  "batch_filter_all": "All",
+  "batch_no_products_hint": "No catalog products yet. Create a product first to record production batches.",
+  "batch_create_product_btn": "Add Product Now",
+  "batch_recipe_tag": "Manufactured"
 }

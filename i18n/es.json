@@ -1531,5 +1531,19 @@
   "guide_faq3_q": "¿Cómo separo gastos personales de los del negocio?",
   "guide_faq3_a": "Elige \"Retiro personal\" al registrar el gasto para que no distorsione el beneficio neto.",
   "guide_faq4_q": "¿Cómo funciona la moneda base y multimoneda?",
-  "guide_faq4_a": "Usa una sola moneda o activa Multimoneda en Ajustes para convertir entre divisas."
+  "guide_faq4_a": "Usa una sola moneda o activa Multimoneda en Ajustes para convertir entre divisas.",
+  "batch_add_btn": "Nuevo lote de producción",
+  "batch_sheet_title": "Registrar lote de producción",
+  "batch_sheet_subtitle": "Añade un lote listo o en curado y descuenta materiales",
+  "batch_select_product": "Seleccionar producto",
+  "batch_curing_presets_label": "Periodo de curado",
+  "batch_ready_now_preset": "Listo ahora (0)",
+  "batch_days_short_fmt": "{days}d",
+  "batch_kpi_curing": "En curado",
+  "batch_kpi_ready": "Listos",
+  "batch_kpi_expiring": "Por caducar",
+  "batch_filter_all": "Todos",
+  "batch_no_products_hint": "Aún no hay productos. Crea un producto primero para registrar lotes.",
+  "batch_create_product_btn": "Agregar producto ahora",
+  "batch_recipe_tag": "Fabricado"
 }
