@@ -26,6 +26,7 @@ import '../../features/guide/presentation/screens/app_user_guide_screen.dart';
 import '../../features/shipments/presentation/screens/shipments_list_screen.dart';
 import '../../features/suppliers/presentation/screens/suppliers_list_screen.dart';
 import '../../features/about/presentation/screens/about_app_screen.dart';
+import '../../features/audit/presentation/screens/audit_log_screen.dart';
 
 /// دراور تجاري ومالي احترافي مصقول يعكس هوية المال والأعمال والشحن
 class BusinessDrawer extends StatelessWidget {
@@ -497,6 +498,21 @@ class BusinessDrawer extends StatelessWidget {
                         }
                       },
                     ),
+                  _DrawerMenuItem(
+                    icon: Icons.fact_check_outlined,
+                    title: 'audit_drawer_title'.i18n(),
+                    subtitle: 'audit_drawer_sub'.i18n(),
+                    iconColor: AppColors.vibrantTeal,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AuditLogScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   _DrawerMenuItem(
                     icon: Icons.save_alt_rounded,
                     title: 'backup_and_restore'.i18n(),

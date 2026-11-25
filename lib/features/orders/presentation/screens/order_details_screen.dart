@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/reminder_service.dart';
@@ -12,7 +14,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/yemen_phone_helper.dart';
 import '../../../../core/widgets/design_system.dart';
 import '../../../../models/individual_order.dart';
-import '../../../customers/data/repositories/customer_repository_impl.dart';
+import '../../../audit/presentation/screens/audit_log_screen.dart';
 import '../../../customers/domain/customer_whatsapp_helper.dart';
 import '../../data/repositories/order_repository_impl.dart';
 import '../../domain/repositories/order_repository.dart';
@@ -218,7 +220,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     String cleanPhone = '';
     IndividualOrder orderForMsg = order;
     if (order.customerId != null && order.customerId!.isNotEmpty) {
-      final customer = await CustomerRepositoryImpl().getCustomerById(
+      final customer = await AppServices.instance.orderService.getCustomerById(
         order.customerId!,
       );
       if (customer != null) {
@@ -334,6 +336,22 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         title: Text('order_number_title'.trParams({'number': order.orderNumber})),
         leading: const BackButton(),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded),
+            tooltip: 'audit_center_title'.i18n(),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AuditLogScreen(
+                    entityType: AuditEntityType.order,
+                    entityId: order.id,
+                    entityTitle: '#${order.orderNumber}',
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.print_outlined),
             tooltip: 'print_order_invoice_tooltip'.i18n(),

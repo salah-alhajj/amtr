@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/audit/audit.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/di/app_services.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/services/data_sync_bus.dart';
@@ -15,9 +17,10 @@ import '../../../../models/product.dart';
 import '../../../../models/raw_material.dart';
 import '../../../../models/supplier.dart';
 import '../../../../models/supplier_transaction.dart';
+import '../../../audit/presentation/screens/audit_log_screen.dart';
 import '../../../whatsapp/domain/whatsapp_template_engine.dart';
 import '../../data/repositories/supplier_ledger_repository.dart';
-import '../../data/repositories/supplier_repository_impl.dart';
+import '../../domain/services/supplier_business_service.dart';
 import '../bloc/suppliers_bloc.dart';
 import '../widgets/add_edit_supplier_sheet.dart';
 import '../widgets/supplier_transaction_sheet.dart';
@@ -34,8 +37,8 @@ class SupplierDetailsScreen extends StatefulWidget {
 class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
   static const Color _creditWarmAmber = Color(0xFFD97706);
 
-  final SupplierRepositoryImpl _repo = SupplierRepositoryImpl();
-  final SupplierLedgerRepository _ledgerRepo = SupplierLedgerRepository();
+  final SupplierBusinessService _supplierService =
+      AppServices.instance.supplierService;
   late Supplier _supplier;
   List<Product> _products = const [];
   List<RawMaterial> _materials = const [];
@@ -54,20 +57,15 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
   Future<void> _loadLinkedData() async {
     setState(() => _isLoading = true);
     try {
-      final results = await Future.wait([
-        _repo.getProductsBySupplier(_supplier.id),
-        _repo.getMaterialsBySupplier(_supplier.id),
-        _repo.getExpensesBySupplier(_supplier.id),
-        _ledgerRepo.getBalanceSummary(_supplier.id),
-        _ledgerRepo.getTransactions(_supplier.id),
-      ]);
+      final workspace =
+          await _supplierService.loadSupplierWorkspace(_supplier.id);
       if (!mounted) return;
       setState(() {
-        _products = results[0] as List<Product>;
-        _materials = results[1] as List<RawMaterial>;
-        _expenses = results[2] as List<Expense>;
-        _balanceSummary = results[3] as SupplierBalanceSummary;
-        _transactions = results[4] as List<SupplierTransaction>;
+        _products = workspace.products;
+        _materials = workspace.materials;
+        _expenses = workspace.expenses;
+        _balanceSummary = workspace.balanceSummary;
+        _transactions = workspace.transactions;
         _isLoading = false;
       });
     } catch (_) {
@@ -137,7 +135,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
     if (result == null || !mounted) return;
 
     final tx = result.transaction;
-    await _ledgerRepo.recordTransaction(
+    await _supplierService.recordTransaction(
       tx,
       supplierName: _supplier.name,
       stockItemType: result.stockItemType,
@@ -176,7 +174,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
     );
     if (confirm != true || !mounted) return;
 
-    await _ledgerRepo.deleteTransaction(tx.id);
+    await _supplierService.deleteTransaction(tx.id);
     await _loadLinkedData();
     if (!mounted) return;
 
@@ -202,7 +200,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
       context,
       supplierToEdit: _supplier,
       onSave: (updated) async {
-        await _repo.updateSupplier(updated);
+        await _supplierService.updateSupplier(updated);
         if (!mounted) return;
         setState(() => _supplier = updated);
         try {
@@ -222,7 +220,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
       isDestructive: true,
     );
     if (confirm != true || !mounted) return;
-    await _repo.deleteSupplier(_supplier.id);
+    await _supplierService.deleteSupplier(_supplier.id);
     if (!mounted) return;
     try {
       context.read<SuppliersBloc>().add(const LoadSuppliers());
@@ -243,6 +241,22 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
       appBar: AppBar(
         title: Text(_supplier.name),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded),
+            tooltip: 'audit_center_title'.i18n(),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AuditLogScreen(
+                    entityType: AuditEntityType.supplier,
+                    entityId: _supplier.id,
+                    entityTitle: _supplier.name,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const WhatsAppIcon(size: 20),
             onPressed: _sendStatementWhatsApp,
