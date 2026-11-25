@@ -102,6 +102,58 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
       ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: AppColors.primaryBlue,
+        unselectedLabelColor: AppColors.textSecondary,
+        indicatorColor: AppColors.primaryBlue,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: AppColors.borderDivider,
+        labelStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primaryBlue,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        extendedTextStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceMuted,
+        selectedColor: AppColors.primaryBlue.withValues(alpha: 0.14),
+        disabledColor: AppColors.surfaceMuted,
+        checkmarkColor: AppColors.primaryBlue,
+        labelStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primaryBlue,
+        ),
+        side: const BorderSide(color: AppColors.borderSubtle, width: 0.8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
     );
   }
 
@@ -211,6 +263,58 @@ class AppTheme {
           fontFamily: fontFamily,
           fontSize: 14,
           color: AppColors.darkTextPrimary,
+        ),
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: AppColors.darkPrimaryBlue,
+        unselectedLabelColor: AppColors.darkTextSecondary,
+        indicatorColor: AppColors.darkPrimaryBlue,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: AppColors.darkBorderDivider,
+        labelStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.darkPrimaryBlue,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        extendedTextStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.darkSurfaceMuted,
+        selectedColor: AppColors.darkPrimaryBlue.withValues(alpha: 0.22),
+        disabledColor: AppColors.darkSurfaceMuted,
+        checkmarkColor: AppColors.darkPrimaryBlue,
+        labelStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: AppColors.darkTextPrimary,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.darkPrimaryBlue,
+        ),
+        side: const BorderSide(color: AppColors.darkBorderSubtle, width: 0.8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
