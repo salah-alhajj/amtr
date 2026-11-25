@@ -24,6 +24,23 @@ class CashBoxRepositoryImpl implements CashBoxRepository {
             );
 
   @override
+  Future<double> getCashInForDateYer(DateTime date) async {
+    final db = await _dbHelper.database;
+    final dayPrefix = _formatDatePrefix(date);
+    final paymentMaps = await db.query(
+      'payment_transactions',
+      where: 'paidAt LIKE ?',
+      whereArgs: ['$dayPrefix%'],
+    );
+    double total = 0.0;
+    for (final map in paymentMaps) {
+      final tx = PaymentTransaction.fromMap(map);
+      total += _currencyService.toBaseYer(tx.amount, tx.currency);
+    }
+    return total;
+  }
+
+  @override
   Future<DailyCashBoxSummary> getDailySummary(DateTime date) async {
     final db = await _dbHelper.database;
     final dayPrefix = _formatDatePrefix(date);

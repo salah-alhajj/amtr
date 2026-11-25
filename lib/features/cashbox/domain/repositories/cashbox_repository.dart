@@ -76,4 +76,5 @@ class DailyCashBoxSummary {
 /// واجهة مستودع الصندوق اليومي
 abstract class CashBoxRepository {
   Future<DailyCashBoxSummary> getDailySummary(DateTime date);
+  Future<double> getCashInForDateYer(DateTime date);
 }

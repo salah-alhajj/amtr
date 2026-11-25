@@ -46,6 +46,17 @@ class ProductVariantRepository {
     return grouped;
   }
 
+  Future<Set<String>> getActiveVariantProductIds() async {
+    final db = await dbHelper.database;
+    final rows = await db.rawQuery(
+      'SELECT DISTINCT productId FROM product_variants WHERE isActive = 1',
+    );
+    return rows
+        .map((r) => r['productId'] as String?)
+        .whereType<String>()
+        .toSet();
+  }
+
   Future<void> replaceForProduct(
     String productId,
     List<ProductVariant> variants,
