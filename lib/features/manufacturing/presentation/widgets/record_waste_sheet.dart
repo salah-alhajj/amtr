@@ -232,27 +232,35 @@ class _RecordWasteSheetState extends State<RecordWasteSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: [
-                  ChoiceChip(
-                    label: Text('waste_type_product'.i18n()),
-                    selected: _itemType == 'product',
-                    onSelected: (_) => _switchItemType('product'),
-                  ),
-                  ChoiceChip(
-                    label: Text('waste_type_material'.i18n()),
-                    selected: _itemType == 'material',
-                    onSelected: (_) => _switchItemType('material'),
-                  ),
-                ],
+              // محدد نوع العنصر بأسلوب آبل الأنيق
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: context.surfaceMuted,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.borderSubtle, width: 0.8),
+                ),
+                child: Row(
+                  children: [
+                    _buildTypeSegment(
+                      type: 'product',
+                      icon: Icons.inventory_2_outlined,
+                      label: 'waste_type_product'.i18n(),
+                    ),
+                    const SizedBox(width: 4),
+                    _buildTypeSegment(
+                      type: 'material',
+                      icon: Icons.science_outlined,
+                      label: 'waste_type_material'.i18n(),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               if (_isLoadingItems)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: CircularProgressIndicator.adaptive()),
                 )
               else if (!hasItems)
                 Padding(
@@ -265,21 +273,11 @@ class _RecordWasteSheetState extends State<RecordWasteSheet> {
                   ),
                 )
               else
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedItemId,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: _itemType == 'product'
-                        ? 'waste_select_product'.i18n()
-                        : 'waste_select_material'.i18n(),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                  ),
+                AppDropdownField<String>(
+                  label: _itemType == 'product'
+                      ? 'waste_select_product'.i18n()
+                      : 'waste_select_material'.i18n(),
+                  value: _selectedItemId,
                   items: _itemType == 'product'
                       ? _products
                           .map(
@@ -350,32 +348,47 @@ class _RecordWasteSheetState extends State<RecordWasteSheet> {
                 spacing: 6,
                 runSpacing: 6,
                 children: AppConstants.wasteReasons.map((reason) {
-                  return ChoiceChip(
-                    label: Text(
-                      AppConstants.getWasteReasonLabel(reason),
-                      style: const TextStyle(fontSize: 12),
+                  final selected = _selectedReason == reason;
+                  return InkWell(
+                    onTap: () => setState(() => _selectedReason = reason),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppColors.statusWarning.withValues(alpha: 0.14)
+                            : context.surfaceMuted,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: selected
+                              ? AppColors.statusWarning
+                              : context.borderSubtle,
+                          width: selected ? 1.4 : 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        AppConstants.getWasteReasonLabel(reason),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight:
+                              selected ? FontWeight.bold : FontWeight.w500,
+                          color: selected
+                              ? AppColors.statusWarning
+                              : context.textPrimary,
+                        ),
+                      ),
                     ),
-                    selected: _selectedReason == reason,
-                    onSelected: (_) => setState(() => _selectedReason = reason),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 10),
-              Material(
-                type: MaterialType.transparency,
-                child: SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text(
-                    'waste_deduct_stock_label'.i18n(),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  value: _deductStock,
-                  onChanged: (v) => setState(() => _deductStock = v),
-                ),
+              AppSwitchTile(
+                title: 'waste_deduct_stock_label'.i18n(),
+                value: _deductStock,
+                onChanged: (v) => setState(() => _deductStock = v),
               ),
               const SizedBox(height: 6),
               AppTextField(
@@ -405,11 +418,62 @@ class _RecordWasteSheetState extends State<RecordWasteSheet> {
                 ),
               ],
               const SizedBox(height: 14),
-              AppButton(
+              AppPrimaryButton(
                 label: 'waste_submit_btn'.i18n(),
                 icon: Icons.delete_sweep_outlined,
+                backgroundColor: AppColors.statusDanger,
                 isLoading: _isSubmitting,
                 onPressed: hasItems && !_isSubmitting ? _submit : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeSegment({
+    required String type,
+    required IconData icon,
+    required String label,
+  }) {
+    final active = _itemType == type;
+    final color =
+        type == 'product' ? AppColors.primaryBlue : AppColors.vibrantTeal;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _switchItemType(type),
+        borderRadius: BorderRadius.circular(9),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
+          decoration: BoxDecoration(
+            color: active ? context.surfaceCard : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            border: active
+                ? Border.all(color: color.withValues(alpha: 0.45), width: 1)
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: active ? color : context.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: active ? FontWeight.bold : FontWeight.w500,
+                    color: active ? color : context.textPrimary,
+                  ),
+                ),
               ),
             ],
           ),

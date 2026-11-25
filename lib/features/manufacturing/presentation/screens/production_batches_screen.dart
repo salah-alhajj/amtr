@@ -12,6 +12,7 @@ import '../../../../models/production_batch.dart';
 import '../../../../models/waste_log.dart';
 import '../../data/repositories/production_batch_repository.dart';
 import '../../data/repositories/waste_log_repository.dart';
+import '../widgets/produce_batch_sheet.dart';
 import '../widgets/record_waste_sheet.dart';
 
 /// شاشة متابعة تشغيلات الإنتاج والتعتيق وسجل الهالك والتالف
@@ -32,6 +33,7 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
   List<ProductionBatch> _batches = const [];
   List<WasteLog> _wasteLogs = const [];
   final Set<String> _markingBatchIds = {};
+  String _batchFilter = 'all'; // 'all' | 'curing' | 'ready'
   bool _isLoading = true;
   StreamSubscription<DataDomain>? _syncSub;
 
@@ -118,10 +120,28 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
     }
   }
 
+  Future<void> _openProduceBatch() async {
+    final created = await ProduceBatchSheet.show(context);
+    if (created != null && mounted) {
+      await _loadData();
+    }
+  }
+
   Future<void> _openRecordWaste() async {
     final created = await RecordWasteSheet.show(context);
     if (created != null && mounted) {
       await _loadData();
+    }
+  }
+
+  List<ProductionBatch> get _filteredBatches {
+    switch (_batchFilter) {
+      case AppConstants.batchStatusCuring:
+        return _batches.where((b) => b.isCuring).toList();
+      case AppConstants.batchStatusReady:
+        return _batches.where((b) => b.isReady).toList();
+      default:
+        return _batches;
     }
   }
 
@@ -136,32 +156,75 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
         title: Text('batches_screen_title'.i18n()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_sweep_outlined),
-            tooltip: 'waste_sheet_title'.i18n(),
-            onPressed: _openRecordWaste,
+            icon: Icon(
+              isWasteTab
+                  ? Icons.delete_sweep_outlined
+                  : Icons.precision_manufacturing_outlined,
+            ),
+            tooltip: isWasteTab
+                ? 'waste_sheet_title'.i18n()
+                : 'batch_add_btn'.i18n(),
+            onPressed: isWasteTab ? _openRecordWaste : _openProduceBatch,
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-              icon: const Icon(Icons.hourglass_bottom_rounded, size: 18),
-              text: 'batches_tab_production'.i18n(),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: context.borderDivider, width: 0.7),
+              ),
             ),
-            Tab(
-              icon: const Icon(Icons.delete_sweep_outlined, size: 18),
-              text: 'batches_tab_waste'.i18n(),
+            child: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.hourglass_bottom_rounded, size: 17),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'batches_tab_production'.i18n(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.delete_sweep_outlined, size: 17),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'batches_tab_waste'.i18n(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-      floatingActionButton: isWasteTab
-          ? FloatingActionButton.extended(
-              onPressed: _openRecordWaste,
-              icon: const Icon(Icons.add),
-              label: Text('waste_add_btn'.i18n()),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: isWasteTab ? _openRecordWaste : _openProduceBatch,
+        backgroundColor:
+            isWasteTab ? AppColors.statusDanger : AppColors.primaryBlue,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          isWasteTab ? 'waste_add_btn'.i18n() : 'batch_add_btn'.i18n(),
+        ),
+      ),
       body: _isLoading
           ? AppShimmer.list(itemCount: 4)
           : TabBarView(
@@ -180,144 +243,299 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
         icon: Icons.hourglass_empty_rounded,
         title: 'batches_empty_title'.i18n(),
         subtitle: 'batches_empty_subtitle'.i18n(),
+        actionLabel: 'batch_add_btn'.i18n(),
+        actionIcon: Icons.add_rounded,
+        onActionPressed: _openProduceBatch,
       );
     }
 
+    final curingCount = _batches.where((b) => b.isCuring).length;
+    final readyCount = _batches.where((b) => b.isReady).length;
+    final expiringCount = _batches.where((b) => b.isExpiringSoon).length;
+    final visible = _filteredBatches;
     final fmt = DateFormat('yyyy/MM/dd');
+
     return RefreshIndicator(
       onRefresh: _loadData,
-      child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-        itemCount: _batches.length,
-        itemBuilder: (context, idx) {
-          final batch = _batches[idx];
-          final isCuring = batch.isCuring;
-          final isMarking = _markingBatchIds.contains(batch.id);
-          final statusColor =
-              AppConstants.getBatchStatusColor(batch.batchStatus);
-
-          return AppCard(
-            margin: const EdgeInsets.only(bottom: 10),
-            backgroundColor: isCuring
-                ? AppColors.statusWarning.withValues(alpha: 0.06)
-                : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 92),
+        children: [
+          // ملخص KPI سريع لحالة التشغيلات
+          AppCard(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        batch.productName,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    AppBadge(
-                      label:
-                          AppConstants.getBatchStatusLabel(batch.batchStatus),
-                      color: statusColor,
-                    ),
-                  ],
+                _buildKpiPill(
+                  label: 'batch_kpi_curing'.i18n(),
+                  value: '$curingCount',
+                  color: AppColors.statusWarning,
+                  icon: Icons.hourglass_top_rounded,
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    AppBadge(
-                      label: '×${batch.yieldCount}',
-                      color: AppColors.primaryBlue,
-                      fontSize: 11,
-                    ),
-                    if (batch.totalCost > 0)
-                      AppBadge(
-                        label: cs.formatAmount(
-                          batch.totalCost,
-                          currencyCode: batch.currency,
-                        ),
-                        color: AppColors.vibrantTeal,
-                        fontSize: 11,
-                      ),
-                    if (isCuring)
-                      AppBadge(
-                        label: batch.daysUntilReady > 0
-                            ? 'batch_days_until_ready_fmt'.trParams({
-                                'days': batch.daysUntilReady.toString(),
-                              })
-                            : 'batch_ready_today_label'.i18n(),
-                        color: AppColors.statusWarning,
-                        icon: Icons.schedule_rounded,
-                        fontSize: 11,
-                      ),
-                    if (batch.isExpiringSoon)
-                      AppBadge(
-                        label: 'batch_expiring_soon_badge'.i18n(),
-                        color: AppColors.statusDanger,
-                        icon: Icons.warning_amber_rounded,
-                        fontSize: 11,
-                      ),
-                  ],
+                const SizedBox(width: 8),
+                _buildKpiPill(
+                  label: 'batch_kpi_ready'.i18n(),
+                  value: '$readyCount',
+                  color: AppColors.primaryGreen,
+                  icon: Icons.check_circle_outline_rounded,
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 4,
-                  children: [
-                    Text(
-                      '${'batch_produced_at_label'.i18n()}: ${fmt.format(batch.producedAt)}',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: context.textSecondary,
-                      ),
-                    ),
-                    if (batch.readyAt != null)
-                      Text(
-                        '${'batch_ready_at_label'.i18n()}: ${fmt.format(batch.readyAt!)}',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: context.textSecondary,
-                        ),
-                      ),
-                    if (batch.expiresAt != null)
-                      Text(
-                        '${'batch_expires_at_label'.i18n()}: ${fmt.format(batch.expiresAt!)}',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: batch.isExpiringSoon
-                              ? AppColors.statusDanger
-                              : context.textSecondary,
-                        ),
-                      ),
-                  ],
+                const SizedBox(width: 8),
+                _buildKpiPill(
+                  label: 'batch_kpi_expiring'.i18n(),
+                  value: '$expiringCount',
+                  color: AppColors.statusDanger,
+                  icon: Icons.warning_amber_rounded,
                 ),
-                if (batch.notes != null && batch.notes!.trim().isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    batch.notes!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.textSecondary,
-                    ),
-                  ),
-                ],
-                if (isCuring) ...[
-                  const SizedBox(height: 10),
-                  AppButton(
-                    label: 'batch_mark_ready_btn'.i18n(),
-                    icon: Icons.check_circle_outline_rounded,
-                    size: AppButtonSize.small,
-                    isLoading: isMarking,
-                    onPressed: isMarking ? null : () => _markReady(batch),
-                  ),
-                ],
               ],
             ),
-          );
-        },
+          ),
+
+          const SizedBox(height: 10),
+
+          // فلاتر الحالة
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _buildFilterChip('all', 'batch_filter_all'.i18n()),
+              _buildFilterChip(
+                AppConstants.batchStatusCuring,
+                'batch_status_curing'.i18n(),
+              ),
+              _buildFilterChip(
+                AppConstants.batchStatusReady,
+                'batch_status_ready'.i18n(),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          if (visible.isEmpty)
+            AppCard(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'batches_empty_title'.i18n(),
+                    style: TextStyle(color: context.textSecondary),
+                  ),
+                ),
+              ),
+            )
+          else
+            ...visible.map((batch) => _buildBatchCard(batch, cs, fmt)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKpiPill({
+    required String label,
+    required String value,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.22)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 15, color: color),
+                const SizedBox(width: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: context.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String filterKey, String label) {
+    final selected = _batchFilter == filterKey;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() => _batchFilter = filterKey),
+    );
+  }
+
+  Widget _buildBatchCard(
+    ProductionBatch batch,
+    CurrencyService cs,
+    DateFormat fmt,
+  ) {
+    final isCuring = batch.isCuring;
+    final isMarking = _markingBatchIds.contains(batch.id);
+    final statusColor = AppConstants.getBatchStatusColor(batch.batchStatus);
+
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: 10),
+      backgroundColor:
+          isCuring ? AppColors.statusWarning.withValues(alpha: 0.05) : null,
+      border: isCuring
+          ? Border.all(
+              color: AppColors.statusWarning.withValues(alpha: 0.35),
+              width: 1.1,
+            )
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isCuring
+                      ? Icons.hourglass_bottom_rounded
+                      : Icons.inventory_2_outlined,
+                  color: statusColor,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  batch.productName,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              AppBadge(
+                label: AppConstants.getBatchStatusLabel(batch.batchStatus),
+                color: statusColor,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              AppBadge(
+                label: '×${batch.yieldCount}',
+                color: AppColors.primaryBlue,
+                fontSize: 11,
+              ),
+              if (batch.totalCost > 0)
+                AppBadge(
+                  label: cs.formatAmount(
+                    batch.totalCost,
+                    currencyCode: batch.currency,
+                  ),
+                  color: AppColors.vibrantTeal,
+                  fontSize: 11,
+                ),
+              if (isCuring)
+                AppBadge(
+                  label: batch.daysUntilReady > 0
+                      ? 'batch_days_until_ready_fmt'.trParams({
+                          'days': batch.daysUntilReady.toString(),
+                        })
+                      : 'batch_ready_today_label'.i18n(),
+                  color: AppColors.statusWarning,
+                  icon: Icons.schedule_rounded,
+                  fontSize: 11,
+                ),
+              if (batch.isExpiringSoon)
+                AppBadge(
+                  label: 'batch_expiring_soon_badge'.i18n(),
+                  color: AppColors.statusDanger,
+                  icon: Icons.warning_amber_rounded,
+                  fontSize: 11,
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              Text(
+                '${'batch_produced_at_label'.i18n()}: ${fmt.format(batch.producedAt)}',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: context.textSecondary,
+                ),
+              ),
+              if (batch.readyAt != null)
+                Text(
+                  '${'batch_ready_at_label'.i18n()}: ${fmt.format(batch.readyAt!)}',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: context.textSecondary,
+                  ),
+                ),
+              if (batch.expiresAt != null)
+                Text(
+                  '${'batch_expires_at_label'.i18n()}: ${fmt.format(batch.expiresAt!)}',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: batch.isExpiringSoon
+                        ? AppColors.statusDanger
+                        : context.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+          if (batch.notes != null && batch.notes!.trim().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              batch.notes!,
+              style: TextStyle(
+                fontSize: 12,
+                color: context.textSecondary,
+              ),
+            ),
+          ],
+          if (isCuring) ...[
+            const SizedBox(height: 12),
+            AppPrimaryButton(
+              label: 'batch_mark_ready_btn'.i18n(),
+              icon: Icons.check_circle_outline_rounded,
+              height: 40,
+              backgroundColor: AppColors.primaryGreen,
+              isLoading: isMarking,
+              onPressed: isMarking ? null : () => _markReady(batch),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -334,7 +552,7 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
         title: 'waste_empty_title'.i18n(),
         subtitle: 'waste_empty_subtitle'.i18n(),
         actionLabel: 'waste_add_btn'.i18n(),
-        actionIcon: Icons.add,
+        actionIcon: Icons.add_rounded,
         onActionPressed: _openRecordWaste,
       );
     }
@@ -343,7 +561,7 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 92),
         itemCount: _wasteLogs.length + 1,
         itemBuilder: (context, idx) {
           if (idx == 0) {
@@ -351,14 +569,24 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(14),
               backgroundColor: AppColors.statusDanger.withValues(alpha: 0.08),
+              border: Border.all(
+                color: AppColors.statusDanger.withValues(alpha: 0.25),
+              ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.delete_sweep_outlined,
-                    size: 22,
-                    color: AppColors.statusDanger,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusDanger.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.delete_sweep_outlined,
+                      size: 22,
+                      color: AppColors.statusDanger,
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,6 +634,26 @@ class _ProductionBatchesScreenState extends State<ProductionBatchesScreen>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (log.isProduct
+                            ? AppColors.primaryBlue
+                            : AppColors.vibrantTeal)
+                        .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    log.isProduct
+                        ? Icons.inventory_2_outlined
+                        : Icons.science_outlined,
+                    size: 18,
+                    color: log.isProduct
+                        ? AppColors.primaryBlue
+                        : AppColors.vibrantTeal,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
