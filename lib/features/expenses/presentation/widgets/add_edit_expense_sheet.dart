@@ -452,6 +452,11 @@ class _AddEditExpenseSheetState extends State<AddEditExpenseSheet> {
                       )
                     else
                       amountField,
+                    const SizedBox(height: 8),
+                    QuickAmountChips(
+                      controller: _amountController,
+                      currency: _currency,
+                    ),
                     const SizedBox(height: 12),
                     InkWell(
                       onTap: _pickDate,

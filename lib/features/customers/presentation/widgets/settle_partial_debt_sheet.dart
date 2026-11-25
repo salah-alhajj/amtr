@@ -237,6 +237,11 @@ class _SettlePartialDebtSheetState extends State<SettlePartialDebtSheet> {
             },
             textInputAction: TextInputAction.done,
           ),
+          const SizedBox(height: 8),
+          QuickAmountChips(
+            controller: _amountController,
+            currency: widget.order.currency,
+          ),
           const SizedBox(height: 12),
 
           // معاينة الدين المتبقي بعد السداد أو الرصيد الدائن الفائض

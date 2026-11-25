@@ -54,9 +54,17 @@ class _QuickCustomItem {
 
 /// ورقة البيع السريع في 10 ثوانٍ لوضع الأسر المنتجة والبزنس الصغير
 class QuickOrderSheet extends StatefulWidget {
-  const QuickOrderSheet({super.key});
+  final bool initialInstantCash;
 
-  static Future<bool?> show(BuildContext context) {
+  const QuickOrderSheet({
+    super.key,
+    this.initialInstantCash = false,
+  });
+
+  static Future<bool?> show(
+    BuildContext context, {
+    bool initialInstantCash = false,
+  }) {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -64,7 +72,9 @@ class QuickOrderSheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => const QuickOrderSheet(),
+      builder: (_) => QuickOrderSheet(
+        initialInstantCash: initialInstantCash,
+      ),
     );
   }
 
@@ -97,6 +107,7 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
   bool _isSaving = false;
   bool _showCustomItemForm = false;
   bool _requiresDeposit = false;
+  late bool _isInstantCashSale;
 
   /// كمية كل منتج مختار من الكتالوج (productId -> qty)
   final Map<String, int> _selectedProductQty = {};
@@ -117,6 +128,7 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
   @override
   void initState() {
     super.initState();
+    _isInstantCashSale = widget.initialInstantCash;
     _currency = PreferencesService.instance.getDefaultCurrency();
     _loadInitialData();
   }
@@ -669,7 +681,7 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
 
     final totalSell = _calculateTotalSell();
     double paidAmount = 0.0;
-    if (_paymentStatus == AppConstants.paymentPrepaid) {
+    if (_isInstantCashSale || _paymentStatus == AppConstants.paymentPrepaid) {
       paidAmount = totalSell;
     } else if (_paymentStatus == AppConstants.paymentPartial) {
       paidAmount = double.tryParse(_depositCtrl.text.trim()) ?? 0.0;
@@ -744,7 +756,7 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
       }
 
       String? resolvedCustomerName;
-      if (_isWalkIn) {
+      if (_isInstantCashSale || _isWalkIn) {
         resolvedCustomerName = 'quick_order_customer_walkin'.i18n();
       } else if (_selectedCustomerId != null) {
         final found = _customers.firstWhere(
@@ -761,31 +773,41 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
             : 'quick_order_customer_walkin'.i18n();
       }
 
-      final deliveryFee = _deliveryType == AppConstants.deliveryDelivery
+      final deliveryFee =
+          (!_isInstantCashSale && _deliveryType == AppConstants.deliveryDelivery)
           ? (double.tryParse(_deliveryFeeCtrl.text.trim()) ?? 0.0)
           : 0.0;
-      final discount = double.tryParse(_discountCtrl.text.trim()) ?? 0.0;
+      final discount = _isInstantCashSale
+          ? 0.0
+          : (double.tryParse(_discountCtrl.text.trim()) ?? 0.0);
 
       final order = IndividualOrder(
         id: orderId,
         orderNumber: orderNumber,
-        customerId: _isWalkIn ? null : _selectedCustomerId,
+        customerId: (_isInstantCashSale || _isWalkIn) ? null : _selectedCustomerId,
         customerName: resolvedCustomerName,
-        paymentStatus: _paymentStatus,
-        orderStatus: AppConstants.orderStatusPending,
-        expectedDeliveryDate: _expectedDeliveryDate,
+        paymentStatus: _isInstantCashSale
+            ? AppConstants.paymentPrepaid
+            : _paymentStatus,
+        orderStatus: _isInstantCashSale
+            ? AppConstants.orderStatusDelivered
+            : AppConstants.orderStatusPending,
+        expectedDeliveryDate:
+            _isInstantCashSale ? DateTime.now() : _expectedDeliveryDate,
         paidAmount: paidAmount,
         discount: discount,
         deliveryFee: deliveryFee,
-        deliveryType: _deliveryType,
+        deliveryType:
+            _isInstantCashSale ? AppConstants.deliveryPickup : _deliveryType,
         deliveryAddress:
-            _deliveryType == AppConstants.deliveryDelivery &&
-                _deliveryAddressCtrl.text.trim().isNotEmpty
+            (!_isInstantCashSale &&
+                _deliveryType == AppConstants.deliveryDelivery &&
+                _deliveryAddressCtrl.text.trim().isNotEmpty)
             ? _deliveryAddressCtrl.text.trim()
             : null,
         isQuickOrder: true,
-        requiresDeposit: _requiresDeposit,
-        depositAmount: _requiresDeposit
+        requiresDeposit: _isInstantCashSale ? false : _requiresDeposit,
+        depositAmount: (!_isInstantCashSale && _requiresDeposit)
             ? (double.tryParse(_depositRequiredCtrl.text.trim()) ?? 0.0)
             : 0.0,
         currency: _currency,
@@ -865,15 +887,59 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
                         controller: scrollController,
                         padding: const EdgeInsets.all(16),
                         children: [
-                          _buildWhatsAppPasteBanner(context),
-                          const SizedBox(height: 14),
-                          _buildStepOneItems(context),
-                          const SizedBox(height: 16),
-                          _buildStepTwoCustomer(context),
-                          const SizedBox(height: 16),
-                          _buildStepThreePaymentAndDate(context, totalSell),
+                          _buildSaleModeSwitcher(context),
                           const SizedBox(height: 12),
-                          _buildMoreOptionsExpansion(context),
+                          if (_isInstantCashSale) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 9,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryGreen
+                                    .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primaryGreen
+                                      .withValues(alpha: 0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.flash_on_rounded,
+                                    size: 16,
+                                    color: AppColors.primaryGreen,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'quick_order_instant_cash_hint'.i18n(),
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        height: 1.35,
+                                        color: context.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ] else ...[
+                            _buildWhatsAppPasteBanner(context),
+                            const SizedBox(height: 14),
+                          ],
+                          _buildStepOneItems(context),
+                          if (!_isInstantCashSale) ...[
+                            const SizedBox(height: 16),
+                            _buildStepTwoCustomer(context),
+                            const SizedBox(height: 16),
+                            _buildStepThreePaymentAndDate(context, totalSell),
+                            const SizedBox(height: 12),
+                            _buildMoreOptionsExpansion(context),
+                          ],
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -1761,6 +1827,86 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
     );
   }
 
+  Widget _buildSaleModeSwitcher(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      children: [
+        Expanded(
+          child: _buildSaleModeTab(
+            label: 'quick_order_mode_instant_cash'.i18n(),
+            icon: Icons.bolt_rounded,
+            selected: _isInstantCashSale,
+            activeColor: AppColors.primaryGreen,
+            isDark: isDark,
+            onTap: () => setState(() => _isInstantCashSale = true),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildSaleModeTab(
+            label: 'quick_order_mode_detailed'.i18n(),
+            icon: Icons.tune_rounded,
+            selected: !_isInstantCashSale,
+            activeColor: AppColors.primaryBlue,
+            isDark: isDark,
+            onTap: () => setState(() => _isInstantCashSale = false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaleModeTab({
+    required String label,
+    required IconData icon,
+    required bool selected,
+    required Color activeColor,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? activeColor.withValues(alpha: 0.12)
+              : (isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceMuted),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? activeColor : context.borderSubtle,
+            width: selected ? 1.4 : 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: selected ? activeColor : context.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? activeColor : context.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBottomSaveBar(BuildContext context, double totalSell) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -1784,7 +1930,9 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: context.primaryBlue,
+                  color: _isInstantCashSale
+                      ? AppColors.primaryGreen
+                      : context.primaryBlue,
                 ),
               ),
             ],
@@ -1794,8 +1942,14 @@ class _QuickOrderSheetState extends State<QuickOrderSheet> {
             child: AppPrimaryButton(
               onPressed: _isSaving ? null : _saveQuickOrder,
               isLoading: _isSaving,
-              label: 'quick_order_save_btn'.i18n(),
-              icon: Icons.check_circle_outline_rounded,
+              backgroundColor:
+                  _isInstantCashSale ? AppColors.primaryGreen : null,
+              label: _isInstantCashSale
+                  ? 'quick_order_save_cash_btn'.i18n()
+                  : 'quick_order_save_btn'.i18n(),
+              icon: _isInstantCashSale
+                  ? Icons.bolt_rounded
+                  : Icons.check_circle_outline_rounded,
             ),
           ),
         ],
