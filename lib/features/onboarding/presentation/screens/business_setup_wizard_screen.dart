@@ -473,6 +473,52 @@ class _BusinessSetupWizardScreenState extends State<BusinessSetupWizardScreen> {
                   });
                 },
               ),
+              if (context.watch<LocaleBloc>().state.isArabic) ...[
+                const SizedBox(height: 16),
+                Text(
+                  'dialect_section_title'.i18n(),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'dialect_section_subtitle'.i18n(),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (context) {
+                    final activeDialect =
+                        context.watch<LocaleBloc>().state.arabicDialect;
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: ArabicDialect.supported.map((dialect) {
+                        final selected = activeDialect == dialect.id;
+                        return ChoiceChip(
+                          label: Text(
+                            dialect.nativeName,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          selected: selected,
+                          onSelected: (_) {
+                            context.read<LocaleBloc>().add(
+                                  ChangeArabicDialect(dialect.id),
+                                );
+                          },
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         ),

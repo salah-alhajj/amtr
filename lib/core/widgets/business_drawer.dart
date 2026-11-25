@@ -600,117 +600,247 @@ class BusinessDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              child: BlocBuilder<LocaleBloc, LocaleState>(
+                child: BlocBuilder<LocaleBloc, LocaleState>(
                 builder: (context, localeState) {
                   final currentCode = localeState.locale.languageCode;
+                  final activeDialect =
+                      ArabicDialect.fromId(localeState.arabicDialect);
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurfaceMuted
-                          : AppColors.surfaceMuted,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.darkBorderDivider
-                            : AppColors.borderSubtle,
-                        width: 0.8,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value:
-                            AppLanguage.supported.any(
-                              (l) => l.code == currentCode,
-                            )
-                            ? currentCode
-                            : 'ar',
-                        isExpanded: true,
-                        isDense: true,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary,
-                          size: 20,
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 2,
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        dropdownColor: isDark
-                            ? AppColors.darkSurfaceCard
-                            : AppColors.surfaceWhite,
-                        items: AppLanguage.supported.map((lang) {
-                          final isSelected = lang.code == currentCode;
-                          return DropdownMenuItem<String>(
-                            value: lang.code,
-                            child: Row(
-                              children: [
-                                CountryFlagSvg.fromLanguageCode(
-                                  lang.code,
-                                  width: 20,
-                                  height: 15,
-                                  borderRadius: 2.5,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  lang.nativeName,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: isSelected
-                                        ? (isDark
-                                              ? AppColors.darkPrimaryBlue
-                                              : AppColors.primaryBlue)
-                                        : (isDark
-                                              ? AppColors.darkTextPrimary
-                                              : AppColors.textPrimary),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    '(${lang.translationKey.i18n()})',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: isDark
-                                          ? AppColors.darkTextTertiary
-                                          : AppColors.textTertiary,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurfaceMuted
+                              : AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorderDivider
+                                : AppColors.borderSubtle,
+                            width: 0.8,
+                          ),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value:
+                                AppLanguage.supported.any(
+                                  (l) => l.code == currentCode,
+                                )
+                                ? currentCode
+                                : 'ar',
+                            isExpanded: true,
+                            isDense: true,
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                              size: 20,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            dropdownColor: isDark
+                                ? AppColors.darkSurfaceCard
+                                : AppColors.surfaceWhite,
+                            items: AppLanguage.supported.map((lang) {
+                              final isSelected = lang.code == currentCode;
+                              return DropdownMenuItem<String>(
+                                value: lang.code,
+                                child: Row(
+                                  children: [
+                                    CountryFlagSvg.fromLanguageCode(
+                                      lang.code,
+                                      width: 20,
+                                      height: 15,
+                                      borderRadius: 2.5,
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      lang.nativeName,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? (isDark
+                                                  ? AppColors.darkPrimaryBlue
+                                                  : AppColors.primaryBlue)
+                                            : (isDark
+                                                  ? AppColors.darkTextPrimary
+                                                  : AppColors.textPrimary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        '(${lang.translationKey.i18n()})',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isDark
+                                              ? AppColors.darkTextTertiary
+                                              : AppColors.textTertiary,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(
+                                        Icons.check_rounded,
+                                        size: 16,
+                                        color: isDark
+                                            ? AppColors.darkPrimaryBlue
+                                            : AppColors.primaryBlue,
+                                      ),
+                                  ],
                                 ),
-                                if (isSelected)
+                              );
+                            }).toList(),
+                            onChanged: (newCode) {
+                              if (newCode != null && newCode != currentCode) {
+                                context.read<LocaleBloc>().add(
+                                  ChangeLocale(Locale(newCode)),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      if (localeState.isArabic) ...[
+                        const SizedBox(height: 8),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => _showDialectPickerSheet(
+                              context,
+                              localeState.arabicDialect,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkSurfaceMuted
+                                    : AppColors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.darkBorderDivider
+                                      : AppColors.borderSubtle,
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
                                   Icon(
-                                    Icons.check_rounded,
+                                    Icons.translate_rounded,
                                     size: 16,
                                     color: isDark
                                         ? AppColors.darkPrimaryBlue
                                         : AppColors.primaryBlue,
                                   ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${'dialect_drawer_label'.i18n()}: ',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      activeDialect.nativeName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark
+                                            ? AppColors.darkTextPrimary
+                                            : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 14,
+                                    color: isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary,
+                                  ),
+                                ],
+                              ),
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (newCode) {
-                          if (newCode != null && newCode != currentCode) {
-                            context.read<LocaleBloc>().add(
-                              ChangeLocale(Locale(newCode)),
-                            );
-                          }
-                        },
-                      ),
-                    ),
+                          ),
+                        ),
+                      ],
+                    ],
                   );
                 },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _showDialectPickerSheet(
+    BuildContext context,
+    String currentDialectId,
+  ) async {
+    final localeBloc = context.read<LocaleBloc>();
+    await showAppModalSheet<void>(
+      context: context,
+      title: 'dialect_picker_title'.i18n(),
+      subtitle: 'dialect_picker_subtitle'.i18n(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: ArabicDialect.supported.map((dialect) {
+          final isSelected = dialect.id == currentDialectId;
+          return ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 6),
+            leading: Icon(
+              isSelected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_off_rounded,
+              color: isSelected
+                  ? AppColors.primaryBlue
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            title: Text(
+              dialect.nativeName,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+            subtitle: Text(
+              '${dialect.regionSubtitle}\n${dialect.sampleTerms}',
+              style: const TextStyle(fontSize: 11.5),
+            ),
+            isThreeLine: true,
+            onTap: () {
+              localeBloc.add(ChangeArabicDialect(dialect.id));
+              Navigator.pop(context);
+              AppToast.showSuccess(
+                context,
+                'dialect_changed_toast'.trParams({'name': dialect.nativeName}),
+              );
+            },
+          );
+        }).toList(),
       ),
     );
   }
