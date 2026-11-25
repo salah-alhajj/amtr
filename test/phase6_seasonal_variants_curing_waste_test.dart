@@ -24,6 +24,7 @@ import 'package:mosaed/features/manufacturing/data/repositories/raw_material_rep
 import 'package:mosaed/features/manufacturing/data/repositories/waste_log_repository.dart';
 import 'package:mosaed/features/manufacturing/domain/daily_prep_shopping_service.dart';
 import 'package:mosaed/features/manufacturing/presentation/screens/production_batches_screen.dart';
+import 'package:mosaed/features/manufacturing/presentation/widgets/produce_batch_sheet.dart';
 import 'package:mosaed/features/manufacturing/presentation/widgets/record_waste_sheet.dart';
 import 'package:mosaed/features/orders/data/repositories/order_repository_impl.dart';
 import 'package:mosaed/features/orders/presentation/bloc/orders_bloc.dart';
@@ -899,6 +900,17 @@ void main() {
           child: const ProductionBatchesScreen(),
         );
         expect(find.byType(ProductionBatchesScreen), findsOneWidget);
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+      });
+
+      testWidgets('ProduceBatchSheet renders cleanly ($mode)', (tester) async {
+        await tester.runAsync(() => DemoDataService.instance.generateDemoData());
+        await pumpAt360x740(
+          tester,
+          themeMode: mode,
+          child: const Scaffold(body: ProduceBatchSheet()),
+        );
+        expect(find.byType(ProduceBatchSheet), findsOneWidget);
       });
 
       testWidgets('RecordWasteSheet renders cleanly ($mode)', (tester) async {
