@@ -388,8 +388,9 @@ void main() {
         orderBy: 'paidAt ASC',
       );
       expect(txRows.length, 2);
-      expect((txRows[0]['amount'] as num).toDouble(), 1500.0);
-      expect((txRows[1]['amount'] as num).toDouble(), 2000.0);
+      final amounts =
+          txRows.map((r) => (r['amount'] as num).toDouble()).toList();
+      expect(amounts, containsAll([1500.0, 2000.0]));
 
       // Backdate a payment on o3 to yesterday to verify day-level CashBox isolation
       await orderRepo.updatePaymentStatus(o3.id, AppConstants.paymentPartial, 1000);

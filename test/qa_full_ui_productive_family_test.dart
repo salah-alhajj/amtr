@@ -662,9 +662,9 @@ void main() {
           await pumpAndWait(tester);
 
           // Switch day (previous then next)
-          await tester.tap(find.byIcon(Icons.chevron_left_rounded).first);
+          await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded).first);
           await pumpAndWait(tester);
-          await tester.tap(find.byIcon(Icons.chevron_right_rounded).first);
+          await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded).first);
           await pumpAndWait(tester);
 
           // Add business expense
