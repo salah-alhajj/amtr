@@ -28,71 +28,72 @@ class AppModalSheet extends StatelessWidget {
     final defaultSubtextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
     final defaultDivider = isDark ? AppColors.darkBorderDivider : AppColors.borderDivider;
 
-    return Container(
-      padding: padding ??
-          EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 12,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-      decoration: BoxDecoration(
-        color: defaultBg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // مقبض سحب iOS
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: defaultDivider,
-                borderRadius: BorderRadius.circular(2),
+    return Material(
+      color: defaultBg,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: padding ??
+            EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 12,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // مقبض سحب iOS
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: defaultDivider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          if (title != null) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title!,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: defaultTextColor,
-                        ),
-                      ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 2),
+            if (title != null) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitle!,
+                          title!,
                           style: TextStyle(
-                            fontSize: 11,
-                            color: defaultSubtextColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: defaultTextColor,
                           ),
                         ),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle!,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: defaultSubtextColor,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                ?trailing,
-              ],
-            ),
-            Divider(height: 20, color: defaultDivider),
-          ] else
-            const SizedBox(height: 12),
-          Flexible(child: child),
-        ],
+                  ?trailing,
+                ],
+              ),
+              Divider(height: 20, color: defaultDivider),
+            ] else
+              const SizedBox(height: 12),
+            Flexible(child: child),
+          ],
+        ),
       ),
     );
   }

@@ -52,7 +52,10 @@ class AppCard extends StatelessWidget {
               ),
             ],
       ),
-      child: child,
+      child: Material(
+        type: MaterialType.transparency,
+        child: child,
+      ),
     );
 
     if (onTap != null) {
@@ -202,7 +205,10 @@ class AppHeroCard extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
+      child: Material(
+        type: MaterialType.transparency,
+        child: child,
+      ),
     );
 
     if (onTap != null) {
