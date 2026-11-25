@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/design_system.dart';
+import '../../../guide/presentation/screens/app_user_guide_screen.dart';
 import '../widgets/app_hero_header.dart';
 import '../widgets/developer_profile_card.dart';
 import '../widgets/feature_highlight_card.dart';
@@ -163,6 +165,60 @@ class AboutAppScreen extends StatelessWidget {
 
             // بطاقة المطور صلاح الدين الحاج
             const DeveloperProfileCard(),
+
+            const SizedBox(height: 16),
+
+            // اختصار دليل الاستخدام الشامل
+            AppCard(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AppUserGuideScreen()),
+                );
+              },
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.vibrantTeal.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.menu_book_rounded,
+                      color: AppColors.vibrantTeal,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'guide_screen_title'.i18n(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'drawer_guide_sub'.i18n(),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const ForwardChevron(size: 13),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 28),
 
