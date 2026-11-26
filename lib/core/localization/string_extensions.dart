@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:localization/localization.dart';
 import 'app_localizations.dart';
+import 'locale_bloc.dart';
 import 'localization_helper.dart';
 
 /// امتدادات السلاسل النصية للترجمة الفورية
@@ -31,5 +33,17 @@ extension LocalizedStringExtensions on String {
 
 extension LocalizationContextExtensions on BuildContext {
   bool get isArabic =>
-      Localizations.maybeLocaleOf(this)?.languageCode == 'ar';
+      (Localizations.maybeLocaleOf(this)?.languageCode ??
+          LocalizationHelper.currentLanguage) ==
+      'ar';
+
+  /// الاستماع الآمن لتغييرات اللغة واللهجة الإقليمية في LocaleBloc
+  /// دون التسبب بخطأ ProviderNotFoundException في اختبارات الودجت المعزولة
+  LocaleState? watchLocaleState() {
+    try {
+      return watch<LocaleBloc>().state;
+    } catch (_) {
+      return null;
+    }
+  }
 }

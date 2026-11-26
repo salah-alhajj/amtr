@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 // ignore: implementation_imports
 import 'package:localization/src/localization_service.dart';
 import 'arabic_dialect.dart';
@@ -29,9 +27,32 @@ class AppLocalizations {
         _localizedStrings = const {};
 
   /// تحميل ملفات الترجمة للغة المطلوبة
-  Future<bool> load() async {
+  Future<bool> load({
+    bool syncGlobal = true,
+    bool forceReload = false,
+  }) async {
     final lc = locale.languageCode;
     final cc = locale.countryCode;
+    final effectiveDialect = lc == 'ar'
+        ? ArabicDialect.fromId(arabicDialect).id
+        : ArabicDialect.standardId;
+
+    // إعادة استخدام الخريطة المحمّلة من الأصول مباشرةً إن كانت تطابق اللغة واللهجة المطلوبة
+    if (!forceReload &&
+        LocalizationHelper.isLoadedFromAssets(lc, effectiveDialect) &&
+        LocalizationHelper.localizedStrings != null &&
+        LocalizationHelper.localizedStrings!.isNotEmpty) {
+      _localizedStrings = Map<String, String>.from(
+        LocalizationHelper.localizedStrings!,
+      );
+      if (syncGlobal && LocalizationHelper.matchesTarget(lc, effectiveDialect)) {
+        LocalizationService.instance.changeLanguageFromMap(
+          locale,
+          _localizedStrings,
+        );
+      }
+      return true;
+    }
 
     final Map<String, String> merged = {};
 
@@ -43,46 +64,39 @@ class AppLocalizations {
 
     for (final path in fallbackCandidates) {
       try {
-        final jsonString = await rootBundle.loadString(path);
-        final Map<String, dynamic> jsonMap = json.decode(jsonString);
-        jsonMap.forEach((key, value) {
-          merged[key] = value.toString();
-        });
+        merged.addAll(await LocalizationHelper.loadAssetMap(path));
         break;
       } catch (_) {
         // الاستمرار للملف التالي
       }
     }
 
-    // 2. إذا كانت اللغة المطلوبة مختلفة، تحميلها للكتابة فوق الأساس
-    final targetCandidates = <String>[
-      if (cc != null && cc.isNotEmpty) 'i18n/${lc}_$cc.json',
-      'i18n/$lc.json',
-    ];
+    // 2. إذا كانت اللغة المطلوبة مختلفة عن العربية الأساسية، تحميلها للكتابة فوق الأساس
+    final needsTargetLoad = lc != 'ar' || (cc != null && cc.isNotEmpty);
+    if (needsTargetLoad) {
+      final targetCandidates = <String>[
+        if (cc != null && cc.isNotEmpty) 'i18n/${lc}_$cc.json',
+        'i18n/$lc.json',
+      ];
 
-    for (final path in targetCandidates) {
-      try {
-        final jsonString = await rootBundle.loadString(path);
-        final Map<String, dynamic> jsonMap = json.decode(jsonString);
-        jsonMap.forEach((key, value) {
-          merged[key] = value.toString();
-        });
-        break;
-      } catch (_) {
-        // المحاولة مع المسار التالي
+      for (final path in targetCandidates) {
+        try {
+          merged.addAll(await LocalizationHelper.loadAssetMap(path));
+          break;
+        } catch (_) {
+          // المحاولة مع المسار التالي
+        }
       }
     }
 
     // 3. عند اختيار العربية مع لهجة بلدية محددة، تحميل ملف اللهجة كطبقة فوق i18n/ar.json
     if (lc == 'ar') {
-      final dialect = ArabicDialect.fromId(arabicDialect);
+      final dialect = ArabicDialect.fromId(effectiveDialect);
       if (dialect.id != ArabicDialect.standardId && dialect.assetPath != null) {
         try {
-          final dialectJson = await rootBundle.loadString(dialect.assetPath!);
-          final Map<String, dynamic> dialectMap = json.decode(dialectJson);
-          dialectMap.forEach((key, value) {
-            merged[key] = value.toString();
-          });
+          merged.addAll(
+            await LocalizationHelper.loadAssetMap(dialect.assetPath!),
+          );
         } catch (_) {
           // الرجوع الهادئ إلى العربية الفصحى عند تعذر قراءة ملف اللهجة
         }
@@ -91,17 +105,30 @@ class AppLocalizations {
 
     if (merged.isNotEmpty) {
       _localizedStrings = merged;
-      // مزامنة مع مكتبة localization الداخلية لدعم .i18n()
-      LocalizationService.instance.changeLanguageFromMap(locale, merged);
+      // مزامنة الحالة العامة فقط إذا كان هذا التحميل يطابق أحدث لغة ولهجة نشطة (لمنع Race Conditions)
+      if (syncGlobal && LocalizationHelper.matchesTarget(lc, effectiveDialect)) {
+        LocalizationHelper.setStrings(
+          merged,
+          lc,
+          arabicDialect: effectiveDialect,
+          fromAssets: true,
+        );
+      }
       return true;
     }
 
     if (LocalizationHelper.localizedStrings != null &&
         LocalizationHelper.localizedStrings!.isNotEmpty &&
         LocalizationHelper.currentLanguage == lc &&
-        (lc != 'ar' || LocalizationHelper.currentArabicDialect == arabicDialect)) {
+        (lc != 'ar' ||
+            LocalizationHelper.currentArabicDialect == effectiveDialect)) {
       _localizedStrings = LocalizationHelper.localizedStrings!;
-      LocalizationService.instance.changeLanguageFromMap(locale, _localizedStrings);
+      if (syncGlobal && LocalizationHelper.matchesTarget(lc, effectiveDialect)) {
+        LocalizationService.instance.changeLanguageFromMap(
+          locale,
+          _localizedStrings,
+        );
+      }
       return true;
     }
 
@@ -111,7 +138,8 @@ class AppLocalizations {
 
   /// ترجمة المفتاح مع استبدال المعاملات الاختيارية
   String translate(String key, {Map<String, String>? params}) {
-    String translation = _localizedStrings[key] ?? key;
+    String translation =
+        _localizedStrings[key] ?? LocalizationHelper.translate(key);
 
     if (params != null) {
       params.forEach((paramKey, paramValue) {

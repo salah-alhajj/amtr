@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/preferences_service.dart';
+import 'app_language.dart';
 import 'app_localizations.dart';
 import 'arabic_dialect.dart';
 import 'localization_helper.dart';
@@ -46,12 +47,39 @@ class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
   static String _activeLocaleCode = 'ar';
   static String _activeArabicDialect = ArabicDialect.standardId;
 
-  LocaleBloc()
-      : super(const LocaleState(
-          locale: Locale('ar'),
-          textDirection: TextDirection.rtl,
-          arabicDialect: ArabicDialect.standardId,
-        )) {
+  int _requestSeq = 0;
+
+  static String _normalizeLocaleCode(String? code) {
+    final trimmed = code?.trim() ?? '';
+    if (AppLanguage.supported.any((l) => l.code == trimmed)) {
+      return trimmed;
+    }
+    return 'ar';
+  }
+
+  static LocaleState _resolveInitialState() {
+    try {
+      final code = _normalizeLocaleCode(
+        PreferencesService.instance.getLocaleCode(),
+      );
+      final dialect = PreferencesService.instance.getArabicDialect();
+      _activeLocaleCode = code;
+      _activeArabicDialect = dialect;
+      return LocaleState(
+        locale: Locale(code),
+        textDirection: code == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+        arabicDialect: dialect,
+      );
+    } catch (_) {
+      return const LocaleState(
+        locale: Locale('ar'),
+        textDirection: TextDirection.rtl,
+        arabicDialect: ArabicDialect.standardId,
+      );
+    }
+  }
+
+  LocaleBloc() : super(_resolveInitialState()) {
     on<LoadPersistedLocale>(_onLoadPersistedLocale);
     on<ChangeLocale>(_onChangeLocale);
     on<ToggleLocale>(_onToggleLocale);
@@ -62,15 +90,31 @@ class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
     LoadPersistedLocale event,
     Emitter<LocaleState> emit,
   ) async {
+    final seq = ++_requestSeq;
     try {
       await PreferencesService.instance.init();
-      _activeLocaleCode = PreferencesService.instance.getLocaleCode();
+      if (seq != _requestSeq) return;
+      _activeLocaleCode = _normalizeLocaleCode(
+        PreferencesService.instance.getLocaleCode(),
+      );
       _activeArabicDialect = PreferencesService.instance.getArabicDialect();
     } catch (_) {
       // Fallback in test environments or without native plugin channel
     }
+    if (seq != _requestSeq) return;
+
     final locale = Locale(_activeLocaleCode);
-    await _syncLocalization(locale, _activeArabicDialect);
+    final effectiveDialect = locale.languageCode == 'ar'
+        ? ArabicDialect.fromId(_activeArabicDialect).id
+        : ArabicDialect.standardId;
+
+    LocalizationHelper.setTarget(
+      locale.languageCode,
+      arabicDialect: effectiveDialect,
+    );
+    await _syncLocalization(locale, effectiveDialect);
+    if (seq != _requestSeq) return;
+
     emit(LocaleState(
       locale: locale,
       textDirection:
@@ -83,21 +127,41 @@ class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
     ChangeLocale event,
     Emitter<LocaleState> emit,
   ) async {
-    if (state.locale == event.locale) return;
+    final normalizedCode = _normalizeLocaleCode(event.locale.languageCode);
+    final targetLocale = Locale(normalizedCode);
+    final effectiveDialect = normalizedCode == 'ar'
+        ? ArabicDialect.fromId(state.arabicDialect).id
+        : ArabicDialect.standardId;
 
-    _activeLocaleCode = event.locale.languageCode;
+    if (state.locale == targetLocale &&
+        LocalizationHelper.currentLanguage == normalizedCode &&
+        (normalizedCode != 'ar' ||
+            LocalizationHelper.currentArabicDialect == effectiveDialect) &&
+        LocalizationHelper.localizedStrings != null &&
+        LocalizationHelper.localizedStrings!.isNotEmpty) {
+      return;
+    }
+
+    final seq = ++_requestSeq;
+    _activeLocaleCode = normalizedCode;
+    LocalizationHelper.setTarget(
+      normalizedCode,
+      arabicDialect: effectiveDialect,
+    );
     try {
-      await PreferencesService.instance.setLocaleCode(event.locale.languageCode);
+      await PreferencesService.instance.setLocaleCode(normalizedCode);
     } catch (_) {
       // Fallback
     }
-    await _syncLocalization(event.locale, state.arabicDialect);
+    if (seq != _requestSeq) return;
+
+    await _syncLocalization(targetLocale, state.arabicDialect);
+    if (seq != _requestSeq) return;
 
     emit(LocaleState(
-      locale: event.locale,
-      textDirection: event.locale.languageCode == 'ar'
-          ? TextDirection.rtl
-          : TextDirection.ltr,
+      locale: targetLocale,
+      textDirection:
+          normalizedCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
       arabicDialect: state.arabicDialect,
     ));
   }
@@ -114,14 +178,23 @@ class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
     ChangeArabicDialect event,
     Emitter<LocaleState> emit,
   ) async {
+    final seq = ++_requestSeq;
     final normalized = ArabicDialect.fromId(event.dialectId).id;
     _activeArabicDialect = normalized;
+    LocalizationHelper.setTarget(
+      state.locale.languageCode,
+      arabicDialect: normalized,
+    );
     try {
       await PreferencesService.instance.setArabicDialect(normalized);
     } catch (_) {
       // Fallback
     }
+    if (seq != _requestSeq) return;
+
     await _syncLocalization(state.locale, normalized, forceReload: true);
+    if (seq != _requestSeq) return;
+
     emit(LocaleState(
       locale: state.locale,
       textDirection: state.textDirection,
@@ -144,6 +217,7 @@ class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
         LocalizationHelper.currentLanguage == locale.languageCode &&
         (locale.languageCode != 'ar' ||
             LocalizationHelper.currentArabicDialect == effectiveDialect)) {
+      LocalizationHelper.ensureServiceSynced();
       return;
     }
 
@@ -151,17 +225,15 @@ class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
       locale,
       arabicDialect: effectiveDialect,
     );
-    final success = await appLoc.load();
-    if (success && appLoc.localizedStrings.isNotEmpty) {
-      LocalizationHelper.setStrings(
-        appLoc.localizedStrings,
-        locale.languageCode,
-        arabicDialect: effectiveDialect,
-      );
-    } else {
+    final success = await appLoc.load(
+      syncGlobal: true,
+      forceReload: forceReload,
+    );
+    if (!success || appLoc.localizedStrings.isEmpty) {
       await LocalizationHelper.load(
         locale.languageCode,
         arabicDialect: effectiveDialect,
+        forceReload: forceReload,
       );
     }
   }

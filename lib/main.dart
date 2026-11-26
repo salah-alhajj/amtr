@@ -14,12 +14,23 @@ void main() async {
   // إعداد مسار مجلد الترجمات الموحد لمكتبة localization
   LocalJsonLocalization.delegate.directories = ['i18n'];
 
-  // تهيئة قاعدة البيانات المحلية وخدمة العملات والترجمة الأولية والتفضيلات والتنبيهات
+  // تهيئة قاعدة البيانات المحلية وخدمة العملات والتفضيلات والتنبيهات
   await AppDatabase.instance.database;
   await PreferencesService.instance.init();
   await CurrencyService.instance.init();
   await ReminderService.instance.init();
-  await LocalizationHelper.load('ar');
+
+  // تحميل اللغة واللهجة الإقليمية المحفوظتين قبل بناء أول إطار لمنع أي وميض أو تعارض
+  final persistedLocaleCode = PreferencesService.instance.getLocaleCode();
+  final effectiveLocaleCode =
+      AppLanguage.supported.any((lang) => lang.code == persistedLocaleCode)
+          ? persistedLocaleCode
+          : 'ar';
+  final persistedArabicDialect = PreferencesService.instance.getArabicDialect();
+  await LocalizationHelper.load(
+    effectiveLocaleCode,
+    arabicDialect: persistedArabicDialect,
+  );
 
   runApp(const RetailAssistantApp());
 }

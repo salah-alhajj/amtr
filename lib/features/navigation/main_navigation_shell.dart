@@ -92,6 +92,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   Widget build(BuildContext context) {
     final localeState = context.watch<LocaleBloc>().state;
     final langCode = localeState.locale.languageCode;
+    final localeKey = '${langCode}_${localeState.arabicDialect}';
     final isProductiveFamily = _isProductiveFamily(context);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -105,14 +106,14 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     if (isProductiveFamily) {
       screens = [
         HomeDashboardScreen(
-          key: ValueKey('home_$langCode'),
+          key: ValueKey('home_$localeKey'),
           onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
           onNavigateTab: _onDestinationSelected,
         ),
-        OrdersListScreen(key: ValueKey('orders_$langCode')),
-        ProductsListScreen(key: ValueKey('catalog_$langCode')),
-        CashBoxScreen(key: ValueKey('cashbox_$langCode')),
-        CustomersListScreen(key: ValueKey('customers_$langCode')),
+        OrdersListScreen(key: ValueKey('orders_$localeKey')),
+        ProductsListScreen(key: ValueKey('catalog_$localeKey')),
+        CashBoxScreen(key: ValueKey('cashbox_$localeKey')),
+        CustomersListScreen(key: ValueKey('customers_$localeKey')),
       ];
       navItems = [
         AmtrNavItemData(
@@ -149,14 +150,14 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     } else {
       screens = [
         HomeDashboardScreen(
-          key: ValueKey('home_$langCode'),
+          key: ValueKey('home_$localeKey'),
           onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
           onNavigateTab: _onDestinationSelected,
         ),
-        OrdersListScreen(key: ValueKey('orders_$langCode')),
-        ShipmentsListScreen(key: ValueKey('shipments_$langCode')),
-        CustomersListScreen(key: ValueKey('customers_$langCode')),
-        SettingsScreen(key: ValueKey('settings_$langCode')),
+        OrdersListScreen(key: ValueKey('orders_$localeKey')),
+        ShipmentsListScreen(key: ValueKey('shipments_$localeKey')),
+        CustomersListScreen(key: ValueKey('customers_$localeKey')),
+        SettingsScreen(key: ValueKey('settings_$localeKey')),
       ];
       navItems = [
         AmtrNavItemData(

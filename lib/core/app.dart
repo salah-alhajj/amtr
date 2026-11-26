@@ -99,6 +99,7 @@ class RetailAssistantApp extends StatelessWidget {
             builder: (context, themeState) {
               return MaterialApp(
                 title: 'app_name'.i18n(),
+                onGenerateTitle: (_) => 'app_name'.i18n(),
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
@@ -109,6 +110,8 @@ class RetailAssistantApp extends StatelessWidget {
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
+                  // يُستخدم AppLocalizationsDelegate حصراً بدلاً من LocalJsonLocalization.delegate
+                  // لمنع الكتابة فوق طبقة اللهجة اليمنية المختارة بملف i18n/ar.json
                   AppLocalizationsDelegate(
                     arabicDialect: localeState.arabicDialect,
                   ),
