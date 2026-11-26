@@ -127,8 +127,9 @@ Widget _buildPhase5Harness({
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
-            const AppLocalizationsDelegate(),
-            LocalJsonLocalization.delegate,
+            AppLocalizationsDelegate(
+              arabicDialect: localeState.arabicDialect,
+            ),
           ],
           builder: (context, widgetChild) {
             return Directionality(

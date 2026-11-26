@@ -26,11 +26,13 @@ import 'package:mosaed/features/dashboard/presentation/screens/home_dashboard_sc
 import 'package:mosaed/features/expenses/data/repositories/expense_repository_impl.dart';
 import 'package:mosaed/features/expenses/presentation/bloc/expenses_bloc.dart';
 import 'package:mosaed/features/manufacturing/data/repositories/raw_material_repository.dart';
+import 'package:mosaed/features/navigation/main_navigation_shell.dart';
 import 'package:mosaed/features/orders/data/repositories/order_repository_impl.dart';
 import 'package:mosaed/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:mosaed/features/orders/presentation/widgets/quick_order_sheet.dart';
 import 'package:mosaed/features/products/data/repositories/product_repository_impl.dart';
 import 'package:mosaed/features/products/presentation/bloc/products_bloc.dart';
+import 'package:mosaed/features/settings/presentation/screens/settings_screen.dart';
 import 'package:mosaed/features/settings/presentation/widgets/language_selector_card.dart';
 import 'package:mosaed/features/shipments/data/repositories/shipment_repository_impl.dart';
 import 'package:mosaed/features/shipments/presentation/bloc/shipments_bloc.dart';
@@ -470,16 +472,22 @@ void main() {
               child: const HomeDashboardScreen(),
             ),
           );
+          final saleLabel = 'home_quick_action_sale'.i18n();
+          final expenseLabel = 'home_quick_action_expense'.i18n();
+          final collectDebtLabel = 'home_quick_action_collect_debt'.i18n();
+          final showAnalyticsLabel = 'home_analytics_show_btn'.i18n();
+
           for (var i = 0; i < 20; i++) {
-            if (find.text('بيعة جديدة').evaluate().isNotEmpty) break;
+            if (find.text(saleLabel).evaluate().isNotEmpty) break;
             await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
             await tester.pump(const Duration(milliseconds: 80));
           }
 
-          expect(find.text('بيعة جديدة'), findsOneWidget);
-          expect(find.text('سجّل مصروف'), findsOneWidget);
-          expect(find.text('استلام دين'), findsOneWidget);
-          expect(find.text('اعرض الرسوم والحسابات المفصلة'), findsOneWidget);
+          expect(localeBloc.state.arabicDialect, ArabicDialect.yeSanaaId);
+          expect(find.text(saleLabel), findsOneWidget);
+          expect(find.text(expenseLabel), findsOneWidget);
+          expect(find.text(collectDebtLabel), findsOneWidget);
+          expect(find.text(showAnalyticsLabel), findsOneWidget);
         });
 
         expect(errors, isEmpty, reason: errors.map((e) => e.exceptionAsString()).join('\n'));
@@ -562,5 +570,104 @@ void main() {
         expect(errors, isEmpty, reason: errors.map((e) => e.exceptionAsString()).join('\n'));
       });
     }
+
+    testWidgets('Live dialect switch updates MainNavigationShell, HomeDashboardScreen & SettingsScreen const cards immediately without freeze', (tester) async {
+      tester.view.physicalSize = const Size(360, 740);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.runAsync(() async {
+        await PreferencesService.instance.setBusinessMode(
+          AppConstants.businessModeSimpleSeller,
+        );
+        await PreferencesService.instance.setArabicDialect(
+          ArabicDialect.standardId,
+        );
+        await LocalizationHelper.load(
+          'ar',
+          arabicDialect: ArabicDialect.standardId,
+          forceReload: true,
+        );
+      });
+
+      final localeBloc = LocaleBloc();
+      addTearDown(localeBloc.close);
+
+      final errors = await trapFlutterErrors(() async {
+        await tester.pumpWidget(
+          buildHarness(
+            localeBloc: localeBloc,
+            child: const MainNavigationShell(),
+          ),
+        );
+        for (var i = 0; i < 15; i++) {
+          if (find.text('home_quick_action_sale'.i18n()).evaluate().isNotEmpty) {
+            break;
+          }
+          await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
+          await tester.pump(const Duration(milliseconds: 60));
+        }
+
+        // Standard Arabic initial state
+        expect(find.text('nav_cashbox'.i18n()), findsAtLeastNWidgets(1));
+        expect(find.text('home_quick_action_sale'.i18n()), findsOneWidget);
+
+        // Switch live across all 4 regional Yemeni dialects and verify both nav shell & HomeDashboardScreen update immediately
+        for (final entry in const <MapEntry<String, String>>[
+          MapEntry(ArabicDialect.yeSanaaId, 'الزلط'),
+          MapEntry(ArabicDialect.yeAdenId, 'البيس'),
+          MapEntry(ArabicDialect.yeTaizId, 'القروش'),
+          MapEntry(ArabicDialect.yeHadramautId, 'الدراهم'),
+        ]) {
+          localeBloc.add(ChangeArabicDialect(entry.key));
+          for (var i = 0; i < 30 && localeBloc.state.arabicDialect != entry.key; i++) {
+            await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
+            await tester.pump();
+          }
+          await tester.pump(const Duration(milliseconds: 120));
+
+          expect(localeBloc.state.arabicDialect, entry.key);
+          expect('nav_cashbox'.i18n(), contains(entry.value));
+          expect(find.text('nav_cashbox'.i18n()), findsAtLeastNWidgets(1));
+          expect(find.text('home_quick_action_sale'.i18n()), findsOneWidget);
+        }
+
+        // Verify SettingsScreen (including const BusinessProfileCard, ThemeSelectorCard, DemoDataCard) updates live on dialect change
+        await tester.pumpWidget(
+          buildHarness(
+            localeBloc: localeBloc,
+            child: const SettingsScreen(),
+          ),
+        );
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 60)));
+        await tester.pump();
+
+        final hadramautProfileTitle = 'business_profile_title'.i18n();
+        expect(find.text(hadramautProfileTitle), findsOneWidget);
+
+        localeBloc.add(const ChangeArabicDialect(ArabicDialect.yeSanaaId));
+        for (var i = 0; i < 30 && localeBloc.state.arabicDialect != ArabicDialect.yeSanaaId; i++) {
+          await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
+          await tester.pump();
+        }
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(localeBloc.state.arabicDialect, ArabicDialect.yeSanaaId);
+        expect(find.text('business_profile_title'.i18n()), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('theme_settings'.i18n()),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text('theme_settings'.i18n()), findsOneWidget);
+
+        // Unmount before tearDown to release any active BLoC DB operations cleanly
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      });
+
+      expect(errors, isEmpty, reason: errors.map((e) => e.exceptionAsString()).join('\n'));
+    });
   });
 }
