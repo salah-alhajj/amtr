@@ -96,6 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentItem = OnboardingData.items[_currentPage];
 

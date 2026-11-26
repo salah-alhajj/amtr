@@ -858,6 +858,7 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     final pfMode = PreferencesService.instance.isProductiveFamilyMode;
     final showMultiCurrency =
         PreferencesService.instance.isMultiCurrencyEnabled();

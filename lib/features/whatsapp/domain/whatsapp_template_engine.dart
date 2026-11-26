@@ -32,13 +32,18 @@ class WhatsAppTemplateEngine {
     toneFormal,
   ];
 
+  static String _localizedOrFallback(String key, String fallback) {
+    final translated = key.i18n();
+    return translated == key ? fallback : translated;
+  }
+
   /// القوالب الافتراضية الدافئة لجميع الأنواع والنبرات
   static List<WhatsAppTemplate> get defaultTemplates => [
-        const WhatsAppTemplate(
+        WhatsAppTemplate(
           id: 'tpl_confirm_deposit_warm',
           type: typeConfirmDeposit,
           tone: toneWarm,
-          title: 'تأكيد الطلب والعربون',
+          title: _localizedOrFallback('wa_tpl_confirm', 'تأكيد الطلب والعربون'),
           body: '*{business_name}*\n'
               'أهلاً وسهلاً *{customer}*، أسعد الله أوقاتكم بكل خير.\n'
               'تم استلام وتأكيد طلبكم رقم *#{order_number}* بكل سرور:\n'
@@ -51,11 +56,11 @@ class WhatsAppTemplateEngine {
               '{business_phone}',
           isDefault: true,
         ),
-        const WhatsAppTemplate(
+        WhatsAppTemplate(
           id: 'tpl_ready_warm',
           type: typeReady,
           tone: toneWarm,
-          title: 'طلبك جاهز',
+          title: _localizedOrFallback('wa_tpl_ready', 'طلبك جاهز'),
           body: '*{business_name}*\n'
               'مرحباً *{customer}*، بشرى سارة!\n'
               'طلبكم رقم *#{order_number}* أصبح جاهزاً الآن.\n'
@@ -68,11 +73,12 @@ class WhatsAppTemplateEngine {
           isDefault: true,
         ),
         // نبرة ودّية للأقارب والمعارف — خالية تماماً من كلمة «دين»
-        const WhatsAppTemplate(
+        WhatsAppTemplate(
           id: 'tpl_reminder_warm',
           type: typeReminder,
           tone: toneWarm,
-          title: 'تذكير لطيف (ودّي للأقارب)',
+          title:
+              '${_localizedOrFallback('wa_tpl_reminder', 'تذكير لطيف')} (${_localizedOrFallback('wa_tone_warm', 'ودّي للأقارب')})',
           body: '*{business_name}*\n'
               'السلام عليكم *{customer}*، أتمنى أن تكونوا بأتم الصحة والعافية.\n'
               'أحببت فقط مشاركتكم ملخص طلبكم رقم *#{order_number}* للمتابعة:\n'
@@ -84,11 +90,12 @@ class WhatsAppTemplateEngine {
               '{business_phone}',
           isDefault: true,
         ),
-        const WhatsAppTemplate(
+        WhatsAppTemplate(
           id: 'tpl_reminder_polite',
           type: typeReminder,
           tone: tonePolite,
-          title: 'تذكير لطيف ومهني',
+          title:
+              '${_localizedOrFallback('wa_tpl_reminder', 'تذكير لطيف')} (${_localizedOrFallback('wa_tone_polite', 'لطيف ومهني')})',
           body: '*{business_name}*\n'
               'تحية طيبة *{customer}*،\n'
               'نود تذكيركم بلطف بالمبلغ المتبقي على طلبكم رقم *#{order_number}*:\n'
@@ -100,11 +107,12 @@ class WhatsAppTemplateEngine {
               '{business_phone}',
           isDefault: true,
         ),
-        const WhatsAppTemplate(
+        WhatsAppTemplate(
           id: 'tpl_reminder_formal',
           type: typeReminder,
           tone: toneFormal,
-          title: 'تذكير رسمي مختصر',
+          title:
+              '${_localizedOrFallback('wa_tpl_reminder', 'تذكير لطيف')} (${_localizedOrFallback('wa_tone_formal', 'رسمي مختصر')})',
           body: '*{business_name}*\n'
               'الأخ/الأخت *{customer}*،\n'
               'تذكير بخصوص الطلب رقم *#{order_number}*:\n'
@@ -113,11 +121,11 @@ class WhatsAppTemplateEngine {
               '{business_phone}',
           isDefault: true,
         ),
-        const WhatsAppTemplate(
+        WhatsAppTemplate(
           id: 'tpl_thanks_warm',
           type: typeThanks,
           tone: toneWarm,
-          title: 'شكر بعد السداد',
+          title: _localizedOrFallback('wa_tpl_thanks', 'شكر بعد السداد'),
           body: '*{business_name}*\n'
               'شكراً جزيلاً *{customer}* على سداد كامل مبلغ الطلب رقم *#{order_number}* ({total}).\n'
               'تشرفت جداً بخدمتكم، وأتمنى أن يكون الطلب قد نال إعجابكم.\n'

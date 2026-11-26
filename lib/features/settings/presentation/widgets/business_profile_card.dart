@@ -125,6 +125,7 @@ class _BusinessProfileCardState extends State<BusinessProfileCard> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

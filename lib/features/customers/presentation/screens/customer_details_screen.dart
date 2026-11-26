@@ -329,6 +329,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final summary = _financialSummary;
 

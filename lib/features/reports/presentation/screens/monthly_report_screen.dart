@@ -142,6 +142,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     final localeCode = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     final monthLabel = DateFormat('MMMM yyyy', localeCode).format(_selectedMonth);
 

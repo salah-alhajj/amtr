@@ -164,6 +164,7 @@ class _DemoDataCardState extends State<DemoDataCard> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     const accentPurple = Color(0xFF8B5CF6);
 
     return AppCard(

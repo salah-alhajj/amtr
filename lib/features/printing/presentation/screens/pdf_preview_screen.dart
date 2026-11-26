@@ -172,8 +172,9 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeState = context.watchLocaleState();
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeState?.textDirection ?? TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.title),

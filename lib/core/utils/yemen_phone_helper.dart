@@ -107,7 +107,7 @@ class YemenPhoneHelper {
         AppToast.showInfo(
           context,
           'تم نسخ رقم الهاتف ($cleaned) إلى الحافظة لعدم توفر تطبيق اتصال مباشر',
-          title: 'رقم الهاتف',
+          title: 'customer_phone'.i18n(),
         );
       }
       return false;

@@ -16,6 +16,7 @@ class ThemeSelectorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocBuilder<ThemeBloc, ThemeState>(

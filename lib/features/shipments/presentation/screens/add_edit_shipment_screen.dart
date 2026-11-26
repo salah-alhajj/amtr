@@ -147,6 +147,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchLocaleState();
     return Scaffold(
       appBar: AppBar(
         title: Text(
