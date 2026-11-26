@@ -20,10 +20,18 @@ class CatalogPdfGenerator {
     final boldFontData = await rootBundle.load(
       'assets/fonts/IBMPlexSansArabic-Bold.ttf',
     );
+    final riyalFontData = await rootBundle.load(
+      'assets/fonts/SaudiRiyalSymbol.ttf',
+    );
     final ttfRegular = pw.Font.ttf(regularFontData);
     final ttfBold = pw.Font.ttf(boldFontData);
+    final ttfRiyal = pw.Font.ttf(riyalFontData);
 
-    final baseTheme = pw.ThemeData.withFont(base: ttfRegular, bold: ttfBold);
+    final baseTheme = pw.ThemeData.withFont(
+      base: ttfRegular,
+      bold: ttfBold,
+      fontFallback: [ttfRiyal],
+    );
     final prefs = PreferencesService.instance;
     final cs = CurrencyService.instance;
     final businessName = prefs.getBusinessName().trim();
