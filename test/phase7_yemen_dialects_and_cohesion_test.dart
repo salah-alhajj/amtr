@@ -190,6 +190,7 @@ void main() {
         'ye_hadramaut': 'الدراهم',
       };
 
+      final builtDialects = <String, Map<String, String>>{};
       for (final dialect in ArabicDialect.supported) {
         if (dialect.id == ArabicDialect.standardId) {
           expect(dialect.assetPath, isNull);
@@ -201,13 +202,24 @@ void main() {
                 as Map<String, dynamic>)
             .map((k, v) => MapEntry(k, v.toString()));
 
-        expect(overlay.length, greaterThanOrEqualTo(100));
+        expect(
+          overlay.keys.toSet(),
+          equals(arMap.keys.toSet()),
+          reason: '${dialect.assetPath} must provide 100% full 1:1 coverage of ar.json keys',
+        );
+        builtDialects[dialect.id] = overlay;
 
+        var adaptedCount = 0;
         for (final entry in overlay.entries) {
           expect(
-            arMap.containsKey(entry.key),
-            isTrue,
-            reason: '${dialect.assetPath} has unknown key: ${entry.key}',
+            entry.value.trim(),
+            isNotEmpty,
+            reason: '${dialect.assetPath} has empty value for ${entry.key}',
+          );
+          expect(
+            entry.value.contains('  '),
+            isFalse,
+            reason: '${dialect.assetPath} has double spaces in ${entry.key}',
           );
           expect(
             entry.value.contains('ر.س'),
@@ -223,7 +235,16 @@ void main() {
             equals(expectedPh),
             reason: 'Placeholder mismatch for ${entry.key} in ${dialect.assetPath}',
           );
+          if (entry.value != arMap[entry.key]) {
+            adaptedCount++;
+          }
         }
+
+        expect(
+          adaptedCount,
+          greaterThanOrEqualTo(350),
+          reason: '${dialect.assetPath} should customize broad regional vocabulary ($adaptedCount)',
+        );
 
         final signature = dialectExpectedTerms[dialect.id]!;
         expect(
@@ -231,6 +252,21 @@ void main() {
           isTrue,
           reason: '${dialect.assetPath} should contain regional term "$signature"',
         );
+      }
+
+      // Every pair of regional dialects differs meaningfully across modules
+      final dialectIds = builtDialects.keys.toList();
+      for (var i = 0; i < dialectIds.length; i++) {
+        for (var j = i + 1; j < dialectIds.length; j++) {
+          final a = builtDialects[dialectIds[i]]!;
+          final b = builtDialects[dialectIds[j]]!;
+          final diffCount = arMap.keys.where((k) => a[k] != b[k]).length;
+          expect(
+            diffCount,
+            greaterThanOrEqualTo(250),
+            reason: '${dialectIds[i]} vs ${dialectIds[j]} diffCount=$diffCount',
+          );
+        }
       }
     });
 
@@ -244,11 +280,13 @@ void main() {
       expect(localeBloc.state.arabicDialect, ArabicDialect.yeSanaaId);
       expect(PreferencesService.instance.getArabicDialect(), ArabicDialect.yeSanaaId);
       expect('nav_cashbox'.i18n(), contains('الزلط'));
+      expect('audit_action_payment'.i18n(), contains('زلط'));
       expect('settings_title'.i18n(), 'الإعدادات');
 
       localeBloc.add(const ChangeArabicDialect(ArabicDialect.yeAdenId));
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect('nav_cashbox'.i18n(), contains('البيس'));
+      expect('audit_action_payment'.i18n(), contains('بيس'));
 
       localeBloc.add(const ChangeLocale(Locale('en')));
       await Future<void>.delayed(const Duration(milliseconds: 50));

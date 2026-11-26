@@ -123,6 +123,25 @@ void main() {
       // Verify no obsolete folders exist
       expect(Directory('assets/i18n').existsSync(), false, reason: 'assets/i18n must not exist');
       expect(Directory('lib/i18n').existsSync(), false, reason: 'lib/i18n must not exist');
+
+      // Verify full 100% key parity (0 missing, 0 extra) across all 4 regional Yemeni dialect files
+      for (final dialect in ArabicDialect.supported) {
+        if (dialect.assetPath == null) continue;
+        final dFile = File(dialect.assetPath!);
+        expect(dFile.existsSync(), true, reason: '${dialect.assetPath} must exist');
+        final Map<String, dynamic> dMap = json.decode(dFile.readAsStringSync());
+        final dKeys = dMap.keys.toSet();
+        expect(
+          baseKeys.difference(dKeys),
+          isEmpty,
+          reason: '${dialect.assetPath} is missing keys compared to ar.json',
+        );
+        expect(
+          dKeys.difference(baseKeys),
+          isEmpty,
+          reason: '${dialect.assetPath} has extra keys compared to ar.json',
+        );
+      }
     });
 
     test('English i18n file contains zero Arabic characters', () {
