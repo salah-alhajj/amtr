@@ -480,7 +480,7 @@ class _AppUserGuideScreenState extends State<AppUserGuideScreen> {
                         color: AppColors.primaryBlue,
                         size: 20,
                       ),
-                      title: Text(
+                      title: SaudiRiyalText(
                         faq.qKey.i18n(),
                         style: const TextStyle(
                           fontSize: 13,
@@ -490,7 +490,7 @@ class _AppUserGuideScreenState extends State<AppUserGuideScreen> {
                       children: [
                         Align(
                           alignment: AlignmentDirectional.centerStart,
-                          child: Text(
+                          child: SaudiRiyalText(
                             faq.aKey.i18n(),
                             style: TextStyle(
                               fontSize: 12.5,

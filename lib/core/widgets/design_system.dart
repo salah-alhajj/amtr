@@ -19,6 +19,7 @@ export 'components/app_customer_dropdown.dart';
 // ودجتس وهوية النظام العامة
 export 'apple_widgets.dart';
 export 'saudi_riyal_icon.dart';
+export 'saudi_riyal_text.dart';
 export 'currency_price_display.dart';
 export 'empty_state_view.dart';
 export 'error_state_view.dart';

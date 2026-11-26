@@ -892,14 +892,18 @@ class BusinessDrawer extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 3),
-        Text(
-          valueText,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            valueText,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
+            ),
           ),
         ),
       ],
@@ -928,6 +932,7 @@ class BusinessDrawer extends StatelessWidget {
         children: [
           Text(
             activePrefix,
+            maxLines: 1,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
@@ -940,6 +945,7 @@ class BusinessDrawer extends StatelessWidget {
     } else if (activeCurrency == AppConstants.currencyUsd) {
       activeBadge = Text(
         '$activePrefix\$',
+        maxLines: 1,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,
@@ -949,6 +955,7 @@ class BusinessDrawer extends StatelessWidget {
     } else {
       activeBadge = Text(
         '$activePrefix${isArabic ? AppConstants.yerSymbol.toLowerCase().i18n().toUpperCase() : 'YER'}',
+        maxLines: 1,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,
@@ -982,7 +989,10 @@ class BusinessDrawer extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 3),
-        activeBadge,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: activeBadge,
+        ),
       ],
     );
   }
@@ -1053,7 +1063,7 @@ class _DrawerMenuItem extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      SaudiRiyalText(
                         title,
                         style: TextStyle(
                           fontSize: 13,
@@ -1063,7 +1073,7 @@ class _DrawerMenuItem extends StatelessWidget {
                               : AppColors.textPrimary,
                         ),
                       ),
-                      Text(
+                      SaudiRiyalText(
                         subtitle,
                         style: TextStyle(
                           fontSize: 11,
