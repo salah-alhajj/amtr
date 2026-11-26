@@ -526,21 +526,21 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
           value: AppConstants.currencyYer,
           child: Text(
             'currency_yer'.i18n(),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
         DropdownMenuItem(
           value: AppConstants.currencySar,
           child: Text(
             'currency_sar'.i18n(),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
         DropdownMenuItem(
           value: AppConstants.currencyUsd,
           child: Text(
             'currency_usd'.i18n(),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
       ],
@@ -557,28 +557,28 @@ class _AddEditOrderScreenState extends State<AddEditOrderScreen> {
           value: AppConstants.paymentPrepaid,
           child: Text(
             AppConstants.getPaymentStatusLabel(AppConstants.paymentPrepaid),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
         DropdownMenuItem(
           value: AppConstants.paymentDebt,
           child: Text(
             AppConstants.getPaymentStatusLabel(AppConstants.paymentDebt),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
         DropdownMenuItem(
           value: AppConstants.paymentCod,
           child: Text(
             AppConstants.getPaymentStatusLabel(AppConstants.paymentCod),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
         DropdownMenuItem(
           value: AppConstants.paymentPartial,
           child: Text(
             AppConstants.getPaymentStatusLabel(AppConstants.paymentPartial),
-            style: const TextStyle(fontFamily: 'IBMPlexSansArabic'),
+            style: const TextStyle(fontFamily: 'IBMPlexSansArabic', fontFamilyFallback: AppTheme.fontFamilyFallback),
           ),
         ),
       ],

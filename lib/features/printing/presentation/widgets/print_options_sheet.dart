@@ -219,6 +219,7 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: AppTheme.fontFamily,
+                                  fontFamilyFallback: AppTheme.fontFamilyFallback,
                                 ),
                               ),
                               subtitle: Text(
@@ -227,6 +228,7 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                                   fontSize: 11,
                                   color: context.textSecondary,
                                   fontFamily: AppTheme.fontFamily,
+                                  fontFamilyFallback: AppTheme.fontFamilyFallback,
                                 ),
                               ),
                               onChanged: (val) {
@@ -286,6 +288,7 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
                               fontSize: 11,
                               color: context.textSecondary,
                               fontFamily: AppTheme.fontFamily,
+                              fontFamilyFallback: AppTheme.fontFamilyFallback,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -431,6 +434,7 @@ class _PrintOptionsSheetState extends State<PrintOptionsSheet> {
         fontWeight: FontWeight.bold,
         color: context.textPrimary,
         fontFamily: AppTheme.fontFamily,
+        fontFamilyFallback: AppTheme.fontFamilyFallback,
       ),
     );
   }

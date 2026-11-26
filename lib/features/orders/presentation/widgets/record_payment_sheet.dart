@@ -138,28 +138,28 @@ class _RecordPaymentSheetState extends State<RecordPaymentSheet> {
                 value: AppConstants.paymentPrepaid,
                 child: Text(
                   AppConstants.getPaymentStatusLabel(AppConstants.paymentPrepaid),
-                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                 ),
               ),
               DropdownMenuItem(
                 value: AppConstants.paymentDebt,
                 child: Text(
                   AppConstants.getPaymentStatusLabel(AppConstants.paymentDebt),
-                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                 ),
               ),
               DropdownMenuItem(
                 value: AppConstants.paymentCod,
                 child: Text(
                   AppConstants.getPaymentStatusLabel(AppConstants.paymentCod),
-                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                 ),
               ),
               DropdownMenuItem(
                 value: AppConstants.paymentPartial,
                 child: Text(
                   AppConstants.getPaymentStatusLabel(AppConstants.paymentPartial),
-                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                 ),
               ),
             ],

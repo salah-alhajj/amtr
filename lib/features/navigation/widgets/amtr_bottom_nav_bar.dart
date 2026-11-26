@@ -169,6 +169,7 @@ class _NavBarItem extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? activeColor : inactiveColor,
                   fontFamily: 'IBMPlexSansArabic',
+                  fontFamilyFallback: ['SaudiRiyalSymbol'],
                   height: 1.1,
                 ),
                 maxLines: 1,

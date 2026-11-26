@@ -5,11 +5,14 @@ import 'app_colors.dart';
 /// ثيم التطبيق المتوافق مع معايير Apple iOS HIG بخط IBM Plex Sans Arabic
 class AppTheme {
   static const String fontFamily = 'IBMPlexSansArabic';
+  static const String riyalFontFamily = 'SaudiRiyalSymbol';
+  static const List<String> fontFamilyFallback = [riyalFontFamily];
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.scaffoldBackground,
       colorScheme: const ColorScheme.light(
@@ -29,6 +32,7 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleTextStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 17,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
@@ -56,6 +60,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           textStyle: const TextStyle(
             fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -79,6 +84,7 @@ class AppTheme {
         ),
         hintStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           color: AppColors.textTertiary,
           fontSize: 14,
         ),
@@ -91,6 +97,7 @@ class AppTheme {
       dropdownMenuTheme: const DropdownMenuThemeData(
         textStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 14,
           color: AppColors.textPrimary,
         ),
@@ -98,6 +105,7 @@ class AppTheme {
       popupMenuTheme: const PopupMenuThemeData(
         textStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 14,
           color: AppColors.textPrimary,
         ),
@@ -110,11 +118,13 @@ class AppTheme {
         dividerColor: AppColors.borderDivider,
         labelStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),
         unselectedLabelStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
@@ -128,6 +138,7 @@ class AppTheme {
         ),
         extendedTextStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 13.5,
           fontWeight: FontWeight.w700,
         ),
@@ -139,12 +150,14 @@ class AppTheme {
         checkmarkColor: AppColors.primaryBlue,
         labelStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         secondaryLabelStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 12,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryBlue,
@@ -162,6 +175,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkScaffoldBackground,
       colorScheme: const ColorScheme.dark(
@@ -181,6 +195,7 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 17,
           fontWeight: FontWeight.w600,
           color: AppColors.darkTextPrimary,
@@ -208,6 +223,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           textStyle: const TextStyle(
             fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -231,6 +247,7 @@ class AppTheme {
         ),
         hintStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           color: AppColors.darkTextTertiary,
           fontSize: 14,
         ),
@@ -254,6 +271,7 @@ class AppTheme {
       dropdownMenuTheme: const DropdownMenuThemeData(
         textStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 14,
           color: AppColors.darkTextPrimary,
         ),
@@ -261,6 +279,7 @@ class AppTheme {
       popupMenuTheme: const PopupMenuThemeData(
         textStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 14,
           color: AppColors.darkTextPrimary,
         ),
@@ -273,11 +292,13 @@ class AppTheme {
         dividerColor: AppColors.darkBorderDivider,
         labelStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),
         unselectedLabelStyle: TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
@@ -291,6 +312,7 @@ class AppTheme {
         ),
         extendedTextStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 13.5,
           fontWeight: FontWeight.w700,
         ),
@@ -302,12 +324,14 @@ class AppTheme {
         checkmarkColor: AppColors.darkPrimaryBlue,
         labelStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: AppColors.darkTextPrimary,
         ),
         secondaryLabelStyle: const TextStyle(
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: 12,
           fontWeight: FontWeight.w700,
           color: AppColors.darkPrimaryBlue,

@@ -60,6 +60,7 @@ class GlobalSearchDelegate extends SearchDelegate {
           searchFieldLabel: 'search_global_hint'.i18n(),
           searchFieldStyle: const TextStyle(
             fontFamily: 'IBMPlexSansArabic',
+            fontFamilyFallback: AppTheme.fontFamilyFallback,
             fontSize: 14,
           ),
         );
@@ -78,6 +79,7 @@ class GlobalSearchDelegate extends SearchDelegate {
           color: context.textPrimary,
           fontSize: 15,
           fontFamily: 'IBMPlexSansArabic',
+          fontFamilyFallback: AppTheme.fontFamilyFallback,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -85,6 +87,7 @@ class GlobalSearchDelegate extends SearchDelegate {
           color: context.textTertiary,
           fontSize: 14,
           fontFamily: 'IBMPlexSansArabic',
+          fontFamilyFallback: AppTheme.fontFamilyFallback,
         ),
         border: InputBorder.none,
       ),

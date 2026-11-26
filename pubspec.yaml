@@ -111,3 +111,6 @@ flutter:
           weight: 600
         - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
           weight: 700
+    - family: SaudiRiyalSymbol
+      fonts:
+        - asset: assets/fonts/SaudiRiyalSymbol.ttf

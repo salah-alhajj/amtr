@@ -505,7 +505,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'shipment_order_change_status'.i18n(),
-                              style: const TextStyle(fontSize: 12, fontFamily: AppTheme.fontFamily),
+                              style: const TextStyle(fontSize: 12, fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                             ),
                           ],
                         ),
@@ -522,6 +522,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                                 fontSize: 12,
                                 color: AppColors.statusDanger,
                                 fontFamily: AppTheme.fontFamily,
+                                fontFamilyFallback: AppTheme.fontFamilyFallback,
                               ),
                             ),
                           ],
@@ -535,7 +536,7 @@ class _ShipmentDetailsScreenState extends State<ShipmentDetailsScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'order_details'.i18n(),
-                              style: const TextStyle(fontSize: 12, fontFamily: AppTheme.fontFamily),
+                              style: const TextStyle(fontSize: 12, fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                             ),
                           ],
                         ),

@@ -253,6 +253,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                       'currency_yer'.i18n(),
                                       style: TextStyle(
                                         fontFamily: 'IBMPlexSansArabic',
+                                        fontFamilyFallback: AppTheme.fontFamilyFallback,
                                       ),
                                     ),
                                   ),
@@ -262,6 +263,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                       'currency_sar'.i18n(),
                                       style: TextStyle(
                                         fontFamily: 'IBMPlexSansArabic',
+                                        fontFamilyFallback: AppTheme.fontFamilyFallback,
                                       ),
                                     ),
                                   ),
@@ -271,6 +273,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                       'currency_usd'.i18n(),
                                       style: TextStyle(
                                         fontFamily: 'IBMPlexSansArabic',
+                                        fontFamilyFallback: AppTheme.fontFamilyFallback,
                                       ),
                                     ),
                                   ),
@@ -294,6 +297,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                 ),
                                 style: TextStyle(
                                   fontFamily: 'IBMPlexSansArabic',
+                                  fontFamilyFallback: AppTheme.fontFamilyFallback,
                                 ),
                               ),
                             ),
@@ -305,6 +309,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                 ),
                                 style: TextStyle(
                                   fontFamily: 'IBMPlexSansArabic',
+                                  fontFamilyFallback: AppTheme.fontFamilyFallback,
                                 ),
                               ),
                             ),
@@ -316,6 +321,7 @@ class _AddEditShipmentScreenState extends State<AddEditShipmentScreen> {
                                 ),
                                 style: TextStyle(
                                   fontFamily: 'IBMPlexSansArabic',
+                                  fontFamilyFallback: AppTheme.fontFamilyFallback,
                                 ),
                               ),
                             ),

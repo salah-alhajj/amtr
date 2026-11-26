@@ -95,6 +95,7 @@ class AppTextField extends StatelessWidget {
               fontWeight: FontWeight.w600,
               color: defaultLabelColor,
               fontFamily: 'IBMPlexSansArabic',
+              fontFamilyFallback: AppTheme.fontFamilyFallback,
             ),
           ),
         if (labelWidget != null || label.isNotEmpty) const SizedBox(height: 6),
@@ -260,6 +261,7 @@ class AppDropdownField<T> extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: defaultLabelColor,
             fontFamily: AppTheme.fontFamily,
+            fontFamilyFallback: AppTheme.fontFamilyFallback,
           ),
         ),
         const SizedBox(height: 6),
@@ -274,7 +276,7 @@ class AppDropdownField<T> extends StatelessWidget {
             if (child is Text) {
               if (child.textSpan != null) {
                 styledChild = DefaultTextStyle.merge(
-                  style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                  style: const TextStyle(fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                   child: child,
                 );
               } else {
@@ -282,6 +284,7 @@ class AppDropdownField<T> extends StatelessWidget {
                   child.data ?? '',
                   style: (child.style ?? const TextStyle()).copyWith(
                     fontFamily: AppTheme.fontFamily,
+                    fontFamilyFallback: AppTheme.fontFamilyFallback,
                   ),
                   strutStyle: child.strutStyle,
                   textAlign: child.textAlign,
@@ -299,7 +302,7 @@ class AppDropdownField<T> extends StatelessWidget {
               }
             } else {
               styledChild = DefaultTextStyle.merge(
-                style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                style: const TextStyle(fontFamily: AppTheme.fontFamily, fontFamilyFallback: AppTheme.fontFamilyFallback),
                 child: child,
               );
             }
@@ -323,6 +326,7 @@ class AppDropdownField<T> extends StatelessWidget {
             fontWeight: FontWeight.w500,
             color: defaultTextColor,
             fontFamily: AppTheme.fontFamily,
+            fontFamilyFallback: AppTheme.fontFamilyFallback,
           ),
           dropdownColor: isDark
               ? AppColors.darkSurfaceCard
@@ -333,12 +337,14 @@ class AppDropdownField<T> extends StatelessWidget {
               fontSize: 13,
               color: defaultHintColor,
               fontFamily: AppTheme.fontFamily,
+              fontFamilyFallback: AppTheme.fontFamilyFallback,
             ),
             errorStyle: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
               color: AppColors.statusDanger,
               fontFamily: AppTheme.fontFamily,
+              fontFamilyFallback: AppTheme.fontFamilyFallback,
             ),
             errorMaxLines: 2,
             filled: true,
@@ -424,6 +430,7 @@ class AppDateSelectorField extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: defaultLabelColor,
             fontFamily: 'IBMPlexSansArabic',
+            fontFamilyFallback: AppTheme.fontFamilyFallback,
           ),
         ),
         const SizedBox(height: 6),
@@ -456,6 +463,7 @@ class AppDateSelectorField extends StatelessWidget {
 
                       style: TextStyle(
                         fontFamily: 'IBMPlexSansArabic',
+                        fontFamilyFallback: AppTheme.fontFamilyFallback,
                         fontSize: 13,
                         fontWeight: isSelected
                             ? FontWeight.w600
@@ -556,6 +564,7 @@ class AppSwitchTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontFamily: 'IBMPlexSansArabic',
+                    fontFamilyFallback: AppTheme.fontFamilyFallback,
                     fontWeight: FontWeight.w600,
                     color: isDark
                         ? AppColors.darkTextPrimary
@@ -568,6 +577,7 @@ class AppSwitchTile extends StatelessWidget {
                     subtitle!,
                     style: TextStyle(
                       fontFamily: 'IBMPlexSansArabic',
+                      fontFamilyFallback: AppTheme.fontFamilyFallback,
                       fontSize: 11,
                       color: isDark
                           ? AppColors.darkTextSecondary
